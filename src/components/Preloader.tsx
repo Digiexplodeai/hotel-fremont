@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useIntro } from "@/context/IntroContext";
 
@@ -9,16 +9,35 @@ export default function Preloader() {
   const { isIntroActive, completeIntro } = useIntro();
   const [showCurtain, setShowCurtain] = useState(isIntroActive);
   const [progress, setProgress] = useState(0);
-  const shouldReduceMotion = useReducedMotion();
+  const hasTriggeredExitRef = useRef(false);
+
+  // Manual skip handler (only manual user interaction, never stored or auto-triggered)
+  const handleManualSkip = useCallback(() => {
+    if (hasTriggeredExitRef.current) return;
+    hasTriggeredExitRef.current = true;
+    setShowCurtain(false);
+    completeIntro();
+  }, [completeIntro]);
+
+  // Lock body scroll while intro/curtain is visible to avoid scrolling underneath
+  useEffect(() => {
+    if (showCurtain) {
+      document.body.style.overflow = "hidden";
+      window.scrollTo(0, 0);
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showCurtain]);
 
   useEffect(() => {
-    if (!isIntroActive || shouldReduceMotion) {
-      setShowCurtain(false);
-      completeIntro();
+    if (!isIntroActive) {
       return;
     }
 
-    setShowCurtain(true);
+    hasTriggeredExitRef.current = false;
 
     const startTime = performance.now();
     const minDuration = 1800; // 1.8s minimum visible time
@@ -33,6 +52,8 @@ export default function Preloader() {
       if (pct < 100) {
         animationFrameId = requestAnimationFrame(tick);
       } else {
+        if (hasTriggeredExitRef.current) return;
+        hasTriggeredExitRef.current = true;
         // Progress filled, trigger curtain exit
         setShowCurtain(false);
         // As curtain lifts away (1.0s), mark intro done so hero & navbar reveal
@@ -48,7 +69,7 @@ export default function Preloader() {
       cancelAnimationFrame(animationFrameId);
       clearTimeout(completeTimerId);
     };
-  }, [isIntroActive, shouldReduceMotion, completeIntro]);
+  }, [isIntroActive, completeIntro]);
 
   if (!isIntroActive && !showCurtain) return null;
 
@@ -67,6 +88,16 @@ export default function Preloader() {
             },
           }}
         >
+          {/* Subtle Manual Skip Button */}
+          <button
+            type="button"
+            onClick={handleManualSkip}
+            className="absolute top-6 right-6 z-20 text-[11px] font-sans tracking-[0.2em] text-[#F7F3EC]/40 hover:text-[#C9A96E] uppercase transition-colors px-3 py-1.5 rounded cursor-pointer border border-transparent hover:border-[#C9A96E]/30"
+            aria-label="Skip Intro"
+          >
+            Skip
+          </button>
+
           {/* Ambient Deep Red Core Glow */}
           <div className="absolute w-[600px] h-[600px] rounded-full bg-[#E02B1D]/15 blur-[140px] pointer-events-none" />
 

@@ -19,24 +19,22 @@ export function IntroProvider({ children }: { children: React.ReactNode }) {
   const [isIntroDone, setIsIntroDone] = useState(false);
 
   useEffect(() => {
-    const isDev = process.env.NODE_ENV !== "production";
-    const hasPreloaded = typeof window !== "undefined" ? sessionStorage.getItem("fremont_preloaded") : false;
+    // Disable automatic browser scroll restoration on reload so user always begins at the top (Hero)
+    if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+      window.scrollTo(0, 0);
+    }
 
-    if (!isDev && hasPreloaded) {
-      setIsIntroActive(false);
-      setIsIntroDone(true);
-    } else {
-      setIsIntroActive(true);
-      setIsIntroDone(false);
+    // Clean up any lingering storage flags from earlier versions to prevent any accidental bypass
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("fremont_preloaded");
+      localStorage.removeItem("fremont_preloaded");
     }
   }, []);
 
   const completeIntro = useCallback(() => {
     setIsIntroActive(false);
     setIsIntroDone(true);
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("fremont_preloaded", "true");
-    }
   }, []);
 
   return (
