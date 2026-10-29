@@ -12,6 +12,7 @@ const categories = ["All", "Architecture", "Suites", "Dining", "Events"];
 export default function GallerySection() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
 
   const galleryItems = siteConfig.gallery as GalleryItem[];
 
@@ -80,13 +81,30 @@ export default function GallerySection() {
                 onClick={() => setLightboxIndex(index)}
                 className="group relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#151518] border border-white/10 hover:border-[#C9A96E]/50 cursor-pointer shadow-lg"
               >
-                <Image
-                  src={item.src}
-                  alt={item.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                />
+                {!failedImages[item.id] ? (
+                  <Image
+                    src={item.src}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    onError={() => setFailedImages((prev) => ({ ...prev, [item.id]: true }))}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#1C1C22] via-[#0E0E10] to-[#141417] flex flex-col items-center justify-center p-4 text-center">
+                    <div className="relative w-32 h-10 mb-2 opacity-85">
+                      <Image
+                        src="/assets/logo.png"
+                        alt="Hotel Fremont"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#C9A96E] font-sans">
+                      {item.title}
+                    </span>
+                  </div>
+                )}
 
                 {/* Dark Vignette Overlay on Hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10]/90 via-[#0E0E10]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">

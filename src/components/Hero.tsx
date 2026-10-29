@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { ArrowDown, Sparkles, MapPin, Award } from "lucide-react";
+import { ArrowDown, Sparkles, MapPin } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { useIntro } from "@/context/IntroContext";
 import BookingBar from "./BookingBar";
@@ -19,10 +19,10 @@ interface HeroProps {
 }
 
 const heroSlides = [
-  { src: "/assets/hero/hero-exterior.webp", label: "Exterior" },
-  { src: "/assets/hero/hero-lobby.webp", label: "Grand Lobby" },
-  { src: "/assets/hero/hero-pool.webp", label: "Poolside" },
-  { src: "/assets/hero/hero-suite.webp", label: "Luxury Suites" },
+  { src: "/assets/hero/hero-suite.webp", label: "Classic Luxury Suite" },
+  { src: "/assets/hero/hero-room-1.webp", label: "Deluxe King Room" },
+  { src: "/assets/hero/hero-lobby.webp", label: "Panoramic Modern Suite" },
+  { src: "/assets/hero/hero-room-2.webp", label: "Executive Lounge Suite" },
 ];
 
 export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps) {
@@ -147,24 +147,17 @@ export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps
           {siteConfig.hero.description}
         </motion.p>
 
-        {/* Address & 5-Star Badges */}
+        {/* Address Badge */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={isIntroDone ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.8, delay: isIntroDone ? 0.75 : 0 }}
-          className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-sans text-[#C9A96E] mb-6"
+          className="flex items-center justify-center text-xs font-sans text-[#C9A96E] mb-6"
         >
-          <div className="flex items-center space-x-1.5 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+          <div className="flex items-center space-x-1.5 bg-black/40 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-white/10">
             <MapPin className="w-3.5 h-3.5 text-[#E02B1D]" />
             <span className="tracking-widest uppercase text-[11px] text-[#F7F3EC]/90">
               Sector 80, Airport Road, Mohali
-            </span>
-          </div>
-          <span className="text-white/20 hidden sm:inline">&bull;</span>
-          <div className="flex items-center space-x-1.5 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
-            <Award className="w-3.5 h-3.5 text-[#C9A96E]" />
-            <span className="tracking-widest uppercase text-[11px] text-[#F7F3EC]/90">
-              5-Star Boutique Hospitality
             </span>
           </div>
         </motion.div>

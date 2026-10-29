@@ -13,6 +13,7 @@ interface RoomsSectionProps {
 
 export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
   const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const rooms = siteConfig.rooms as RoomType[];
 
   return (
@@ -64,16 +65,36 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
             >
               {/* Image Container with Safe Zoom and Badge */}
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#0E0E10]">
-                <Image
-                  src={room.image}
-                  alt={room.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                />
+                {!failedImages[room.id] ? (
+                  <Image
+                    src={room.image}
+                    alt={room.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    onError={() => setFailedImages((prev) => ({ ...prev, [room.id]: true }))}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#1C1C22] via-[#0E0E10] to-[#141417] flex flex-col items-center justify-center p-6 text-center">
+                    <div className="relative w-44 h-14 mb-3 opacity-90">
+                      <Image
+                        src="/assets/logo.png"
+                        alt="Hotel Fremont"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#0E0E10]/80 border border-[#C9A96E]/30">
+                      <Sparkles className="w-3 h-3 text-[#E02B1D]" />
+                      <span className="text-[10px] uppercase tracking-widest text-[#C9A96E] font-sans font-semibold">
+                        {room.title}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Dark Vignette Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#151518] via-transparent to-black/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#151518] via-transparent to-black/30 pointer-events-none" />
 
                 {/* Badge */}
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] font-sans font-bold tracking-widest uppercase shadow-lg">

@@ -75,7 +75,7 @@ export default function AboutIntro() {
               <div className="relative w-full aspect-[16/11] rounded-2xl overflow-hidden border border-[#C9A96E]/30 shadow-xl">
                 <Image
                   src={about.imagePrimary}
-                  alt="Hotel Fremont Courtyard and Architecture"
+                  alt="Hotel Fremont Deluxe Suite Sanctuary"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover"

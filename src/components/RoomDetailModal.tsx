@@ -30,9 +30,11 @@ interface RoomDetailModalProps {
 
 export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetailModalProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setActiveImageIndex(0);
+    setFailedImages({});
   }, [room]);
 
   // Handle ESC key to close
@@ -85,14 +87,36 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
             {/* Gallery Column */}
             <div className="lg:col-span-7 p-4 sm:p-6 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10">
               {/* Main Active Image */}
-              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-4 border border-white/10">
-                <Image
-                  src={room.gallery[activeImageIndex] || room.image}
-                  alt={`${room.title} - View ${activeImageIndex + 1}`}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 60vw"
-                  className="object-cover transition-all duration-500"
-                />
+              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-4 border border-white/10 bg-[#0E0E10]">
+                {!failedImages[`${room.id}-${activeImageIndex}`] ? (
+                  <Image
+                    src={room.gallery[activeImageIndex] || room.image}
+                    alt={`${room.title} - View ${activeImageIndex + 1}`}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className="object-cover transition-all duration-500"
+                    onError={() =>
+                      setFailedImages((prev) => ({
+                        ...prev,
+                        [`${room.id}-${activeImageIndex}`]: true,
+                      }))
+                    }
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#1C1C22] via-[#0E0E10] to-[#141417] flex flex-col items-center justify-center p-6 text-center">
+                    <div className="relative w-40 h-12 mb-3 opacity-90">
+                      <Image
+                        src="/assets/logo.png"
+                        alt="Hotel Fremont"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <span className="text-[10px] uppercase tracking-widest text-[#C9A96E] font-sans font-semibold">
+                      {room.title}
+                    </span>
+                  </div>
+                )}
                 <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] uppercase font-bold tracking-widest shadow-md">
                   {room.badge}
                 </div>
@@ -104,18 +128,32 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
                   <button
                     key={i}
                     onClick={() => setActiveImageIndex(i)}
-                    className={`relative aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`relative aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all bg-[#0E0E10] ${
                       activeImageIndex === i
                         ? "border-[#E02B1D] ring-2 ring-[#E02B1D]/40"
                         : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                   >
-                    <Image
-                      src={imgUrl}
-                      alt={`Thumbnail ${i + 1}`}
-                      fill
-                      className="object-cover"
-                    />
+                    {!failedImages[`thumb-${room.id}-${i}`] ? (
+                      <Image
+                        src={imgUrl}
+                        alt={`Thumbnail ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        onError={() =>
+                          setFailedImages((prev) => ({
+                            ...prev,
+                            [`thumb-${room.id}-${i}`]: true,
+                          }))
+                        }
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center p-2 bg-[#1A1A1E]">
+                        <span className="text-[9px] uppercase tracking-wider text-[#C9A96E] font-sans">
+                          View {i + 1}
+                        </span>
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>

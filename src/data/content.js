@@ -83,8 +83,8 @@ export const siteConfig = {
       { title: "Architectural Peace", desc: "Acoustic triple-glazed sound insulation ensuring complete sanctuary from the bustling city." }
     ],
     // High-resolution photography for about section
-    imagePrimary: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200",
-    imageSecondary: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=900",
+    imagePrimary: "/assets/hero/hero-room-1.webp",
+    imageSecondary: "/assets/hero/hero-room-2.webp",
     imageInterior: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=900",
   },
 
@@ -140,11 +140,11 @@ export const siteConfig = {
       bed: "Royal Grand King + Daybed",
       view: "Dual-Aspect Garden & Horizon View",
       description: "The epitome of boutique grandeur. Features a 6-seater private dining alcove, hand-finished brass accents, champagne welcome bar, and dedicated butler service on call.",
-      highlights: ["Dedicated Private Butler", "Chauffeured Luxury Sedan", "Free Mini-bar & Champagne", "Whirlpool Jacuzzi", "Priority Dining"],
+      highlights: ["Dedicated Private Butler", "Chauffeured Luxury Sedan", "Free Mini-bar & Champagne", "Luxury Hydrotherapy Jacuzzi", "Priority Dining"],
       amenities: ["Private Dining Area", "Jacuzzi", "Butler Service", "Champagne Bar", "Powder Room", "Panoramic Terrace"],
-      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1000",
+      image: "/assets/rooms/royal-fremont-suite.webp",
       gallery: [
-        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1200",
+        "/assets/rooms/royal-fremont-suite.webp",
         "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=1200",
         "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=1200",
       ]
@@ -166,7 +166,7 @@ export const siteConfig = {
       gallery: [
         "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1200",
         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200",
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1200",
+        "/assets/hero/hero-room-2.webp",
       ]
     }
   ],
@@ -271,7 +271,7 @@ export const siteConfig = {
     { id: 5, title: "Presidential Penthouse Living Lounge", category: "Suites", src: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
     { id: 6, title: "Italian Marble En-Suite Bathroom", category: "Suites", src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
     { id: 7, title: "Chef's Signature Tandoor Platter", category: "Dining", src: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
-    { id: 8, title: "Lobby Courtyard & Water Installation", category: "Architecture", src: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
+    { id: 8, title: "Deluxe King Room Sanctuary", category: "Suites", src: "/assets/hero/hero-room-1.webp", span: "col-span-1 row-span-1" },
   ],
 
   testimonials: [
