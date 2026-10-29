@@ -62,14 +62,14 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
               transition={{ duration: 0.8, delay: index * 0.15 }}
               className="group relative rounded-2xl bg-[#151518] border border-white/10 hover:border-[#C9A96E]/40 transition-all duration-500 overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.6)] flex flex-col justify-between"
             >
-              {/* Image Container with Zoom and Badge */}
-              <div className="relative w-full aspect-[16/10] overflow-hidden">
+              {/* Image Container with Safe Zoom and Badge */}
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#0E0E10]">
                 <Image
                   src={room.image}
                   alt={room.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                 />
 
                 {/* Dark Vignette Overlay */}

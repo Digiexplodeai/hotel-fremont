@@ -73,10 +73,10 @@ export default function GallerySection() {
               <motion.div
                 layout
                 key={item.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
                 onClick={() => setLightboxIndex(index)}
                 className="group relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#151518] border border-white/10 hover:border-[#C9A96E]/50 cursor-pointer shadow-lg"
               >
@@ -85,7 +85,7 @@ export default function GallerySection() {
                   alt={item.title}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                 />
 
                 {/* Dark Vignette Overlay on Hover */}

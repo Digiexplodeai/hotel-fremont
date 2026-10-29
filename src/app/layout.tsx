@@ -72,10 +72,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/assets/f-icon.png", sizes: "64x64", type: "image/png" },
-      { url: "/assets/f-icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/assets/f-icon.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/assets/f-icon.png" }],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: ["/favicon.ico"],
   },
 };
 

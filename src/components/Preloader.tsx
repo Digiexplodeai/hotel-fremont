@@ -1,103 +1,113 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import { useIntro } from "@/context/IntroContext";
 
-interface PreloaderProps {
-  onLoadingComplete?: () => void;
-}
-
-export default function Preloader({ onLoadingComplete }: PreloaderProps) {
-  const [show, setShow] = useState(true);
+export default function Preloader() {
+  const { isIntroActive, completeIntro } = useIntro();
+  const [showCurtain, setShowCurtain] = useState(isIntroActive);
+  const [progress, setProgress] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    // Check if session already played the preloader
-    const hasLoaded = sessionStorage.getItem("fremont_preloaded");
-    if (hasLoaded) {
-      setShow(false);
-      onLoadingComplete?.();
+    if (!isIntroActive || shouldReduceMotion) {
+      setShowCurtain(false);
+      completeIntro();
       return;
     }
 
-    const timer = setTimeout(() => {
-      setShow(false);
-      sessionStorage.setItem("fremont_preloaded", "true");
-      onLoadingComplete?.();
-    }, 2400);
+    setShowCurtain(true);
 
-    return () => clearTimeout(timer);
-  }, [onLoadingComplete]);
+    const startTime = performance.now();
+    const minDuration = 1800; // 1.8s minimum visible time
+    let animationFrameId: number;
+    let completeTimerId: ReturnType<typeof setTimeout>;
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const pct = Math.min(100, (elapsed / minDuration) * 100);
+      setProgress(pct);
+
+      if (pct < 100) {
+        animationFrameId = requestAnimationFrame(tick);
+      } else {
+        // Progress filled, trigger curtain exit
+        setShowCurtain(false);
+        // As curtain lifts away (1.0s), mark intro done so hero & navbar reveal
+        completeTimerId = setTimeout(() => {
+          completeIntro();
+        }, 900);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      clearTimeout(completeTimerId);
+    };
+  }, [isIntroActive, shouldReduceMotion, completeIntro]);
+
+  if (!isIntroActive && !showCurtain) return null;
 
   return (
     <AnimatePresence>
-      {show && (
+      {showCurtain && (
         <motion.div
-          key="preloader"
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0E0E10] text-center"
-          initial={{ opacity: 1 }}
+          key="fremont-preloader-curtain"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0E0E10] text-center overflow-hidden"
+          initial={{ y: "0%" }}
           exit={{
             y: "-100%",
-            transition: { duration: 0.85, ease: [0.77, 0, 0.175, 1] },
+            transition: {
+              duration: 1.0,
+              ease: [0.76, 0, 0.24, 1], // Exact cubic-bezier(0.76, 0, 0.24, 1) luxury curtain lift
+            },
           }}
         >
-          {/* Subtle Ambient Red Glow */}
-          <div className="absolute w-96 h-96 rounded-full bg-[#E02B1D]/10 blur-3xl pointer-events-none" />
+          {/* Ambient Deep Red Core Glow */}
+          <div className="absolute w-[600px] h-[600px] rounded-full bg-[#E02B1D]/15 blur-[140px] pointer-events-none" />
 
-          {/* Logo Container with Mask & Line Animation */}
-          <div className="relative z-10 flex flex-col items-center max-w-sm px-6">
-            {/* Animated F Monogram */}
+          {/* Centered Content Container */}
+          <div className="relative z-10 flex flex-col items-center px-6 max-w-lg w-full">
+            {/* Logo fades in + slides up slightly (0.8s, ease power3.out) */}
             <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="relative w-28 h-28 mb-6"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-8 flex justify-center w-full"
             >
               <Image
-                src="/assets/f-icon.png"
-                alt="Hotel Fremont Monogram"
-                fill
+                src="/assets/logo.png"
+                alt="HOTEL FREMONT"
+                width={500}
+                height={56}
                 priority
-                className="object-contain drop-shadow-[0_0_20px_rgba(224,43,29,0.35)]"
+                style={{ width: "auto" }}
+                className="h-12 sm:h-14 object-contain drop-shadow-[0_4px_30px_rgba(224,43,29,0.45)]"
               />
             </motion.div>
 
-            {/* Red Line Draw Animation */}
-            <div className="relative w-48 h-1 mb-6 bg-white/10 overflow-hidden rounded-full">
+            {/* Thin red progress line under it fills from 0 to 100% over ~1.6s */}
+            <div className="w-56 sm:w-64 h-[2px] bg-white/10 overflow-hidden rounded-full mb-4">
               <motion.div
-                className="h-full bg-[#E02B1D] shadow-[0_0_12px_#E02B1D]"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 1.6, ease: "easeInOut" }}
+                className="h-full bg-[#E02B1D] shadow-[0_0_14px_#E02B1D]"
+                style={{ width: `${progress}%` }}
+                transition={{ ease: "easeOut" }}
               />
             </div>
 
-            {/* Wordmark Reveal */}
-            <motion.h2
-              className="text-2xl md:text-3xl font-serif font-bold tracking-[0.25em] text-[#F7F3EC] uppercase"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              Hotel Fremont
-            </motion.h2>
-
-            {/* Tagline */}
-            <motion.p
-              className="mt-2 text-xs md:text-sm font-sans tracking-[0.35em] text-[#C9A96E] uppercase font-medium"
+            {/* Subtle Mohali Subtitle */}
+            <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.0, duration: 0.8 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="text-[10px] sm:text-[11px] font-sans tracking-[0.3em] text-[#C9A96E] uppercase font-medium"
             >
-              Stay Beyond Ordinary
-            </motion.p>
-          </div>
-
-          {/* Bottom Progress Indicator */}
-          <div className="absolute bottom-10 flex items-center space-x-2 text-[11px] font-sans tracking-[0.2em] text-[#A8A59E]/70 uppercase">
-            <span>Mohali</span>
-            <span>&bull;</span>
-            <span>Airport Road</span>
+              Mohali &bull; Airport Road
+            </motion.span>
           </div>
         </motion.div>
       )}

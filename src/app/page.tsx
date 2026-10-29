@@ -19,6 +19,8 @@ import Footer from "@/components/Footer";
 import FloatingMobileActions from "@/components/FloatingMobileActions";
 import BookingModal from "@/components/BookingModal";
 
+import { IntroProvider } from "@/context/IntroContext";
+
 export default function Home() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingInitialData, setBookingInitialData] = useState<{
@@ -49,24 +51,25 @@ export default function Home() {
   };
 
   return (
-    <SmoothScroll>
-      <Preloader />
-      <CustomCursor />
+    <IntroProvider>
+      <SmoothScroll>
+        <Preloader />
+        <CustomCursor />
 
-      {/* Main Page Layout */}
-      <div className="relative min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col selection:bg-[#E02B1D] selection:text-white">
-        {/* Transparent & Frosted Glass Navigation */}
-        <Navbar onOpenBooking={() => handleOpenBooking()} />
+        {/* Main Page Layout */}
+        <div className="relative min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col selection:bg-[#E02B1D] selection:text-white">
+          {/* Transparent & Frosted Glass Navigation */}
+          <Navbar onOpenBooking={() => handleOpenBooking()} />
 
-        {/* Hero Section with Cinematic Background & Floating Booking Bar */}
-        <main className="flex-1">
-          <Hero
-            onCheckAvailability={(data) => handleOpenBooking(data)}
-            onExploreSuites={() => {
-              const roomsEl = document.getElementById("rooms");
-              roomsEl?.scrollIntoView({ behavior: "smooth" });
-            }}
-          />
+          {/* Hero Section with Cinematic Background & Floating Booking Bar */}
+          <main className="flex-1">
+            <Hero
+              onCheckAvailability={(data) => handleOpenBooking(data)}
+              onExploreSuites={() => {
+                const roomsEl = document.getElementById("rooms");
+                roomsEl?.scrollIntoView({ behavior: "smooth" });
+              }}
+            />
 
           {/* About / Heritage Story & Overlapping Parallax Visuals */}
           <AboutIntro />
@@ -110,5 +113,6 @@ export default function Home() {
         />
       </div>
     </SmoothScroll>
+    </IntroProvider>
   );
 }

@@ -31,15 +31,15 @@ export default function DiningSection() {
           </p>
         </div>
 
-        {/* Featured Atmospheric Banner with Parallax Feel & Split Content */}
-        <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_25px_70px_rgba(0,0,0,0.7)] mb-16">
-          <div className="relative w-full aspect-[16/9] md:aspect-[21/9] min-h-[420px]">
+        {/* Featured Atmospheric Banner with Safe Aspect Ratio */}
+        <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_25px_70px_rgba(0,0,0,0.7)] mb-16 bg-[#0E0E10]">
+          <div className="relative w-full aspect-[16/10] sm:aspect-[21/9] min-h-[380px] sm:min-h-[440px]">
             <Image
               src={dining.imagePrimary}
               alt="Aura Fine Dining Restaurant and Lounge"
               fill
               sizes="100vw"
-              className="object-cover scale-105 transition-transform duration-1000 ease-out"
+              className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10] via-[#0E0E10]/60 to-black/30" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0E0E10]/90 via-[#0E0E10]/50 to-transparent" />

@@ -43,10 +43,10 @@ export const siteConfig = {
   },
 
   navLinks: [
-    { label: "Rooms & Suites", href: "#rooms" },
+    { label: "Suites", href: "#rooms" },
     { label: "Dining", href: "#dining" },
     { label: "Amenities", href: "#amenities" },
-    { label: "Banquets & Events", href: "#events" },
+    { label: "Events", href: "#events" },
     { label: "Gallery", href: "#gallery" },
     { label: "Location", href: "#location" },
     { label: "Contact", href: "#contact" },

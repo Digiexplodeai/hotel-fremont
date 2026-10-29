@@ -15,16 +15,20 @@
     --border-subtle: rgba(255, 255, 255, 0.08);
   }
 
-  * {
+  *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
   html {
-    scroll-behavior: smooth;
-    background-color: var(--bg-dark);
-    color: var(--text-ivory);
+    /* Lenis provides smooth scrolling - native smooth scroll MUST be auto to avoid conflict */
+    scroll-behavior: auto !important;
+    background-color: #0E0E10;
+    color: #F7F3EC;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
     font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
@@ -33,13 +37,25 @@
     color: #F7F3EC;
     overflow-x: hidden;
     position: relative;
-    min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
+    min-height: 100svh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Headings with luxury serif */
+  /* Global safe media rules to prevent any image/video distortion */
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Headings */
   h1, h2, h3, h4, .font-serif {
     font-family: var(--font-serif), "Playfair Display", Georgia, serif;
     letter-spacing: -0.01em;
+    line-height: 1.2;
   }
 
   /* Custom selection */
@@ -68,7 +84,7 @@
   }
 }
 
-/* Lenis smooth scroll */
+/* Lenis smooth scroll safe styles */
 html.lenis, html.lenis-smooth {
   height: auto;
 }
@@ -83,18 +99,18 @@ html.lenis, html.lenis-smooth {
 
 /* Glassmorphism utilities */
 .glass-panel {
-  background: rgba(18, 18, 22, 0.72);
+  background: rgba(18, 18, 22, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(201, 169, 110, 0.16);
+  border: 1px solid rgba(201, 169, 110, 0.2);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .glass-card {
-  background: rgba(22, 22, 26, 0.82);
+  background: rgba(22, 22, 26, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card:hover {
@@ -106,11 +122,13 @@ html.lenis, html.lenis-smooth {
   border: 1px solid rgba(224, 43, 29, 0.25);
 }
 
-/* Gold Gradient Text */
+/* Gold Gradient Text - robust against line clipping */
 .gold-gradient-text {
   background: linear-gradient(135deg, #FFF1D6 0%, #C9A96E 60%, #9F7E46 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 
 /* Red Glow Shadow */

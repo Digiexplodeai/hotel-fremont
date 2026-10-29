@@ -57,7 +57,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative bg-[#09090B] text-[#F7F3EC] border-t border-white/10 pt-20 pb-28 sm:pb-16 overflow-hidden">
+    <footer id="contact" className="relative bg-[#09090B] text-[#F7F3EC] border-t border-white/10 pt-20 pb-28 sm:pb-16 overflow-hidden">
       {/* Background Accent */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#C9A96E]/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -66,14 +66,14 @@ export default function Footer() {
           {/* Brand Info & Logo Column */}
           <div className="lg:col-span-4 space-y-6">
             <Link href="/" className="inline-block" aria-label="Hotel Fremont">
-              <div className="relative h-12 w-60">
-                <Image
-                  src="/assets/logo.png"
-                  alt="Hotel Fremont"
-                  fill
-                  className="object-contain object-left"
-                />
-              </div>
+              <Image
+                src="/assets/logo.png"
+                alt="HOTEL FREMONT"
+                width={360}
+                height={32}
+                style={{ width: "auto" }}
+                className="h-10 sm:h-12 object-contain object-left block"
+              />
             </Link>
 
             <p className="text-xs sm:text-sm text-[#A8A59E] font-light leading-relaxed max-w-sm">

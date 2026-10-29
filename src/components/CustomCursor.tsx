@@ -11,7 +11,7 @@ export default function CustomCursor() {
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
-  const springConfig = { damping: 25, stiffness: 250, mass: 0.5 };
+  const springConfig = { damping: 28, stiffness: 300, mass: 0.4 };
   const smoothX = useSpring(cursorX, springConfig);
   const smoothY = useSpring(cursorY, springConfig);
 
@@ -44,10 +44,10 @@ export default function CustomCursor() {
     const handleMouseLeave = () => setIsVisible(false);
     const handleMouseEnter = () => setIsVisible(true);
 
-    window.addEventListener("mousemove", moveCursor);
+    window.addEventListener("mousemove", moveCursor, { passive: true });
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mouseover", handleMouseOver);
+    window.addEventListener("mouseover", handleMouseOver, { passive: true });
     document.addEventListener("mouseleave", handleMouseLeave);
     document.addEventListener("mouseenter", handleMouseEnter);
 
@@ -67,12 +67,10 @@ export default function CustomCursor() {
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden hidden md:block">
       {/* Outer Follower Ring */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full border border-[#C9A96E]/60 pointer-events-none"
+        className="fixed top-0 left-0 rounded-full border border-[#C9A96E]/60 pointer-events-none -translate-x-1/2 -translate-y-1/2"
         style={{
           x: smoothX,
           y: smoothY,
-          translateX: "-50%",
-          translateY: "-50%",
         }}
         animate={{
           width: isHovered ? 48 : 32,
@@ -81,22 +79,20 @@ export default function CustomCursor() {
           backgroundColor: isHovered ? "rgba(224, 43, 29, 0.12)" : "transparent",
           scale: isClicked ? 0.85 : 1,
         }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
       />
 
       {/* Center Signature Red Dot */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full bg-[#E02B1D] pointer-events-none shadow-[0_0_8px_rgba(224,43,29,0.8)]"
+        className="fixed top-0 left-0 rounded-full bg-[#E02B1D] pointer-events-none shadow-[0_0_8px_rgba(224,43,29,0.8)] -translate-x-1/2 -translate-y-1/2"
         style={{
           x: cursorX,
           y: cursorY,
-          translateX: "-50%",
-          translateY: "-50%",
         }}
         animate={{
           width: isHovered ? 8 : 6,
           height: isHovered ? 8 : 6,
-          scale: isClicked ? 1.5 : 1,
+          scale: isClicked ? 1.4 : 1,
         }}
         transition={{ duration: 0.1 }}
       />
