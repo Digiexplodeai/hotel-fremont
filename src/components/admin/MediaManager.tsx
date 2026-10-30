@@ -94,7 +94,7 @@ export default function MediaManager() {
   }, []);
 
   // 2. Fetch media items when authenticated or category changes
-  const fetchMedia = async (cat = selectedCategory) => {
+  const fetchMedia = React.useCallback(async (cat = selectedCategory) => {
     if (!isAuthenticated) return;
     setIsLoading(true);
     setErrorMsg("");
@@ -112,13 +112,13 @@ export default function MediaManager() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isAuthenticated, selectedCategory]);
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchMedia(selectedCategory);
     }
-  }, [isAuthenticated, selectedCategory]);
+  }, [isAuthenticated, selectedCategory, fetchMedia]);
 
   // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -763,7 +763,7 @@ export default function MediaManager() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
             <div className="bg-black/60 p-3.5 rounded-lg border border-stone-800">
               <span className="text-[#E51E25] block mb-1">
-                // Example: src/data/rooms.ts
+                {"// Example: src/data/rooms.ts"}
               </span>
               <p className="text-stone-400">
                 image: &ldquo;{r2Info.publicUrl || "https://pub-583d3181aad14cfaac7a1be83ef68da2.r2.dev"}/rooms/deluxe-king-suite.jpg&rdquo;
@@ -771,7 +771,7 @@ export default function MediaManager() {
             </div>
             <div className="bg-black/60 p-3.5 rounded-lg border border-stone-800">
               <span className="text-[#E51E25] block mb-1">
-                // Example: Hero Slideshow
+                {"// Example: Hero Slideshow"}
               </span>
               <p className="text-stone-400">
                 src: &ldquo;{r2Info.publicUrl || "https://pub-583d3181aad14cfaac7a1be83ef68da2.r2.dev"}/hero/evening-lounge-slide.jpg&rdquo;

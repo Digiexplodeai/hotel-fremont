@@ -312,6 +312,32 @@ export async function listMediaObjects({
 }
 
 /**
+ * Checks if an object exists in Cloudflare R2 bucket and returns its metadata
+ */
+export async function verifyObjectExists(
+  key: string
+): Promise<{ exists: boolean; size?: number; contentType?: string }> {
+  const s3 = getR2Client();
+  const bucketName = process.env.R2_BUCKET_NAME || process.env.R2_BUCKET || "hotel-fremont-media";
+
+  try {
+    const head = await s3.send(
+      new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      })
+    );
+    return {
+      exists: true,
+      size: head.ContentLength,
+      contentType: head.ContentType,
+    };
+  } catch {
+    return { exists: false };
+  }
+}
+
+/**
  * Deletes a media object by key from Cloudflare R2
  */
 export async function deleteMediaObject(key: string): Promise<{ success: boolean; key: string }> {

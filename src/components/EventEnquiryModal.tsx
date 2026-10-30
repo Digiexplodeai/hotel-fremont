@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Crown, Users, Sparkles, CheckCircle2, Phone, Mail } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { submitPublicEnquiryAction } from "@/actions/enquiries";
 
 interface EventEnquiryModalProps {
   isOpen: boolean;
@@ -55,6 +56,22 @@ export default function EventEnquiryModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitted(true);
+
+    // Record event inquiry to admin pipeline
+    submitPublicEnquiryAction({
+      type: "event_banquet",
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email || undefined,
+      dates: formData.date,
+      guests: Number(formData.guests) || 50,
+      details: {
+        eventType: formData.eventType,
+        venue: formData.venue,
+        notes: formData.notes || "None",
+      },
+      notes: `${formData.eventType} in ${formData.venue} for ~${formData.guests} guests on ${formData.date}`,
+    }).catch(console.warn);
 
     const message = `*Banquets & Event Enquiry - Hotel Fremont*%0A%0A*Host Name:* ${encodeURIComponent(
       formData.name

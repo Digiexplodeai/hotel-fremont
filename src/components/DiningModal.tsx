@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Clock, Users, Utensils, CheckCircle2, Phone, Sparkles } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { submitPublicEnquiryAction } from "@/actions/enquiries";
 
 interface DiningModalProps {
   isOpen: boolean;
@@ -43,6 +44,21 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitted(true);
+
+    // Record dining inquiry to admin pipeline
+    submitPublicEnquiryAction({
+      type: "dining_aura",
+      name: formData.name,
+      phone: formData.phone,
+      dates: `${formData.date} at ${formData.time}`,
+      guests: Number(formData.guests) || 2,
+      details: {
+        time: formData.time,
+        seating: formData.seating,
+        specialRequests: formData.specialRequest || "None",
+      },
+      notes: `Aura dining reservation for ${formData.guests} guests. Seating: ${formData.seating}`,
+    }).catch(console.warn);
 
     // Format WhatsApp message
     const message = `*Table Reservation Request - Hotel Fremont (Aura)*%0A%0A*Name:* ${encodeURIComponent(

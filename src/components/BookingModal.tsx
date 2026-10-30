@@ -15,6 +15,7 @@ import {
   Plane,
 } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { submitPublicEnquiryAction } from "@/actions/enquiries";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -104,17 +105,23 @@ export default function BookingModal({
     setBookingRef(refCode);
     setIsSubmitted(true);
 
-    /**
-     * BACKEND HOOK:
-     * When you are ready to connect a real backend/database or payment gateway,
-     * simply replace or uncomment the fetch below:
-     *
-     * await fetch('/api/bookings', {
-     *   method: 'POST',
-     *   headers: { 'Content-Type': 'application/json' },
-     *   body: JSON.stringify({ refCode, name, phone, email, checkIn, checkOut, roomType, guests, total })
-     * });
-     */
+    // Record inquiry to database and admin pipeline asynchronously
+    submitPublicEnquiryAction({
+      type: "book_now",
+      name,
+      phone,
+      email: email || undefined,
+      dates: `${checkIn} to ${checkOut}`,
+      guests,
+      details: {
+        refCode,
+        suite: selectedRoom.title,
+        totalAmount: total,
+        nights,
+        specialRequests: specialRequests || "None",
+      },
+      notes: `Direct web booking request. Ref: ${refCode}. Nights: ${nights}`,
+    }).catch(console.warn);
 
     // Format WhatsApp confirmation text
     const message = `*Hotel Fremont - New Reservation Request*%0A%0A*Ref:* ${refCode}%0A*Guest:* ${encodeURIComponent(
