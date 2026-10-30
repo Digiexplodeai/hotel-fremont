@@ -95,9 +95,9 @@ All website copy, room prices, phone numbers, emails, and images are centralized
 In `data/content.js`:
 ```javascript
 contact: {
-  phone: "+91 98765 43210",               // Display phone number
-  whatsapp: "+91 98765 43210",            // Display WhatsApp number
-  whatsappNumber: "919876543210",         // Direct WhatsApp number (without + or spaces)
+  phone: "+91 98727 68514",               // Display phone number
+  whatsapp: "+91 98727 68514",            // Display WhatsApp number
+  whatsappNumber: "919872768514",         // Direct WhatsApp number (without + or spaces)
   bookingEmail: "stay@hotelfremont.com",  // Booking email
   directionsUrl: "https://maps.google.com/?q=Hotel+Fremont+Airport+Road+Sector+80+SAS+Nagar+Mohali+Punjab",
 }

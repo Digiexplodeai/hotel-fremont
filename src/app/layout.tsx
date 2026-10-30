@@ -3,6 +3,7 @@ import { Playfair_Display, Manrope } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/data/content";
 import { TOTAL_ROOMS, HOTEL_REPUTATION } from "@/data/rooms";
+import { CONTACT } from "@/data/contact";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -102,7 +103,7 @@ export default function RootLayout({
     image: "https://hotelfremont.com/assets/logo.png",
     logo: "https://hotelfremont.com/assets/logo.png",
     url: "https://hotelfremont.com",
-    telephone: siteConfig.contact.phone,
+    telephone: CONTACT.phoneRaw, // +919872768514
     email: siteConfig.contact.email,
     priceRange: "₹₹₹₹",
     numberOfRooms: TOTAL_ROOMS, // Exactly 12 rooms & suites

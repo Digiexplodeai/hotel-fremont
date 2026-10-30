@@ -138,7 +138,7 @@ export default function EventEnquiryModal({
                     <input
                       type="tel"
                       required
-                      placeholder="+91 98765 43210"
+                      placeholder="+91 98727 68514"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-sm text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"

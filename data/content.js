@@ -6,6 +6,7 @@
  */
 
 import { roomCategories, TOTAL_ROOMS, HOTEL_REPUTATION } from "./rooms";
+import { CONTACT } from "./contact";
 
 export const siteConfig = {
   brand: {
@@ -29,12 +30,13 @@ export const siteConfig = {
     postalCode: "140308",
     country: "India",
     airportDistance: "10 Minutes from Chandigarh International Airport (IXC)",
-    phone: "+91 98765 43210",
-    phoneDisplay: "+91 98765 43210",
-    phoneTel: "tel:+919876543210",
-    whatsapp: "+91 98765 43210",
-    whatsappNumber: "919876543210",
-    whatsappLink: "https://wa.me/919876543210?text=Hello%20Hotel%20Fremont%2C%20I%20would%20like%20to%20inquire%20about%20a%20reservation.",
+    phone: CONTACT.phoneDisplay,
+    phoneDisplay: CONTACT.phoneDisplay,
+    phoneTel: CONTACT.phoneTel,
+    phoneRaw: CONTACT.phoneRaw,
+    whatsapp: CONTACT.whatsappDisplay,
+    whatsappNumber: CONTACT.whatsappNumber,
+    whatsappLink: CONTACT.whatsappLink,
     email: "stay@hotelfremont.com",
     bookingEmail: "reservations@hotelfremont.com",
     eventsEmail: "banquets@hotelfremont.com",
@@ -252,7 +254,7 @@ export const siteConfig = {
     title: "Experience Punjab’s Foremost Luxury Boutique Hotel",
     subtitle: "Book direct today for guaranteed best rates, complimentary airport drop, and priority suite upgrades.",
     buttonText: "Reserve Your Experience",
-    callText: "Speak with Reservations: +91 98765 43210",
+    callText: `Speak with Reservations: ${CONTACT.phoneDisplay}`,
   },
 
   footer: {
