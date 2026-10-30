@@ -68,11 +68,11 @@ export default function Footer() {
             <Link href="/" className="inline-block" aria-label="Hotel Fremont">
               <Image
                 src="/assets/logo.png"
-                alt="HOTEL FREMONT"
+                alt="Hotel Fremont"
                 width={360}
-                height={32}
+                height={28}
                 style={{ width: "auto" }}
-                className="h-10 sm:h-12 object-contain object-left block"
+                className="h-9 sm:h-10 object-contain object-left block"
               />
             </Link>
 

@@ -59,7 +59,7 @@ export const metadata: Metadata = {
         url: "/assets/logo.png",
         width: 1200,
         height: 630,
-        alt: "Hotel Fremont - Luxury Hotel Mohali",
+        alt: "Hotel Fremont",
       },
     ],
   },

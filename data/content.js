@@ -17,7 +17,6 @@ export const siteConfig = {
     darkColor: "#0E0E10",
     ivoryColor: "#F7F3EC",
     logoPath: "/assets/logo.png",
-    logoSvgPath: "/assets/logo.svg",
     iconPath: "/assets/f-icon.png",
   },
 

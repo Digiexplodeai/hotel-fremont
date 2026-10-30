@@ -112,12 +112,12 @@ export default function Preloader() {
             >
               <Image
                 src="/assets/logo.png"
-                alt="HOTEL FREMONT"
-                width={500}
-                height={56}
+                alt="Hotel Fremont"
+                width={340}
+                height={26}
                 priority
-                style={{ width: "auto" }}
-                className="h-12 sm:h-14 object-contain drop-shadow-[0_4px_30px_rgba(224,43,29,0.45)]"
+                style={{ height: "auto" }}
+                className="w-[280px] sm:w-[320px] md:w-[340px] max-w-[70vw] object-contain drop-shadow-[0_4px_30px_rgba(224,43,29,0.45)]"
               />
             </motion.div>
 

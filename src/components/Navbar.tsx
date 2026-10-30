@@ -164,7 +164,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             >
               <Image
                 src="/assets/logo.png"
-                alt="HOTEL FREMONT"
+                alt="Hotel Fremont"
                 width={360}
                 height={32}
                 priority
