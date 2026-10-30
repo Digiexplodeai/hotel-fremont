@@ -5,13 +5,15 @@
  * You can edit this file to update any information across the entire website instantly.
  */
 
+import { roomCategories, TOTAL_ROOMS, HOTEL_REPUTATION } from "./rooms";
+
 export const siteConfig = {
   brand: {
     name: "Hotel Fremont",
     legalName: "Hotel Fremont Hospitality Pvt Ltd",
     logoWordmark: "HOTEL FREMONT",
     tagline: "Stay Beyond Ordinary.",
-    shortDescription: "A 5-star boutique luxury hotel on Airport Road, Sector 80, Mohali, offering refined suites, gourmet dining, and magnificent celebration venues.",
+    shortDescription: "An intimate 5-star boutique hotel on Airport Road, Sector 80, Mohali, featuring 12 elegantly appointed rooms and suites, gourmet dining, and magnificent celebration venues.",
     accentColor: "#E02B1D",
     goldColor: "#C9A96E",
     darkColor: "#0E0E10",
@@ -64,16 +66,16 @@ export const siteConfig = {
   },
 
   stats: [
-    { value: 48, suffix: "+", label: "Luxury Suites", sub: "Designed for Tranquility" },
-    { value: 120, suffix: "k+", label: "Happy Guests", sub: "From Around the World" },
+    { value: TOTAL_ROOMS, suffix: "", label: "Luxury Rooms & Suites", sub: "Designed for Tranquility" },
+    { value: "24/7", suffix: "", label: "Concierge & Butler Service", sub: "Dedicated Around the Clock" },
     { value: 10, suffix: " Mins", label: "Airport Proximity", sub: "Shaheed Bhagat Singh IXC" },
-    { value: 4.9, suffix: "★", label: "Google Guest Rating", sub: "Over 1,800+ Verified Reviews" },
+    { value: HOTEL_REPUTATION.rating, suffix: HOTEL_REPUTATION.ratingSuffix, label: HOTEL_REPUTATION.ratingLabel, sub: HOTEL_REPUTATION.reviewsSub },
   ],
 
   about: {
     eyebrow: "OUR HERITAGE & SPIRIT",
     title: "An Oasis of Modern Royalty on Airport Road",
-    paragraph1: "Rising gracefully along Mohali’s thriving Airport Road, Hotel Fremont redefines boutique luxury in Punjab. Conceived for the cosmopolitan traveler, business visionary, and destination wedding parties, every detail—from our Italian marble corridors to custom silk furnishings—radiates calm authority.",
+    paragraph1: "Rising gracefully along Mohali’s thriving Airport Road, Hotel Fremont redefines boutique luxury in Punjab with 12 bespoke rooms and suites. Conceived for the cosmopolitan traveler, business visionary, and destination wedding parties, every detail—from our Italian marble corridors to custom silk furnishings—radiates calm authority.",
     paragraph2: "Whether you are landing from an international red-eye flight, hosting a royal celebration in our Grand Fremont Ballroom, or savoring artisanal Punjabi flavours at Aura, our dedicated 24-hour concierge and butler service ensures your stay is nothing short of exceptional.",
     features: [
       { title: "Direct Airport Arterial", desc: "Effortless 10-minute commute to Chandigarh International Airport (IXC) via smooth six-lane expressway." },
@@ -87,88 +89,7 @@ export const siteConfig = {
     imageInterior: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=900",
   },
 
-  rooms: [
-    {
-      id: "deluxe-king",
-      title: "Deluxe King Room",
-      badge: "Best Value",
-      price: 5499,
-      priceLabel: "₹5,499",
-      size: "380 sq.ft",
-      occupancy: "2 Adults + 1 Child",
-      bed: "Super King Bed with 400TC Egyptian Cotton",
-      view: "City Skyline & Courtyard View",
-      description: "A sanctuary of calm featuring warm wooden textures, custom atmospheric lighting, an Italian marble en-suite with rain shower, and a high-speed ergonomic workstation.",
-      highlights: ["Free Airport Drop", "High-speed Wi-Fi 6", "50-inch 4K Smart TV", "Artisanal Coffee Maker", "Complimentary Breakfast"],
-      amenities: ["King Bed", "Rain Shower", "Work Desk", "Mini Bar", "Soundproof", "Safe Locker", "24/7 Room Service"],
-      image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000",
-      gallery: [
-        "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1200",
-        "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1200",
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1200",
-      ]
-    },
-    {
-      id: "executive-suite",
-      title: "Premier Executive Suite",
-      badge: "Corporate Choice",
-      price: 8999,
-      priceLabel: "₹8,999",
-      size: "540 sq.ft",
-      occupancy: "3 Adults or 2 Adults + 2 Children",
-      bed: "Plush California King Bed",
-      view: "Panoramic Airport Road & Boulevard View",
-      description: "Generously proportioned with a private living lounge, plush velvet seating, walk-in dressing closet, and deep-soaking bathtub. Ideal for business leaders and extended stays.",
-      highlights: ["Complimentary Airport Chauffeur", "Lounge Access", "Bathtub & Jacuzzi Jet", "Espresso Machine", "Express Check-in"],
-      amenities: ["Separate Living Room", "Soaking Tub", "Walk-in Closet", "Nespresso Bar", "Balcony", "Smart Climate Control"],
-      image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000",
-      gallery: [
-        "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1200",
-        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=1200",
-        "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&q=80&w=1200",
-      ]
-    },
-    {
-      id: "royal-fremont-suite",
-      title: "The Royal Fremont Suite",
-      badge: "Signature Experience",
-      price: 14999,
-      priceLabel: "₹14,999",
-      size: "780 sq.ft",
-      occupancy: "4 Guests",
-      bed: "Royal Grand King + Daybed",
-      view: "Dual-Aspect Garden & Horizon View",
-      description: "The epitome of boutique grandeur. Features a 6-seater private dining alcove, hand-finished brass accents, champagne welcome bar, and dedicated butler service on call.",
-      highlights: ["Dedicated Private Butler", "Chauffeured Luxury Sedan", "Free Mini-bar & Champagne", "Luxury Hydrotherapy Jacuzzi", "Priority Dining"],
-      amenities: ["Private Dining Area", "Jacuzzi", "Butler Service", "Champagne Bar", "Powder Room", "Panoramic Terrace"],
-      image: "/assets/rooms/royal-fremont-suite.webp",
-      gallery: [
-        "/assets/rooms/royal-fremont-suite.webp",
-        "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=1200",
-        "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=1200",
-      ]
-    },
-    {
-      id: "presidential-penthouse",
-      title: "Presidential Penthouse",
-      badge: "Ultra Luxury",
-      price: 24999,
-      priceLabel: "₹24,999",
-      size: "1,250 sq.ft",
-      occupancy: "Up to 5 Guests",
-      bed: "Master King Suite + Guest Bedroom",
-      view: "Top-Floor 360° Skyline & Airport Runway Sunset View",
-      description: "Our crowning jewel on the highest tier. Boasting two luxurious master bedrooms, a private terrace, grand Steinway piano lounge, bespoke gold-leaf ceiling, and round-the-clock personal chef availability.",
-      highlights: ["Private Rooftop Terrace", "Personal Chef on Demand", "Luxury Airport Limousine", "Full Bar & Cellar", "VIP Security Access"],
-      amenities: ["2 Master Bedrooms", "Private Terrace", "Chef Service", "Steinway Lounge", "Sauna & Steam", "VIP Elevator"],
-      image: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1000",
-      gallery: [
-        "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1200",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200",
-        "/assets/hero/hero-room-2.webp",
-      ]
-    }
-  ],
+  rooms: roomCategories,
 
   amenities: [
     {
@@ -335,7 +256,7 @@ export const siteConfig = {
   },
 
   footer: {
-    about: "Hotel Fremont is an architectural luxury boutique destination on Airport Road, Sector 80, Mohali. Dedicated to authentic hospitality, culinary passion, and unforgettable stays.",
+    about: "Hotel Fremont is an intimate 12-key luxury boutique destination on Airport Road, Sector 80, Mohali. Dedicated to authentic hospitality, culinary passion, and unforgettable stays.",
     quickLinks: [
       { label: "Home", href: "#" },
       { label: "Rooms & Suites", href: "#rooms" },

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Users, BedDouble, Search, ChevronDown, ArrowRight } from "lucide-react";
-import { siteConfig } from "@/data/content";
+import { Calendar, Users, BedDouble, ChevronDown, ArrowRight, Info } from "lucide-react";
+import { roomCategories } from "@/data/rooms";
 
 interface BookingBarProps {
   onCheckAvailability: (bookingData: {
@@ -24,15 +24,21 @@ export default function BookingBar({ onCheckAvailability, className = "" }: Book
 
   const [checkIn, setCheckIn] = useState(getFormattedDate(1));
   const [checkOut, setCheckOut] = useState(getFormattedDate(3));
-  const [roomType, setRoomType] = useState(siteConfig.rooms[0].id);
+  const [roomType, setRoomType] = useState(roomCategories[0].slug);
   const [guests, setGuests] = useState(2);
+
+  const currentCategory =
+    roomCategories.find((r) => r.slug === roomType || r.id === roomType) || roomCategories[0];
+  const isOverCapacity = guests > currentCategory.maxGuests;
+  const suggestedCategory = roomCategories.find((r) => r.maxGuests >= guests);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const effectiveRoomType = isOverCapacity && suggestedCategory ? suggestedCategory.slug : roomType;
     onCheckAvailability({
       checkIn,
       checkOut,
-      roomType,
+      roomType: effectiveRoomType,
       guests,
     });
   };
@@ -86,9 +92,9 @@ export default function BookingBar({ onCheckAvailability, className = "" }: Book
               onChange={(e) => setRoomType(e.target.value)}
               className="w-full bg-transparent text-sm font-medium text-[#F7F3EC] focus:outline-none cursor-pointer appearance-none pr-6 truncate"
             >
-              {siteConfig.rooms.map((r) => (
-                <option key={r.id} value={r.id} className="bg-[#16161A] text-[#F7F3EC]">
-                  {r.title} ({r.priceLabel})
+              {roomCategories.map((r) => (
+                <option key={r.slug} value={r.slug} className="bg-[#16161A] text-[#F7F3EC]">
+                  {r.name} ({r.priceLabel})
                 </option>
               ))}
             </select>
@@ -97,7 +103,7 @@ export default function BookingBar({ onCheckAvailability, className = "" }: Book
         </div>
 
         {/* Guests & Action Button */}
-        <div className="grid grid-cols-[1fr_1.35fr] gap-2 items-center">
+        <div className="grid grid-cols-[minmax(86px,1.1fr)_1.35fr] gap-2 items-center">
           {/* Guests dropdown */}
           <div className="h-[62px] px-3 py-2 rounded-xl bg-[#16161A]/80 border border-white/10 hover:border-[#C9A96E]/50 transition-colors flex flex-col justify-center">
             <label className="text-[10px] font-sans tracking-[0.2em] text-[#C9A96E] uppercase font-semibold flex items-center space-x-1 mb-0.5">
@@ -108,12 +114,13 @@ export default function BookingBar({ onCheckAvailability, className = "" }: Book
               <select
                 value={guests}
                 onChange={(e) => setGuests(Number(e.target.value))}
-                className="w-full bg-transparent text-sm font-medium text-[#F7F3EC] focus:outline-none cursor-pointer appearance-none pr-5"
+                className="w-full bg-transparent text-sm font-medium text-[#F7F3EC] focus:outline-none cursor-pointer appearance-none pr-4"
               >
-                <option value={1} className="bg-[#16161A] text-[#F7F3EC]">1</option>
-                <option value={2} className="bg-[#16161A] text-[#F7F3EC]">2</option>
-                <option value={3} className="bg-[#16161A] text-[#F7F3EC]">3</option>
-                <option value={4} className="bg-[#16161A] text-[#F7F3EC]">4+</option>
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <option key={num} value={num} className="bg-[#16161A] text-[#F7F3EC]">
+                    {num} {num === 1 ? "Guest" : "Guests"}
+                  </option>
+                ))}
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-[#C9A96E] absolute right-0 pointer-events-none" />
             </div>
@@ -129,6 +136,31 @@ export default function BookingBar({ onCheckAvailability, className = "" }: Book
           </button>
         </div>
       </form>
+
+      {/* Gentle inline message when selected guests exceed category max capacity */}
+      {isOverCapacity && (
+        <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs text-[#F7F3EC]/90">
+          <div className="flex items-center space-x-2">
+            <Info className="w-3.5 h-3.5 text-[#E02B1D] shrink-0" />
+            <span>
+              {currentCategory.name} accommodates up to {currentCategory.maxGuests} guests.
+              {suggestedCategory && (
+                <span className="text-[#A8A59E] ml-1.5">
+                  We recommend our{" "}
+                  <button
+                    type="button"
+                    onClick={() => setRoomType(suggestedCategory.slug)}
+                    className="text-[#C9A96E] hover:text-[#E02B1D] font-semibold underline transition-colors cursor-pointer"
+                  >
+                    {suggestedCategory.name}
+                  </button>
+                  {" "}for {guests} guests.
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

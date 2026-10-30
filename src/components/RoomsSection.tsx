@@ -96,9 +96,16 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
                 {/* Dark Vignette Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#151518] via-transparent to-black/30 pointer-events-none" />
 
-                {/* Badge */}
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] font-sans font-bold tracking-widest uppercase shadow-lg">
-                  {room.badge}
+                {/* Badges: Category Tag & Inventory Chip */}
+                <div className="absolute top-4 left-4 flex items-center space-x-2">
+                  <div className="px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] font-sans font-bold tracking-widest uppercase shadow-lg">
+                    {room.badge}
+                  </div>
+                  {room.inventoryLabel && (
+                    <div className="px-2.5 py-1 rounded-full bg-[#0E0E10]/85 backdrop-blur-md border border-[#C9A96E]/40 text-[#C9A96E] text-[10px] font-sans font-semibold tracking-wider uppercase shadow-md">
+                      {room.inventoryLabel}
+                    </div>
+                  )}
                 </div>
 
                 {/* Price Tag Pill */}
@@ -128,7 +135,9 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
                     </div>
                     <div className="flex items-center space-x-1.5">
                       <Users className="w-3.5 h-3.5 text-[#E02B1D] shrink-0" />
-                      <span className="text-[11px] truncate">{room.occupancy.split(" ")[0]} Guests</span>
+                      <span className="text-[11px] truncate">
+                        {room.maxGuests ? `${room.maxGuests} Guests` : room.occupancy}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1.5">
                       <BedDouble className="w-3.5 h-3.5 text-[#E02B1D] shrink-0" />

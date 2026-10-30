@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Manrope } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/data/content";
+import { TOTAL_ROOMS, HOTEL_REPUTATION } from "@/data/rooms";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -27,12 +28,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Hotel Fremont | Luxury Hotel near Airport Road, Mohali",
   description:
-    "Experience 5-star boutique luxury at Hotel Fremont, Airport Road, Sector 80, SAS Nagar, Mohali. 10 minutes from Chandigarh International Airport (IXC). Bespoke suites, fine dining, and grand banquets.",
+    "Experience intimate 5-star boutique luxury at Hotel Fremont, Airport Road, Sector 80, SAS Nagar, Mohali. Featuring 12 elegantly appointed rooms and suites, fine dining, and grand banquets just 10 minutes from Chandigarh International Airport (IXC).",
   keywords: [
     "hotel in Mohali",
     "hotel near Chandigarh airport",
     "best hotel Airport Road Mohali",
     "luxury hotel Mohali",
+    "12 room luxury hotel Mohali",
+    "boutique hotel Airport Road Mohali",
     "banquet hall Mohali",
     "wedding venue Mohali",
     "Hotel Fremont",
@@ -49,7 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hotel Fremont | Luxury Boutique Hotel near Airport Road, Mohali",
     description:
-      "Stay Beyond Ordinary. 5-star boutique hotel in Mohali, Punjab, minutes from Chandigarh Airport. Luxury suites, fine dining, and banquet venues.",
+      "Stay Beyond Ordinary. An intimate 12-key 5-star boutique hotel in Mohali, Punjab, minutes from Chandigarh Airport. 12 luxury rooms and suites, fine dining, and banquet venues.",
     url: "https://hotelfremont.com",
     siteName: "Hotel Fremont",
     locale: "en_IN",
@@ -67,7 +70,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Hotel Fremont | Luxury Hotel near Airport Road, Mohali",
     description:
-      "Stay Beyond Ordinary at Hotel Fremont, Sector 80, Airport Road, Mohali. 10 mins from Chandigarh Airport.",
+      "Stay Beyond Ordinary at Hotel Fremont, Sector 80, Airport Road, Mohali. 12 bespoke rooms & suites, 10 mins from Chandigarh Airport.",
     images: ["/assets/logo.png"],
   },
   icons: {
@@ -102,14 +105,14 @@ export default function RootLayout({
     telephone: siteConfig.contact.phone,
     email: siteConfig.contact.email,
     priceRange: "₹₹₹₹",
+    numberOfRooms: TOTAL_ROOMS, // Exactly 12 rooms & suites
     starRating: {
       "@type": "Rating",
       ratingValue: "5",
     },
     aggregateRating: {
       "@type": "AggregateRating",
-      ratingValue: "4.9",
-      reviewCount: "1840",
+      ratingValue: HOTEL_REPUTATION.rating,
       bestRating: "5",
       worstRating: "1",
     },

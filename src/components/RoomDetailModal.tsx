@@ -4,23 +4,9 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, BedDouble, Maximize2, Users, Eye, Calendar, Sparkles } from "lucide-react";
+import { RoomCategory } from "@/data/rooms";
 
-export interface RoomType {
-  id: string;
-  title: string;
-  badge: string;
-  price: number;
-  priceLabel: string;
-  size: string;
-  occupancy: string;
-  bed: string;
-  view: string;
-  description: string;
-  highlights: string[];
-  amenities: string[];
-  image: string;
-  gallery: string[];
-}
+export type RoomType = RoomCategory;
 
 interface RoomDetailModalProps {
   room: RoomType | null;
@@ -117,8 +103,15 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
                     </span>
                   </div>
                 )}
-                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] uppercase font-bold tracking-widest shadow-md">
-                  {room.badge}
+                <div className="absolute top-3 left-3 flex items-center space-x-2">
+                  <div className="px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] uppercase font-bold tracking-widest shadow-md">
+                    {room.badge}
+                  </div>
+                  {room.inventoryLabel && (
+                    <div className="px-2.5 py-1 rounded-full bg-[#0E0E10]/85 backdrop-blur-md border border-[#C9A96E]/40 text-[#C9A96E] text-[10px] uppercase font-semibold tracking-wider shadow-md">
+                      {room.inventoryLabel}
+                    </div>
+                  )}
                 </div>
               </div>
 

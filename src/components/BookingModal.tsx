@@ -83,7 +83,7 @@ export default function BookingModal({
 
   // Selected room data
   const selectedRoom =
-    siteConfig.rooms.find((r) => r.id === roomType) || siteConfig.rooms[0];
+    siteConfig.rooms.find((r) => r.id === roomType || (r as any).slug === roomType) || siteConfig.rooms[0];
 
   // Calculate nights
   const d1 = new Date(checkIn);
@@ -222,7 +222,7 @@ export default function BookingModal({
                       className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     >
                       {siteConfig.rooms.map((r) => (
-                        <option key={r.id} value={r.id}>
+                        <option key={r.id || (r as any).slug} value={r.id || (r as any).slug}>
                           {r.title} ({r.priceLabel}/night)
                         </option>
                       ))}
@@ -238,11 +238,17 @@ export default function BookingModal({
                       onChange={(e) => setGuests(Number(e.target.value))}
                       className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     >
-                      <option value={1}>1 Guest</option>
-                      <option value={2}>2 Guests</option>
-                      <option value={3}>3 Guests</option>
-                      <option value={4}>4+ Guests</option>
+                      {[1, 2, 3, 4, 5, 6].map((num) => (
+                        <option key={num} value={num}>
+                          {num} {num === 1 ? "Guest" : "Guests"}
+                        </option>
+                      ))}
                     </select>
+                    {selectedRoom && (selectedRoom as any).maxGuests && guests > (selectedRoom as any).maxGuests && (
+                      <p className="text-[10px] text-[#C9A96E] mt-1">
+                        {selectedRoom.title} accommodates up to {(selectedRoom as any).maxGuests} guests.
+                      </p>
+                    )}
                   </div>
                 </div>
 
