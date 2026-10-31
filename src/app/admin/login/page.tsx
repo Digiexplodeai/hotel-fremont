@@ -161,6 +161,9 @@ export default function AdminLoginPage() {
                   />
                   <Lock className="absolute right-3.5 top-3.5 w-4 h-4 text-[#A8A59E]/50" />
                 </div>
+                <p className="text-[11px] text-[#A8A59E]/70 mt-1.5">
+                  Demo Password: <code className="text-[#C9A96E]">fremont-admin-2026</code>
+                </p>
               </div>
             </>
           )}

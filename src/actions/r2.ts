@@ -86,14 +86,17 @@ export async function requestPresignedUploadUrl({
     const objectKey = `site/${section}/${cleanBase}-${Date.now()}-${uniqueId}.${cleanExt}`;
 
     // 5. Generate Presigned PUT URL (valid for 120 seconds)
+    // Explicitly sign only 'host' to avoid signature mismatch and R2 flexible checksum issues
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: objectKey,
       ContentType: mimeType,
-      CacheControl: "public, max-age=31536000, immutable",
     });
 
-    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 120 });
+    const uploadUrl = await getSignedUrl(s3, command, {
+      expiresIn: 120,
+      signableHeaders: new Set(["host"]),
+    });
     const publicUrl = getPublicMediaUrl(objectKey);
 
     return {

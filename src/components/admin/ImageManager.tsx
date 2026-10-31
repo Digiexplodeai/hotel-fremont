@@ -496,11 +496,11 @@ export default function ImageManager() {
       setStatusMessage("Uploading directly to Cloudflare R2 bucket (bypassing Netlify payload limits)...");
 
       // 3. Direct browser PUT to Cloudflare R2 with progress
+      // Only send Content-Type matching the presigned configuration, no extra headers
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", presignRes.uploadUrl!, true);
         xhr.setRequestHeader("Content-Type", processed.mimeType);
-        xhr.setRequestHeader("Cache-Control", "public, max-age=31536000, immutable");
 
         xhr.upload.onprogress = (evt) => {
           if (evt.lengthComputable) {
