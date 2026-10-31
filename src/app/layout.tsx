@@ -154,14 +154,21 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${playfair.variable} ${manrope.variable} dark scroll-smooth`}>
+    <html
+      lang="en"
+      className={`${playfair.variable} ${manrope.variable} dark scroll-smooth`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen bg-[#0E0E10] text-[#F7F3EC] antialiased selection:bg-[#E02B1D] selection:text-white">
+      <body
+        className="min-h-screen bg-[#0E0E10] text-[#F7F3EC] antialiased selection:bg-[#E02B1D] selection:text-white"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { BedDouble, Maximize2, Users, ArrowRight, Eye, Calendar, Sparkles } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 import RoomDetailModal, { RoomType } from "./RoomDetailModal";
 
 interface RoomsSectionProps {
@@ -14,7 +15,21 @@ interface RoomsSectionProps {
 export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
   const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
-  const rooms = siteConfig.rooms as RoomType[];
+  const { slots } = useSiteSlots();
+
+  const rooms = (siteConfig.rooms as RoomType[]).map((room) => {
+    const mainSlot = slots[`rooms.${room.id}.main`];
+    const g1Slot = slots[`rooms.${room.id}.gallery.1`];
+    const g2Slot = slots[`rooms.${room.id}.gallery.2`];
+    return {
+      ...room,
+      image: mainSlot?.url || room.image,
+      gallery: [
+        g1Slot?.url || room.gallery?.[0] || room.image,
+        g2Slot?.url || room.gallery?.[1] || room.image,
+      ],
+    };
+  });
 
   return (
     <section id="rooms" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">

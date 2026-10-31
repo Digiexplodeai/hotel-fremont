@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCurrentUser, signOutAction } from "@/actions/auth";
 import ImageManager from "@/components/admin/ImageManager";
+import { getImageSlotsMap } from "@/lib/data/siteData";
 import {
   ExternalLink,
   LogOut,
@@ -14,6 +15,9 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Website Images Manager | Hotel Fremont",
@@ -30,6 +34,8 @@ export default async function AdminImagesPage() {
   if (!user) {
     redirect("/admin/login");
   }
+
+  const initialSlotsMap = await getImageSlotsMap();
 
   return (
     <div className="min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col">
@@ -163,7 +169,7 @@ export default async function AdminImagesPage() {
         </div>
 
         {/* The Image Manager UI */}
-        <ImageManager />
+        <ImageManager initialSlotsMap={initialSlotsMap} />
       </main>
     </div>
   );

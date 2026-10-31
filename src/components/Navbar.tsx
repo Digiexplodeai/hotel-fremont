@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Calendar, ArrowRight, MapPin } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { useIntro } from "@/context/IntroContext";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 
 interface NavbarProps {
   onOpenBooking: () => void;
@@ -14,6 +15,8 @@ interface NavbarProps {
 
 export default function Navbar({ onOpenBooking }: NavbarProps) {
   const { isIntroDone } = useIntro();
+  const { slots } = useSiteSlots();
+  const logoUrl = slots["branding.logo"]?.url || "/assets/logo.png";
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -163,7 +166,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
               aria-label="Hotel Fremont Home"
             >
               <Image
-                src="/assets/logo.png"
+                src={logoUrl}
                 alt="Hotel Fremont"
                 width={360}
                 height={32}

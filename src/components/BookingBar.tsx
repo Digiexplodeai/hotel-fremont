@@ -61,6 +61,7 @@ export default function BookingBar({ onCheckAvailability, className = "" }: Book
             onChange={(e) => setCheckIn(e.target.value)}
             className="w-full bg-transparent text-sm font-medium text-[#F7F3EC] focus:outline-none cursor-pointer [color-scheme:dark]"
             required
+            suppressHydrationWarning
           />
         </div>
 
@@ -77,6 +78,7 @@ export default function BookingBar({ onCheckAvailability, className = "" }: Book
             onChange={(e) => setCheckOut(e.target.value)}
             className="w-full bg-transparent text-sm font-medium text-[#F7F3EC] focus:outline-none cursor-pointer [color-scheme:dark]"
             required
+            suppressHydrationWarning
           />
         </div>
 

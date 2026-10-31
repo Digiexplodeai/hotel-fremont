@@ -69,14 +69,37 @@ CREATE TABLE IF NOT EXISTS public.media_assets (
 -- 4. Website Image Slots (Single Source of Truth for all site images)
 CREATE TABLE IF NOT EXISTS public.image_slots (
   slot_key TEXT PRIMARY KEY,
-  label TEXT NOT NULL,
-  section TEXT NOT NULL,
-  media_id UUID REFERENCES public.media_assets(id) ON DELETE SET NULL,
-  fallback_url TEXT NOT NULL,
+  url TEXT NOT NULL,
   alt_text TEXT,
-  focal_point TEXT DEFAULT '50% 50%',
+  focal_x TEXT DEFAULT '50%',
+  focal_y TEXT DEFAULT '50%',
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Safe migrations in case table was previously created with different columns
+ALTER TABLE public.image_slots ADD COLUMN IF NOT EXISTS url TEXT;
+ALTER TABLE public.image_slots ADD COLUMN IF NOT EXISTS alt_text TEXT;
+ALTER TABLE public.image_slots ADD COLUMN IF NOT EXISTS focal_x TEXT DEFAULT '50%';
+ALTER TABLE public.image_slots ADD COLUMN IF NOT EXISTS focal_y TEXT DEFAULT '50%';
+ALTER TABLE public.image_slots ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+DO $$
+BEGIN
+  ALTER TABLE public.image_slots ALTER COLUMN label DROP NOT NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER TABLE public.image_slots ALTER COLUMN section DROP NOT NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER TABLE public.image_slots ALTER COLUMN fallback_url DROP NOT NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
 -- 5. Curated Gallery Items (Visual Journal)
 CREATE TABLE IF NOT EXISTS public.gallery_items (
@@ -244,8 +267,9 @@ CREATE POLICY "Staff read enquiries" ON public.enquiries
 CREATE POLICY "Managers manage media" ON public.media_assets
   FOR ALL USING (public.get_user_role() IN ('owner', 'manager'));
 
-CREATE POLICY "Managers manage image_slots" ON public.image_slots
-  FOR ALL USING (public.get_user_role() IN ('owner', 'manager'));
+DROP POLICY IF EXISTS "Managers manage image_slots" ON public.image_slots;
+CREATE POLICY "Allow all writes to image_slots" ON public.image_slots
+  FOR ALL USING (true) WITH CHECK (true);
 
 CREATE POLICY "Managers manage gallery_items" ON public.gallery_items
   FOR ALL USING (public.get_user_role() IN ('owner', 'manager'));

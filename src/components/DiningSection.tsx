@@ -5,11 +5,15 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Utensils, Clock, Wine, Sparkles, Calendar } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 import DiningModal from "./DiningModal";
 
 export default function DiningSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { dining } = siteConfig;
+  const { slots } = useSiteSlots();
+
+  const bannerImage = slots["dining.banner_primary"]?.url || dining.imagePrimary;
 
   return (
     <section id="dining" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">
@@ -35,7 +39,7 @@ export default function DiningSection() {
         <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_25px_70px_rgba(0,0,0,0.7)] mb-16 bg-[#0E0E10]">
           <div className="relative w-full aspect-[16/10] sm:aspect-[21/9] min-h-[380px] sm:min-h-[440px]">
             <Image
-              src={dining.imagePrimary}
+              src={bannerImage}
               alt="Aura Fine Dining Restaurant and Lounge"
               fill
               sizes="100vw"

@@ -4,9 +4,14 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Plane, CheckCircle2 } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 
 export default function AboutIntro() {
   const { about, stats } = siteConfig;
+  const { slots } = useSiteSlots();
+
+  const primaryImage = slots["about.image_primary"]?.url || about.imagePrimary;
+  const secondaryImage = slots["about.image_secondary"]?.url || about.imageSecondary;
 
   return (
     <section id="about" className="relative py-20 lg:py-28 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">
@@ -74,7 +79,7 @@ export default function AboutIntro() {
               {/* Primary Image */}
               <div className="relative w-full aspect-[16/11] rounded-2xl overflow-hidden border border-[#C9A96E]/30 shadow-xl">
                 <Image
-                  src={about.imagePrimary}
+                  src={primaryImage}
                   alt="Hotel Fremont Deluxe Suite Sanctuary"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -86,7 +91,7 @@ export default function AboutIntro() {
               {/* Overlapping Secondary Image */}
               <div className="absolute -bottom-5 -left-3 sm:-left-6 w-1/2 aspect-[4/3] rounded-xl overflow-hidden border-2 border-[#151518] shadow-2xl z-10 hidden sm:block">
                 <Image
-                  src={about.imageSecondary}
+                  src={secondaryImage}
                   alt="Hotel Fremont Luxury Interior Suite"
                   fill
                   sizes="(max-width: 1024px) 40vw, 25vw"

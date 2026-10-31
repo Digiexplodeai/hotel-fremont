@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowDown, Sparkles, MapPin } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { useIntro } from "@/context/IntroContext";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 import BookingBar from "./BookingBar";
 
 interface HeroProps {
@@ -18,7 +19,7 @@ interface HeroProps {
   onExploreSuites: () => void;
 }
 
-const heroSlides = [
+const DEFAULT_HERO_SLIDES = [
   { src: "/assets/hero/hero-suite.webp", label: "Classic Luxury Suite" },
   { src: "/assets/hero/hero-room-1.webp", label: "Deluxe King Room" },
   { src: "/assets/hero/hero-lobby.webp", label: "Panoramic Modern Suite" },
@@ -27,6 +28,15 @@ const heroSlides = [
 
 export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps) {
   const { isIntroDone } = useIntro();
+  const { slots } = useSiteSlots();
+
+  const heroSlides = [
+    { src: slots["hero.slide_1"]?.url || DEFAULT_HERO_SLIDES[0].src, label: "Classic Luxury Suite" },
+    { src: slots["hero.slide_2"]?.url || DEFAULT_HERO_SLIDES[1].src, label: "Deluxe King Room" },
+    { src: slots["hero.slide_3"]?.url || DEFAULT_HERO_SLIDES[2].src, label: "Panoramic Modern Suite" },
+    { src: slots["hero.slide_4"]?.url || DEFAULT_HERO_SLIDES[3].src, label: "Executive Lounge Suite" },
+  ];
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();

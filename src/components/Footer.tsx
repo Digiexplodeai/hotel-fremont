@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin, ArrowUp } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 
 function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -51,6 +52,8 @@ const socialIcons: Record<string, React.ElementType> = {
 
 export default function Footer() {
   const { footer, contact } = siteConfig;
+  const { slots } = useSiteSlots();
+  const logoUrl = slots["branding.logo"]?.url || "/assets/logo.png";
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -67,7 +70,7 @@ export default function Footer() {
           <div className="lg:col-span-4 space-y-6">
             <Link href="/" className="inline-block" aria-label="Hotel Fremont">
               <Image
-                src="/assets/logo.png"
+                src={logoUrl}
                 alt="Hotel Fremont"
                 width={360}
                 height={28}

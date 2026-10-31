@@ -43,6 +43,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { processImageBeforeUpload } from "@/lib/image-processing";
+import { SlotData } from "@/lib/data/siteData";
 import {
   requestPresignedUploadUrl,
   confirmUploadAction,
@@ -388,9 +389,42 @@ function SortableGalleryCard({
   );
 }
 
-export default function ImageManager() {
+function mergeSlotsWithInitial(
+  baseSlots: ImageSlotUI[],
+  initialMap?: Record<string, SlotData>
+): ImageSlotUI[] {
+  if (!initialMap) return baseSlots;
+  return baseSlots.map((slot) => {
+    const custom = initialMap[slot.key];
+    if (custom && custom.isCustom) {
+      return {
+        ...slot,
+        currentUrl: custom.url,
+        altText: custom.altText || slot.altText,
+        focalPoint: custom.focalPoint || slot.focalPoint,
+        isCustomR2: true,
+      };
+    }
+    return slot;
+  });
+}
+
+export interface ImageManagerProps {
+  initialSlotsMap?: Record<string, SlotData>;
+}
+
+export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}) {
   const [activeSection, setActiveSection] = useState("all");
-  const [slots, setSlots] = useState<ImageSlotUI[]>(INITIAL_SLOTS);
+  const [slots, setSlots] = useState<ImageSlotUI[]>(() =>
+    mergeSlotsWithInitial(INITIAL_SLOTS, initialSlotsMap)
+  );
+
+  useEffect(() => {
+    if (initialSlotsMap) {
+      setSlots(mergeSlotsWithInitial(INITIAL_SLOTS, initialSlotsMap));
+    }
+  }, [initialSlotsMap]);
+
   const [galleryItems, setGalleryItems] = useState<GalleryItemUI[]>(INITIAL_GALLERY);
 
   // Active slot being replaced
@@ -548,11 +582,15 @@ export default function ImageManager() {
       setUploadProgress(100);
       setStatusMessage("Image successfully updated on Cloudflare R2!");
 
-      // Update local state
+      // Update local state with cache-busting timestamp
+      const confirmedUrl = confirmRes.publicUrl
+        ? `${confirmRes.publicUrl}?v=${Date.now()}`
+        : presignRes.publicUrl!;
+
       setSlots((prev) =>
         prev.map((s) =>
           s.key === replacingSlot.key
-            ? { ...s, currentUrl: presignRes.publicUrl!, isCustomR2: true }
+            ? { ...s, currentUrl: confirmedUrl, isCustomR2: true }
             : s
         )
       );
@@ -579,8 +617,9 @@ export default function ImageManager() {
 
     const res = await restoreSlotDefaultAction({ slotKey: slot.key });
     if (res.success) {
+      const defaultUrl = INITIAL_SLOTS.find((s) => s.key === slot.key)?.currentUrl || slot.currentUrl;
       setSlots((prev) =>
-        prev.map((s) => (s.key === slot.key ? { ...s, isCustomR2: false } : s))
+        prev.map((s) => (s.key === slot.key ? { ...s, currentUrl: defaultUrl, isCustomR2: false } : s))
       );
       showToast(`Restored default for '${slot.label}'`);
     } else {

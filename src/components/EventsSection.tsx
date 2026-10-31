@@ -5,12 +5,22 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Crown, Users, Maximize2, Sparkles, Calendar, ArrowRight } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 import EventEnquiryModal from "./EventEnquiryModal";
 
 export default function EventsSection() {
   const [selectedVenue, setSelectedVenue] = useState<string>("The Grand Fremont Ballroom");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { events } = siteConfig;
+  const { slots } = useSiteSlots();
+
+  const venues = events.venues.map((venue, idx) => {
+    const slotKey = `events.venue_${idx + 1}`;
+    return {
+      ...venue,
+      image: slots[slotKey]?.url || venue.image,
+    };
+  });
 
   const handleEnquire = (venueName: string) => {
     setSelectedVenue(venueName);
@@ -54,7 +64,7 @@ export default function EventsSection() {
 
         {/* Venues Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {events.venues.map((venue, index) => (
+          {venues.map((venue, index) => (
             <motion.div
               key={venue.name}
               initial={{ opacity: 0, y: 30 }}
