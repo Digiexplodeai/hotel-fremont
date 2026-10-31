@@ -52,3 +52,4 @@ DROP POLICY IF EXISTS "Managers manage image_slots" ON public.image_slots;
 DROP POLICY IF EXISTS "Allow all writes to image_slots" ON public.image_slots;
 CREATE POLICY "Allow all writes to image_slots" ON public.image_slots
   FOR ALL USING (true) WITH CHECK (true);
+
