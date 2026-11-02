@@ -47,19 +47,19 @@ export interface BookingRecord {
 const defaultPhysicalRooms: PhysicalRoom[] = [
   // 6 Deluxe King Rooms (Floor 1)
   { id: "room-101", roomNumber: "101", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
-  { id: "room-102", roomNumber: "102", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "occupied", currentBooking: { bookingCode: "HF-20261030-01", guestName: "Vikram Malhotra", checkIn: "2026-10-29", checkOut: "2026-10-31" } },
+  { id: "room-102", roomNumber: "102", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
   { id: "room-103", roomNumber: "103", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
-  { id: "room-104", roomNumber: "104", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "cleaning" },
+  { id: "room-104", roomNumber: "104", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
   { id: "room-105", roomNumber: "105", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
   { id: "room-106", roomNumber: "106", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
 
   // 3 Premier Executive Suites (Floor 2)
-  { id: "room-201", roomNumber: "201", categorySlug: "premier-executive", categoryName: "Premier Executive Suite", floor: 2, status: "occupied", currentBooking: { bookingCode: "HF-20261028-04", guestName: "Sarah Jenkins", checkIn: "2026-10-28", checkOut: "2026-11-01" } },
+  { id: "room-201", roomNumber: "201", categorySlug: "premier-executive", categoryName: "Premier Executive Suite", floor: 2, status: "available" },
   { id: "room-202", roomNumber: "202", categorySlug: "premier-executive", categoryName: "Premier Executive Suite", floor: 2, status: "available" },
   { id: "room-203", roomNumber: "203", categorySlug: "premier-executive", categoryName: "Premier Executive Suite", floor: 2, status: "available" },
 
   // 2 The Royal Fremont Suites (Floor 3)
-  { id: "room-301", roomNumber: "301", categorySlug: "royal-fremont", categoryName: "The Royal Fremont Suite", floor: 3, status: "occupied", currentBooking: { bookingCode: "HF-20261030-08", guestName: "Rohit & Ananya Khanna", checkIn: "2026-10-30", checkOut: "2026-11-02" } },
+  { id: "room-301", roomNumber: "301", categorySlug: "royal-fremont", categoryName: "The Royal Fremont Suite", floor: 3, status: "available" },
   { id: "room-302", roomNumber: "302", categorySlug: "royal-fremont", categoryName: "The Royal Fremont Suite", floor: 3, status: "available" },
 
   // 1 Presidential Penthouse (Floor 4)

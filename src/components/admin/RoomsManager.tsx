@@ -697,7 +697,7 @@ export default function RoomsManager({
                   <input
                     required
                     type="text"
-                    placeholder="e.g. Vikram Malhotra"
+                    placeholder="e.g. Guest Full Name"
                     value={bookingForm.guestName}
                     onChange={(e) => setBookingForm({ ...bookingForm, guestName: e.target.value })}
                     className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-[#F7F3EC] focus:outline-none focus:border-[#C9A96E]"

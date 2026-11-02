@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   EnquiryRecord,
   EnquiryStatus,
   EnquiryType,
+  getEnquiriesAction,
   updateEnquiryStatusAction,
+  deleteEnquiryAction,
 } from "@/actions/enquiries";
 import {
   MessageSquare,
@@ -22,6 +24,11 @@ import {
   User,
   ChevronRight,
   FileText,
+  RefreshCw,
+  Trash2,
+  AlertCircle,
+  Loader2,
+  X,
 } from "lucide-react";
 
 interface EnquiriesManagerProps {
@@ -77,6 +84,12 @@ const statusConfig: Record<
   },
   contacted: {
     label: "Contacted",
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    border: "border-blue-500/30",
+  },
+  in_discussion: {
+    label: "In Discussion",
     bg: "bg-amber-500/10",
     text: "text-amber-400",
     border: "border-amber-500/30",
@@ -88,12 +101,21 @@ const statusConfig: Record<
     border: "border-emerald-500/30",
   },
   closed: {
-    label: "Closed",
+    label: "Closed / Cancelled",
     bg: "bg-slate-500/10",
     text: "text-slate-400",
     border: "border-slate-500/30",
   },
 };
+
+// Helper: Clean phone number to digits with 91 country code
+function getCleanPhone(phone: string): string {
+  const digits = (phone || "").replace(/\D/g, "");
+  if (!digits) return "919872768514";
+  if (digits.startsWith("91") && digits.length >= 12) return digits;
+  if (digits.length === 10) return `91${digits}`;
+  return digits;
+}
 
 export default function EnquiriesManager({
   initialEnquiries,
@@ -105,13 +127,58 @@ export default function EnquiriesManager({
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [successBanner, setSuccessBanner] = useState<string | null>(null);
   const [noteEdit, setNoteEdit] = useState<string>("");
 
-  // Metrics
+  // Top Statistics (Calculated strictly from real Supabase rows)
   const total = enquiries.length;
-  const newCount = enquiries.filter((e) => e.status === "new").length;
-  const contactedCount = enquiries.filter((e) => e.status === "contacted").length;
-  const convertedCount = enquiries.filter((e) => e.status === "converted").length;
+  const actionRequired = enquiries.filter((e) => e.status === "new").length;
+  const inDiscussion = enquiries.filter((e) => e.status === "in_discussion" || e.status === "contacted").length;
+  const converted = enquiries.filter((e) => e.status === "converted").length;
+
+  // Refresh data from Supabase
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setErrorBanner(null);
+    try {
+      const res = await getEnquiriesAction();
+      if (res.success) {
+        setEnquiries(res.enquiries);
+        if (selectedEnquiry) {
+          const updated = res.enquiries.find((e) => e.id === selectedEnquiry.id);
+          if (updated) setSelectedEnquiry(updated);
+        }
+      } else {
+        setErrorBanner(res.error || "Failed to fetch enquiries from Supabase.");
+      }
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorBanner(error.message || "Network error while refreshing enquiries.");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Auto-refresh when tab regains focus or visibility
+  useEffect(() => {
+    const onFocus = () => {
+      handleRefresh();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        handleRefresh();
+      }
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
 
   // Filtered List
   const filtered = enquiries.filter((item) => {
@@ -127,8 +194,10 @@ export default function EnquiriesManager({
     return true;
   });
 
+  // Handle status update
   const handleStatusChange = async (enquiryId: string, newStatus: EnquiryStatus) => {
     setIsUpdating(enquiryId);
+    setErrorBanner(null);
     try {
       const res = await updateEnquiryStatusAction(enquiryId, newStatus);
       if (res.success) {
@@ -138,15 +207,52 @@ export default function EnquiriesManager({
         if (selectedEnquiry?.id === enquiryId) {
           setSelectedEnquiry((prev) => (prev ? { ...prev, status: newStatus } : null));
         }
+        setSuccessBanner(`Lead marked as ${statusConfig[newStatus]?.label || newStatus}`);
+        setTimeout(() => setSuccessBanner(null), 3000);
+      } else {
+        setErrorBanner(res.error || "Failed to update lead status in Supabase.");
       }
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorBanner(error.message || "Failed to update status.");
     } finally {
       setIsUpdating(null);
     }
   };
 
+  // Handle delete
+  const handleDelete = async (enquiryId: string, name: string) => {
+    if (!confirm(`Are you sure you want to permanently delete the inquiry from "${name}"?`)) {
+      return;
+    }
+
+    setIsDeleting(enquiryId);
+    setErrorBanner(null);
+    try {
+      const res = await deleteEnquiryAction(enquiryId);
+      if (res.success) {
+        setEnquiries((prev) => prev.filter((e) => e.id !== enquiryId));
+        if (selectedEnquiry?.id === enquiryId) {
+          setSelectedEnquiry(null);
+        }
+        setSuccessBanner(`Inquiry from "${name}" deleted.`);
+        setTimeout(() => setSuccessBanner(null), 3000);
+      } else {
+        setErrorBanner(res.error || "Failed to delete lead from Supabase.");
+      }
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorBanner(error.message || "Failed to delete lead.");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  // Handle saving staff notes
   const handleSaveNotes = async () => {
     if (!selectedEnquiry) return;
     setIsUpdating(selectedEnquiry.id);
+    setErrorBanner(null);
     try {
       const res = await updateEnquiryStatusAction(
         selectedEnquiry.id,
@@ -158,7 +264,14 @@ export default function EnquiriesManager({
           prev.map((e) => (e.id === selectedEnquiry.id ? { ...e, notes: noteEdit } : e))
         );
         setSelectedEnquiry((prev) => (prev ? { ...prev, notes: noteEdit } : null));
+        setSuccessBanner("Notes saved to Supabase.");
+        setTimeout(() => setSuccessBanner(null), 3000);
+      } else {
+        setErrorBanner(res.error || "Failed to save notes.");
       }
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorBanner(error.message || "Failed to save notes.");
     } finally {
       setIsUpdating(null);
     }
@@ -179,7 +292,7 @@ export default function EnquiriesManager({
         <div className="p-4 rounded-xl bg-[#151518] border border-[#E02B1D]/25 shadow-sm flex flex-col justify-between">
           <span className="text-[11px] font-mono uppercase text-[#E02B1D]">Action Required</span>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-mono font-bold text-[#E02B1D]">{newCount}</span>
+            <span className="text-2xl font-mono font-bold text-[#E02B1D]">{actionRequired}</span>
             <span className="text-[10px] text-[#E02B1D]/80 animate-pulse font-mono">Uncontacted</span>
           </div>
         </div>
@@ -187,7 +300,7 @@ export default function EnquiriesManager({
         <div className="p-4 rounded-xl bg-[#151518] border border-amber-500/20 shadow-sm flex flex-col justify-between">
           <span className="text-[11px] font-mono uppercase text-amber-400">In Discussion</span>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-mono font-bold text-amber-400">{contactedCount}</span>
+            <span className="text-2xl font-mono font-bold text-amber-400">{inDiscussion}</span>
             <span className="text-[10px] text-amber-400/80 font-mono">Follow-up</span>
           </div>
         </div>
@@ -195,11 +308,31 @@ export default function EnquiriesManager({
         <div className="p-4 rounded-xl bg-[#151518] border border-emerald-500/20 shadow-sm flex flex-col justify-between">
           <span className="text-[11px] font-mono uppercase text-emerald-400">Converted</span>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-mono font-bold text-emerald-400">{convertedCount}</span>
-            <span className="text-[10px] text-emerald-400/80 font-mono">Booked</span>
+            <span className="text-2xl font-mono font-bold text-emerald-400">{converted}</span>
+            <span className="text-[10px] text-emerald-400/80 font-mono">Confirmed</span>
           </div>
         </div>
       </div>
+
+      {/* Notifications */}
+      {errorBanner && (
+        <div className="p-3.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <span>{errorBanner}</span>
+          </div>
+          <button onClick={() => setErrorBanner(null)} className="text-red-300 hover:text-white">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {successBanner && (
+        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{successBanner}</span>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="bg-[#151518] border border-white/10 rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3 shadow-md">
@@ -220,23 +353,24 @@ export default function EnquiriesManager({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#F7F3EC] focus:outline-none focus:border-[#C9A96E]"
+            className="bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#F7F3EC] focus:outline-none focus:border-[#C9A96E] cursor-pointer"
           >
             <option value="all">All Statuses ({total})</option>
-            <option value="new">New Leads ({newCount})</option>
-            <option value="contacted">Contacted ({contactedCount})</option>
-            <option value="converted">Converted ({convertedCount})</option>
-            <option value="closed">Closed</option>
+            <option value="new">New Leads ({actionRequired})</option>
+            <option value="contacted">Contacted</option>
+            <option value="in_discussion">In Discussion</option>
+            <option value="converted">Converted ({converted})</option>
+            <option value="closed">Closed / Cancelled</option>
           </select>
 
-          {/* Type Filter */}
+          {/* Channel Filter */}
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#F7F3EC] focus:outline-none focus:border-[#C9A96E]"
+            className="bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#F7F3EC] focus:outline-none focus:border-[#C9A96E] cursor-pointer"
           >
             <option value="all">All Channels</option>
-            <option value="book_now">Room Booking</option>
+            <option value="book_now">Room Reservation</option>
             <option value="rate_check">Rate Check</option>
             <option value="dining_aura">Aura Dining</option>
             <option value="event_banquet">Event &amp; Banquet</option>
@@ -244,9 +378,22 @@ export default function EnquiriesManager({
           </select>
         </div>
 
-        <span className="text-xs text-[#A8A59E] font-mono shrink-0">
-          Showing {filtered.length} of {total} leads
-        </span>
+        {/* Right action controls */}
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          <span className="text-xs text-[#A8A59E] font-mono shrink-0">
+            Showing {filtered.length} of {total} leads
+          </span>
+
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="px-3 py-1.5 rounded-lg bg-black/40 hover:bg-white/5 border border-white/10 hover:border-white/20 text-xs text-[#F7F3EC] flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+            title="Reload from Supabase"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#C9A96E] ${isRefreshing ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Leads Table & Details Drawer Split View */}
@@ -256,20 +403,35 @@ export default function EnquiriesManager({
           <div className="bg-[#151518] border border-white/10 rounded-xl overflow-hidden shadow-md">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-black/40 text-[#A8A59E] font-mono border-b border-white/10 uppercase text-[10px]">
+                <thead className="bg-black/50 text-[#A8A59E] font-mono border-b border-white/10 uppercase text-[10px]">
                   <tr>
                     <th className="py-3 px-4">Guest Contact</th>
                     <th className="py-3 px-4">Channel / Type</th>
                     <th className="py-3 px-4">Details / Dates</th>
                     <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Quick Connect</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-[#F7F3EC]">
-                  {filtered.length === 0 ? (
+                  {isRefreshing && enquiries.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-[#A8A59E]">
-                        No matching inquiries found.
+                      <td colSpan={5} className="py-12 text-center text-[#A8A59E]">
+                        <Loader2 className="w-6 h-6 text-[#E02B1D] animate-spin mx-auto mb-2" />
+                        <span>Fetching real leads from Supabase...</span>
+                      </td>
+                    </tr>
+                  ) : filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-12 text-center text-[#A8A59E]">
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 mx-auto flex items-center justify-center text-[#A8A59E] mb-2">
+                          <MessageSquare className="w-5 h-5" />
+                        </div>
+                        <span className="font-serif font-bold block text-sm text-white mb-1">
+                          No leads yet
+                        </span>
+                        <span className="text-xs text-[#A8A59E] max-w-sm block mx-auto">
+                          New guest submissions from the public website will appear here in real-time.
+                        </span>
                       </td>
                     </tr>
                   ) : (
@@ -278,11 +440,10 @@ export default function EnquiriesManager({
                       const scfg = statusConfig[item.status] || statusConfig.new;
                       const isSelected = selectedEnquiry?.id === item.id;
 
-                      // Build WhatsApp URL with context
-                      const cleanPhone = item.phone.replace(/[^0-9]/g, "");
-                      const waPhone = cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`;
-                      const waText = `Hello ${item.name}, thank you for reaching out to Hotel Fremont regarding your ${tcfg.label}. How may we assist you with your reservation?`;
+                      const waPhone = getCleanPhone(item.phone);
+                      const waText = `Hello ${item.name}, thank you for reaching out to Hotel Fremont regarding your ${tcfg.label}. How may we assist you with your booking?`;
                       const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(waText)}`;
+                      const telUrl = `tel:+${waPhone}`;
 
                       return (
                         <tr
@@ -301,7 +462,10 @@ export default function EnquiriesManager({
                             <div className="font-semibold text-white flex items-center gap-1.5">
                               <span>{item.name}</span>
                               {item.status === "new" && (
-                                <span className="w-2 h-2 rounded-full bg-[#E02B1D] animate-ping" />
+                                <span
+                                  className="w-2 h-2 rounded-full bg-[#E02B1D] animate-pulse"
+                                  title="New Lead (Action Required)"
+                                />
                               )}
                             </div>
                             <div className="text-[11px] text-[#A8A59E] font-mono mt-0.5">
@@ -351,6 +515,11 @@ export default function EnquiriesManager({
                                 {item.details.eventType}
                               </div>
                             )}
+                            {item.details?.totalAmount ? (
+                              <div className="text-[10px] text-emerald-400 font-mono font-semibold">
+                                ₹{Number(item.details.totalAmount).toLocaleString("en-IN")}
+                              </div>
+                            ) : null}
                           </td>
 
                           <td className="py-3 px-4">
@@ -376,12 +545,26 @@ export default function EnquiriesManager({
 
                               {/* 1-Click Call */}
                               <a
-                                href={`tel:${item.phone}`}
+                                href={telUrl}
                                 title="Call Guest"
                                 className="p-1.5 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/30 transition flex items-center gap-1 text-[11px]"
                               >
                                 <Phone className="w-3.5 h-3.5" />
                               </a>
+
+                              {/* Delete Lead Button */}
+                              <button
+                                onClick={() => handleDelete(item.id, item.name)}
+                                disabled={isDeleting === item.id}
+                                title="Delete Lead"
+                                className="p-1.5 rounded-lg border border-red-500/20 text-red-400 hover:text-red-300 hover:bg-red-950/30 transition flex items-center gap-1 text-[11px] cursor-pointer disabled:opacity-50"
+                              >
+                                {isDeleting === item.id ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                )}
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -416,18 +599,29 @@ export default function EnquiriesManager({
                 </p>
               </div>
 
-              <button
-                onClick={() => setSelectedEnquiry(null)}
-                className="text-xs text-[#A8A59E] hover:text-white p-1 rounded-md bg-black/40"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDelete(selectedEnquiry.id, selectedEnquiry.name)}
+                  disabled={isDeleting === selectedEnquiry.id}
+                  className="text-xs text-red-400 hover:text-red-300 p-1.5 rounded-md bg-red-950/40 border border-red-500/20 transition cursor-pointer"
+                  title="Delete Lead"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={() => setSelectedEnquiry(null)}
+                  className="text-xs text-[#A8A59E] hover:text-white p-1 rounded-md bg-black/40 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
             {/* Direct Connect Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <a
-                href={`https://wa.me/${selectedEnquiry.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                href={`https://wa.me/${getCleanPhone(selectedEnquiry.phone)}?text=${encodeURIComponent(
                   `Hello ${selectedEnquiry.name}, thank you for inquiring about Hotel Fremont.`
                 )}`}
                 target="_blank"
@@ -439,7 +633,7 @@ export default function EnquiriesManager({
               </a>
 
               <a
-                href={`tel:${selectedEnquiry.phone}`}
+                href={`tel:+${getCleanPhone(selectedEnquiry.phone)}`}
                 className="py-2.5 px-4 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 text-white font-semibold text-xs transition flex items-center justify-center gap-2"
               >
                 <Phone className="w-4 h-4 text-[#C9A96E]" />
@@ -471,6 +665,14 @@ export default function EnquiriesManager({
                   <span className="text-white font-medium">{selectedEnquiry.guests} Guests</span>
                 </div>
               )}
+              {selectedEnquiry.details?.totalAmount && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[#A8A59E]">Estimated Total:</span>
+                  <span className="text-emerald-400 font-mono font-bold">
+                    ₹{Number(selectedEnquiry.details.totalAmount).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Specific Submission Details */}
@@ -478,25 +680,31 @@ export default function EnquiriesManager({
               <div className="space-y-1.5">
                 <span className="text-[11px] font-mono uppercase text-[#A8A59E]">Form Submission Payload</span>
                 <div className="p-3 rounded-lg bg-black/30 border border-white/5 text-xs text-[#F7F3EC] space-y-1 font-mono">
-                  {Object.entries(selectedEnquiry.details).map(([k, v]) => (
-                    <div key={k} className="flex items-baseline justify-between text-[11px]">
-                      <span className="text-[#A8A59E] capitalize">{k.replace(/([A-Z])/g, " $1")}:</span>
-                      <span className="text-[#C9A96E] text-right font-medium">{String(v)}</span>
-                    </div>
-                  ))}
+                  {Object.entries(selectedEnquiry.details).map(([k, v]) => {
+                    if (v === undefined || v === null || v === "") return null;
+                    return (
+                      <div key={k} className="flex items-baseline justify-between text-[11px]">
+                        <span className="text-[#A8A59E] capitalize">{k.replace(/([A-Z])/g, " $1")}:</span>
+                        <span className="text-[#C9A96E] text-right font-medium max-w-[220px] truncate">
+                          {String(v)}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {/* Status Workflow Selector */}
+            {/* Status Workflow Selector (Dropdown + Buttons) */}
             <div className="space-y-2">
               <span className="text-[11px] font-mono uppercase text-[#A8A59E]">Lead Status</span>
               <div className="grid grid-cols-2 gap-2">
-                {(["new", "contacted", "converted", "closed"] as EnquiryStatus[]).map((st) => (
+                {(["new", "contacted", "in_discussion", "converted", "closed"] as EnquiryStatus[]).map((st) => (
                   <button
                     key={st}
+                    disabled={isUpdating === selectedEnquiry.id}
                     onClick={() => handleStatusChange(selectedEnquiry.id, st)}
-                    className={`py-2 px-3 rounded-lg text-xs font-semibold capitalize border transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-3 rounded-lg text-xs font-semibold capitalize border transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 ${
                       selectedEnquiry.status === st
                         ? statusConfig[st].bg + " " + statusConfig[st].text + " " + statusConfig[st].border
                         : "bg-black/30 text-[#A8A59E] border-white/5 hover:border-white/20"
@@ -514,9 +722,10 @@ export default function EnquiriesManager({
                 <span className="text-[11px] font-mono uppercase text-[#A8A59E]">Front Desk Call Notes</span>
                 <button
                   onClick={handleSaveNotes}
-                  className="text-[11px] text-[#C9A96E] hover:underline font-semibold"
+                  disabled={isUpdating === selectedEnquiry.id}
+                  className="text-[11px] text-[#C9A96E] hover:underline font-semibold cursor-pointer disabled:opacity-50"
                 >
-                  Save Notes
+                  {isUpdating === selectedEnquiry.id ? "Saving..." : "Save Notes"}
                 </button>
               </div>
               <textarea
@@ -533,4 +742,3 @@ export default function EnquiriesManager({
     </div>
   );
 }
-

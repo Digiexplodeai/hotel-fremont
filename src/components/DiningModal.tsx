@@ -20,8 +20,11 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
     guests: "2",
     seating: "Indoor Fine Dining",
     specialRequest: "",
+    botField: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
       window.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
       setIsSubmitted(false);
+      setErrorMessage(null);
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -41,43 +45,59 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    if (formData.botField) return; // Silent discard for bot spam
 
-    // Record dining inquiry to admin pipeline
-    submitPublicEnquiryAction({
-      type: "dining_aura",
-      name: formData.name,
-      phone: formData.phone,
-      dates: `${formData.date} at ${formData.time}`,
-      guests: Number(formData.guests) || 2,
-      details: {
-        time: formData.time,
-        seating: formData.seating,
-        specialRequests: formData.specialRequest || "None",
-      },
-      notes: `Aura dining reservation for ${formData.guests} guests. Seating: ${formData.seating}`,
-    }).catch(console.warn);
+    setIsSubmitting(true);
+    setErrorMessage(null);
 
-    // Format WhatsApp message
-    const message = `*Table Reservation Request - Hotel Fremont (Aura)*%0A%0A*Name:* ${encodeURIComponent(
-      formData.name
-    )}%0A*Phone:* ${encodeURIComponent(formData.phone)}%0A*Date:* ${encodeURIComponent(
-      formData.date
-    )}%0A*Time:* ${encodeURIComponent(formData.time)}%0A*Party Size:* ${encodeURIComponent(
-      formData.guests
-    )} Guests%0A*Seating Preference:* ${encodeURIComponent(
-      formData.seating
-    )}%0A*Special Requests:* ${encodeURIComponent(
-      formData.specialRequest || "None"
-    )}`;
+    try {
+      // Record dining inquiry to Supabase pipeline
+      const res = await submitPublicEnquiryAction({
+        type: "dining_aura",
+        name: formData.name,
+        phone: formData.phone,
+        dates: `${formData.date} at ${formData.time}`,
+        guests: Number(formData.guests) || 2,
+        details: {
+          time: formData.time,
+          seating: formData.seating,
+          specialRequests: formData.specialRequest || "None",
+        },
+        notes: `Aura dining reservation for ${formData.guests} guests. Seating: ${formData.seating}`,
+      });
 
-    // Open WhatsApp in new tab
-    const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
-    setTimeout(() => {
-      window.open(waUrl, "_blank");
-    }, 800);
+      if (!res.success) {
+        setErrorMessage(res.error || "Failed to submit reservation. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+
+      // Format WhatsApp message
+      const message = `*Table Reservation Request - Hotel Fremont (Aura)*%0A%0A*Name:* ${encodeURIComponent(
+        formData.name
+      )}%0A*Phone:* ${encodeURIComponent(formData.phone)}%0A*Date:* ${encodeURIComponent(
+        formData.date
+      )}%0A*Time:* ${encodeURIComponent(formData.time)}%0A*Party Size:* ${encodeURIComponent(
+        formData.guests
+      )} Guests%0A*Seating Preference:* ${encodeURIComponent(
+        formData.seating
+      )}%0A*Special Requests:* ${encodeURIComponent(
+        formData.specialRequest || "None"
+      )}`;
+
+      const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
+      setTimeout(() => {
+        window.open(waUrl, "_blank");
+      }, 800);
+    } catch (err: any) {
+      setErrorMessage(err?.message || "An unexpected error occurred. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -122,7 +142,24 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                 Secure your dining experience at Hotel Fremont. Our sommelier and culinary hosts look forward to greeting you.
               </p>
 
+              {errorMessage && (
+                <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs">
+                  {errorMessage}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Honeypot field */}
+                <input
+                  type="text"
+                  name="user_note_verify"
+                  value={formData.botField}
+                  onChange={(e) => setFormData({ ...formData, botField: e.target.value })}
+                  className="hidden"
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+
                 <div>
                   <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Guest Full Name *
@@ -236,9 +273,17 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] text-white font-semibold text-xs uppercase tracking-[0.2em] shadow-lg transition-all duration-300 mt-2 btn-magnetic"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs uppercase tracking-[0.2em] shadow-lg transition-all duration-300 mt-2 btn-magnetic flex items-center justify-center space-x-2"
                 >
-                  Confirm Table Request
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Submitting to Host...</span>
+                    </>
+                  ) : (
+                    <span>Confirm Table Request</span>
+                  )}
                 </button>
               </form>
             </div>

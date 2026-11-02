@@ -26,8 +26,11 @@ export default function EventEnquiryModal({
     guests: "200-350 Guests",
     date: new Date().toISOString().split("T")[0],
     notes: "",
+    botField: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
@@ -44,6 +47,7 @@ export default function EventEnquiryModal({
       window.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
       setIsSubmitted(false);
+      setErrorMessage(null);
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -53,44 +57,61 @@ export default function EventEnquiryModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    if (formData.botField) return; // Silent discard for bot spam
 
-    // Record event inquiry to admin pipeline
-    submitPublicEnquiryAction({
-      type: "event_banquet",
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email || undefined,
-      dates: formData.date,
-      guests: Number(formData.guests) || 50,
-      details: {
-        eventType: formData.eventType,
-        venue: formData.venue,
-        notes: formData.notes || "None",
-      },
-      notes: `${formData.eventType} in ${formData.venue} for ~${formData.guests} guests on ${formData.date}`,
-    }).catch(console.warn);
+    setIsSubmitting(true);
+    setErrorMessage(null);
 
-    const message = `*Banquets & Event Enquiry - Hotel Fremont*%0A%0A*Host Name:* ${encodeURIComponent(
-      formData.name
-    )}%0A*Phone:* ${encodeURIComponent(formData.phone)}%0A*Email:* ${encodeURIComponent(
-      formData.email || "N/A"
-    )}%0A*Event Type:* ${encodeURIComponent(
-      formData.eventType
-    )}%0A*Venue:* ${encodeURIComponent(
-      formData.venue
-    )}%0A*Estimated Guests:* ${encodeURIComponent(
-      formData.guests
-    )}%0A*Preferred Date:* ${encodeURIComponent(
-      formData.date
-    )}%0A*Notes/Requirements:* ${encodeURIComponent(formData.notes || "None")}`;
+    try {
+      // Record event inquiry to Supabase pipeline
+      const res = await submitPublicEnquiryAction({
+        type: "event_banquet",
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email || undefined,
+        dates: formData.date,
+        guests: parseInt(formData.guests) || 100,
+        details: {
+          eventType: formData.eventType,
+          venue: formData.venue,
+          notes: formData.notes || "None",
+        },
+        notes: `${formData.eventType} in ${formData.venue} for ~${formData.guests} guests on ${formData.date}`,
+      });
 
-    const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
-    setTimeout(() => {
-      window.open(waUrl, "_blank");
-    }, 800);
+      if (!res.success) {
+        setErrorMessage(res.error || "Failed to submit event enquiry. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+
+      const message = `*Banquets & Event Enquiry - Hotel Fremont*%0A%0A*Host Name:* ${encodeURIComponent(
+        formData.name
+      )}%0A*Phone:* ${encodeURIComponent(formData.phone)}%0A*Email:* ${encodeURIComponent(
+        formData.email || "N/A"
+      )}%0A*Event Type:* ${encodeURIComponent(
+        formData.eventType
+      )}%0A*Venue:* ${encodeURIComponent(
+        formData.venue
+      )}%0A*Estimated Guests:* ${encodeURIComponent(
+        formData.guests
+      )}%0A*Preferred Date:* ${encodeURIComponent(
+        formData.date
+      )}%0A*Notes/Requirements:* ${encodeURIComponent(formData.notes || "None")}`;
+
+      const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
+      setTimeout(() => {
+        window.open(waUrl, "_blank");
+      }, 800);
+    } catch (err: any) {
+      setErrorMessage(err?.message || "An unexpected error occurred. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -132,7 +153,24 @@ export default function EventEnquiryModal({
                 From fairy-tale weddings to corporate conclaves, our banqueting team creates unforgettable occasions on Airport Road, Mohali.
               </p>
 
+              {errorMessage && (
+                <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs">
+                  {errorMessage}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Honeypot field */}
+                <input
+                  type="text"
+                  name="user_verification_notes"
+                  value={formData.botField}
+                  onChange={(e) => setFormData({ ...formData, botField: e.target.value })}
+                  className="hidden"
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+
                 <div>
                   <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Host / Organizer Name *
@@ -257,9 +295,17 @@ export default function EventEnquiryModal({
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] text-white font-semibold text-xs uppercase tracking-[0.2em] shadow-lg transition-all duration-300 btn-magnetic"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs uppercase tracking-[0.2em] shadow-lg transition-all duration-300 btn-magnetic flex items-center justify-center space-x-2"
                 >
-                  Send Event Enquiry
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Transmitting to Banquet Desk...</span>
+                    </>
+                  ) : (
+                    <span>Send Event Enquiry</span>
+                  )}
                 </button>
               </form>
             </div>

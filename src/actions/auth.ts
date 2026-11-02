@@ -153,6 +153,7 @@ export async function signInAction(formData: FormData): Promise<{
       if (
         emailLower === "admin@hotelfremont.com" ||
         emailLower === "owner@hotelfremont.com" ||
+        emailLower === "sagarkiisha3@gmail.com" ||
         emailLower.endsWith("@hotelfremont.com")
       ) {
         resolvedRole = "owner";
