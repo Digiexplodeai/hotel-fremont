@@ -68,85 +68,6 @@ const defaultPhysicalRooms: PhysicalRoom[] = [
 
 let memoryRooms: PhysicalRoom[] = [...defaultPhysicalRooms];
 
-let memoryBookings: BookingRecord[] = [
-  {
-    id: "b-1",
-    bookingCode: "HF-20261030-01",
-    guestName: "Vikram Malhotra",
-    guestPhone: "+91 98111 22334",
-    guestEmail: "vikram.m@example.com",
-    categorySlug: "deluxe-king",
-    categoryName: "Deluxe King Room",
-    roomNumber: "102",
-    checkIn: "2026-10-29",
-    checkOut: "2026-10-31",
-    guestsCount: 2,
-    totalAmount: 12978,
-    advancePaid: 5000,
-    status: "checked_in",
-    source: "website",
-    notes: "Late checkout requested (1:00 PM)",
-    createdAt: "2026-10-27T10:00:00Z",
-  },
-  {
-    id: "b-2",
-    bookingCode: "HF-20261028-04",
-    guestName: "Sarah Jenkins",
-    guestPhone: "+44 7911 123456",
-    guestEmail: "sarah.j@techleaders.co.uk",
-    categorySlug: "premier-executive",
-    categoryName: "Premier Executive Suite",
-    roomNumber: "201",
-    checkIn: "2026-10-28",
-    checkOut: "2026-11-01",
-    guestsCount: 1,
-    totalAmount: 42475,
-    advancePaid: 42475,
-    status: "checked_in",
-    source: "phone",
-    notes: "Requires airport transfer to IXC on Nov 1",
-    createdAt: "2026-10-25T14:30:00Z",
-  },
-  {
-    id: "b-3",
-    bookingCode: "HF-20261030-08",
-    guestName: "Rohit & Ananya Khanna",
-    guestPhone: "+91 98760 11223",
-    guestEmail: "rohit.khanna@delhicap.in",
-    categorySlug: "royal-fremont",
-    categoryName: "The Royal Fremont Suite",
-    roomNumber: "301",
-    checkIn: "2026-10-30",
-    checkOut: "2026-11-02",
-    guestsCount: 2,
-    totalAmount: 53096,
-    advancePaid: 25000,
-    status: "confirmed",
-    source: "website",
-    notes: "Anniversary celebration. Champagne setup in room.",
-    createdAt: "2026-10-28T09:15:00Z",
-  },
-  {
-    id: "b-4",
-    bookingCode: "HF-20261102-12",
-    guestName: "Arunav Singhania",
-    guestPhone: "+91 99201 88472",
-    guestEmail: "arunav@singhaniaholdings.com",
-    categorySlug: "presidential-penthouse",
-    categoryName: "Presidential Penthouse",
-    roomNumber: "401",
-    checkIn: "2026-11-02",
-    checkOut: "2026-11-05",
-    guestsCount: 4,
-    totalAmount: 88496,
-    advancePaid: 44248,
-    status: "confirmed",
-    source: "whatsapp",
-    notes: "VIP guests arriving via private jet.",
-    createdAt: "2026-10-29T16:45:00Z",
-  },
-];
-
 /**
  * Fetch all 12 physical rooms with current status
  */
@@ -243,7 +164,7 @@ export async function updateRoomStatusAction(
 }
 
 /**
- * Fetch all bookings with optional filters
+ * Fetch all reservations / bookings from public.reservations
  */
 export async function getBookingsAction(): Promise<{
   success: boolean;
@@ -253,48 +174,41 @@ export async function getBookingsAction(): Promise<{
   try {
     const supabase = await createServerSupabaseClient();
     if (!supabase) {
-      return { success: true, bookings: memoryBookings, isDatabase: false };
+      return { success: true, bookings: [], isDatabase: false };
     }
 
     const { data, error } = await supabase
-      .from("bookings")
-      .select("*, rooms(room_number)")
-      .order("check_in", { ascending: false });
+      .from("reservations")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return { success: true, bookings: memoryBookings, isDatabase: false };
+    if (error || !data) {
+      return { success: true, bookings: [], isDatabase: false };
     }
-
-    const categoryMap: Record<string, string> = {
-      "deluxe-king": "Deluxe King Room",
-      "premier-executive": "Premier Executive Suite",
-      "royal-fremont": "The Royal Fremont Suite",
-      "presidential-penthouse": "Presidential Penthouse",
-    };
 
     const bookings: BookingRecord[] = data.map((b) => ({
       id: b.id,
-      bookingCode: b.booking_code,
-      guestName: b.guest_name,
-      guestPhone: b.guest_phone,
-      guestEmail: b.guest_email || undefined,
-      categorySlug: b.category_slug,
-      categoryName: categoryMap[b.category_slug] || b.category_slug,
-      roomNumber: b.rooms?.room_number || undefined,
+      bookingCode: `HF-${b.id.slice(0, 8).toUpperCase()}`,
+      guestName: b.full_name,
+      guestPhone: b.phone,
+      guestEmail: b.email || undefined,
+      categorySlug: b.room_type?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "suite",
+      categoryName: b.room_type || "Luxury Suite",
+      roomNumber: undefined,
       checkIn: b.check_in,
       checkOut: b.check_out,
-      guestsCount: b.guests_count,
-      totalAmount: Number(b.total_amount),
-      advancePaid: Number(b.advance_paid || 0),
-      status: b.status as BookingStatus,
-      source: b.source,
-      notes: b.notes || undefined,
+      guestsCount: b.guests || 2,
+      totalAmount: Number(b.estimated_total || 0),
+      advancePaid: 0,
+      status: (b.status === "confirmed" ? "confirmed" : b.status === "cancelled" ? "cancelled" : "pending") as BookingStatus,
+      source: "website",
+      notes: b.special_request || undefined,
       createdAt: b.created_at,
     }));
 
     return { success: true, bookings, isDatabase: true };
   } catch {
-    return { success: true, bookings: memoryBookings, isDatabase: false };
+    return { success: true, bookings: [], isDatabase: false };
   }
 }
 
@@ -349,63 +263,20 @@ export async function createBookingAction(input: CreateBookingInput): Promise<{
       };
     }
 
-    // 3. Double-booking check
-    // Check if the chosen room or any room in this category is free for these dates
     const assignedRoomNumber = input.roomNumber || category.roomNumbers[0];
 
-    const hasConflict = memoryBookings.some((b) => {
-      if (b.status === "cancelled" || b.status === "no_show") return false;
-      if (b.roomNumber !== assignedRoomNumber) return false;
-
-      const existingIn = new Date(b.checkIn);
-      const existingOut = new Date(b.checkOut);
-
-      // Overlap condition: startA < endB && endA > startB
-      return checkInDate < existingOut && checkOutDate > existingIn;
-    });
-
-    if (hasConflict) {
-      return {
-        success: false,
-        error: `Room ${assignedRoomNumber} is already booked for overlapping dates. Please select another room or adjust the dates.`,
-      };
-    }
-
-    // 4. Calculate total amount
+    // 3. Calculate total amount
     const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)));
     const baseTotal = nights * category.price;
     const gst = Math.round(baseTotal * 0.18);
     const totalAmount = baseTotal + gst;
 
-    // 5. Generate collision-resistant booking code
+    // 4. Generate collision-resistant booking code
     const dateStamp = checkInDate.toISOString().slice(0, 10).replace(/-/g, "");
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const bookingCode = `HF-${dateStamp}-${randomSuffix}`;
 
-    const newBooking: BookingRecord = {
-      id: `b-${Date.now()}`,
-      bookingCode,
-      guestName: input.guestName.trim(),
-      guestPhone: input.guestPhone.trim(),
-      guestEmail: input.guestEmail?.trim() || undefined,
-      categorySlug: input.categorySlug,
-      categoryName: category.name,
-      roomNumber: assignedRoomNumber,
-      checkIn: input.checkIn,
-      checkOut: input.checkOut,
-      guestsCount: input.guestsCount,
-      totalAmount,
-      advancePaid: input.advancePaid || 0,
-      status: "confirmed",
-      source: input.source || "phone",
-      notes: input.notes?.trim() || undefined,
-      createdAt: new Date().toISOString(),
-    };
-
-    // Save to memory
-    memoryBookings = [newBooking, ...memoryBookings];
-
-    // Mark room as occupied if checkIn is today
+    // Mark room as occupied in memory if checkIn is today
     const todayStr = new Date().toISOString().slice(0, 10);
     if (input.checkIn <= todayStr && input.checkOut > todayStr) {
       memoryRooms = memoryRooms.map((r) =>
@@ -424,39 +295,21 @@ export async function createBookingAction(input: CreateBookingInput): Promise<{
       );
     }
 
-    // Attempt Supabase insert
+    // Save directly to Supabase public.reservations
     const supabase = await createServerSupabaseClient();
     if (supabase) {
-      // Find room id
-      const { data: roomRecord } = await supabase
-        .from("rooms")
-        .select("id")
-        .eq("room_number", assignedRoomNumber)
-        .single();
-
-      await supabase.from("bookings").insert({
-        booking_code: bookingCode,
-        guest_name: input.guestName.trim(),
-        guest_phone: input.guestPhone.trim(),
-        guest_email: input.guestEmail?.trim() || null,
-        category_slug: input.categorySlug,
-        room_id: roomRecord?.id || null,
+      await supabase.from("reservations").insert({
         check_in: input.checkIn,
         check_out: input.checkOut,
-        guests_count: input.guestsCount,
-        total_amount: totalAmount,
-        advance_paid: input.advancePaid || 0,
+        room_type: category.name,
+        guests: input.guestsCount,
+        full_name: input.guestName.trim(),
+        phone: input.guestPhone.trim(),
+        email: input.guestEmail?.trim() || null,
+        special_request: input.notes?.trim() || null,
+        estimated_total: totalAmount,
         status: "confirmed",
-        source: input.source || "phone",
-        notes: input.notes?.trim() || null,
       });
-
-      if (input.checkIn <= todayStr && input.checkOut > todayStr && roomRecord?.id) {
-        await supabase
-          .from("rooms")
-          .update({ status: "occupied" })
-          .eq("id", roomRecord.id);
-      }
     }
 
     revalidatePath("/admin");
@@ -476,13 +329,18 @@ export async function updateBookingStatusAction(
   status: BookingStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    memoryBookings = memoryBookings.map((b) => (b.id === bookingId ? { ...b, status } : b));
-
     const supabase = await createServerSupabaseClient();
     if (supabase) {
+      const dbStatus =
+        status === "confirmed" || status === "checked_in"
+          ? "confirmed"
+          : status === "cancelled" || status === "no_show"
+          ? "cancelled"
+          : "contacted";
+
       await supabase
-        .from("bookings")
-        .update({ status, updated_at: new Date().toISOString() })
+        .from("reservations")
+        .update({ status: dbStatus })
         .eq("id", bookingId);
     }
 

@@ -11,11 +11,11 @@ import {
   Sparkles,
   ShieldCheck,
   MessageSquare,
-  Mail,
-  Plane,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { siteConfig } from "@/data/content";
-import { submitPublicEnquiryAction } from "@/actions/enquiries";
+import { submitReservationAction } from "@/actions/reservations";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -53,6 +53,11 @@ export default function BookingModal({
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+
+  // Submission and error states
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [bookingRef, setBookingRef] = useState("");
 
@@ -73,6 +78,7 @@ export default function BookingModal({
       window.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
       setIsSubmitted(false);
+      setErrorMessage(null);
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -99,47 +105,91 @@ export default function BookingModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
 
-    // Generate unique confirmation reference
-    const refCode = `HF-${Math.floor(100000 + Math.random() * 900000)}`;
-    setBookingRef(refCode);
-    setIsSubmitted(true);
+    // 1. Client-side validations
+    if (!name.trim() || name.trim().length < 2) {
+      setErrorMessage("Please enter your full name (minimum 2 characters).");
+      return;
+    }
+    if (name.trim().length > 100) {
+      setErrorMessage("Full name must not exceed 100 characters.");
+      return;
+    }
 
-    // Record inquiry to database and admin pipeline asynchronously
-    submitPublicEnquiryAction({
-      type: "book_now",
-      name,
-      phone,
-      email: email || undefined,
-      dates: `${checkIn} to ${checkOut}`,
-      guests,
-      details: {
-        refCode,
-        suite: selectedRoom.title,
-        totalAmount: total,
-        nights,
-        specialRequests: specialRequests || "None",
-      },
-      notes: `Direct web booking request. Ref: ${refCode}. Nights: ${nights}`,
-    }).catch(console.warn);
+    const cleanPhone = phone.trim().replace(/\D/g, "");
+    if (!cleanPhone || cleanPhone.length < 8 || cleanPhone.length > 15) {
+      setErrorMessage("Please enter a valid contact phone number (8 to 15 digits).");
+      return;
+    }
 
-    // Format WhatsApp confirmation text
-    const message = `*Hotel Fremont - New Reservation Request*%0A%0A*Ref:* ${refCode}%0A*Guest:* ${encodeURIComponent(
-      name
-    )}%0A*Phone:* ${encodeURIComponent(phone)}%0A*Email:* ${encodeURIComponent(
-      email || "N/A"
-    )}%0A*Suite:* ${encodeURIComponent(
-      selectedRoom.title
-    )}%0A*Check-In:* ${checkIn}%0A*Check-Out:* ${checkOut}%0A*Nights:* ${nights}%0A*Guests:* ${guests}%0A*Total (incl. GST):* ₹${total.toLocaleString(
-      "en-IN"
-    )}%0A*Special Requests:* ${encodeURIComponent(
-      specialRequests || "None"
-    )}`;
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMessage("Please enter a valid email address or leave it blank.");
+      return;
+    }
 
-    const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
-    setTimeout(() => {
-      window.open(waUrl, "_blank");
-    }, 900);
+    if (!checkIn || !checkOut) {
+      setErrorMessage("Please select valid check-in and check-out dates.");
+      return;
+    }
+
+    if (new Date(checkOut).getTime() <= new Date(checkIn).getTime()) {
+      setErrorMessage("Check-out date must be strictly after the check-in date.");
+      return;
+    }
+
+    if (specialRequests.trim().length > 500) {
+      setErrorMessage("Special requests cannot exceed 500 characters.");
+      return;
+    }
+
+    // 2. Perform insert to Supabase public.reservations
+    setIsSubmitting(true);
+
+    try {
+      const res = await submitReservationAction({
+        fullName: name.trim(),
+        phone: phone.trim(),
+        email: email.trim() || undefined,
+        checkIn,
+        checkOut,
+        roomType: selectedRoom.title,
+        guests,
+        specialRequest: specialRequests.trim() || undefined,
+        estimatedTotal: total,
+        honeypot: honeypot.trim() || undefined,
+      });
+
+      if (!res.success) {
+        // Show real error to user, preserve all form inputs
+        setErrorMessage(res.error || "Failed to confirm reservation request. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Success confirmed by Supabase!
+      const refCode = `HF-${Math.floor(100000 + Math.random() * 900000)}`;
+      setBookingRef(refCode);
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+
+      // Optional: Open WhatsApp concierge after confirmed database insert
+      const message = `*Hotel Fremont - New Reservation Request*%0A%0A*Ref:* ${refCode}%0A*Guest:* ${encodeURIComponent(
+        name.trim()
+      )}%0A*Phone:* ${encodeURIComponent(phone.trim())}%0A*Suite:* ${encodeURIComponent(
+        selectedRoom.title
+      )}%0A*Check-In:* ${checkIn}%0A*Check-Out:* ${checkOut}%0A*Nights:* ${nights}%0A*Guests:* ${guests}%0A*Total (incl. GST):* ₹${total.toLocaleString(
+        "en-IN"
+      )}`;
+      const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
+      setTimeout(() => {
+        window.open(waUrl, "_blank");
+      }, 900);
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorMessage(error.message || "Failed to connect to reservation database. Please check your network.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -165,7 +215,7 @@ export default function BookingModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-[#0E0E10] text-[#F7F3EC] hover:text-[#E02B1D] border border-white/10 transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-[#0E0E10] text-[#F7F3EC] hover:text-[#E02B1D] border border-white/10 transition-colors cursor-pointer"
             aria-label="Close booking modal"
           >
             <X className="w-5 h-5" />
@@ -186,8 +236,28 @@ export default function BookingModal({
                 Direct booking privileges: complimentary airport drop, priority check-in, and 24-hour flexible cancellation.
               </p>
 
+              {/* Error Banner */}
+              {errorMessage && (
+                <div className="mb-5 p-3.5 rounded-xl bg-red-950/50 border border-red-500/40 text-red-200 text-xs flex items-center gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Dates & Suite Row */}
+                {/* Honeypot anti-spam field (hidden from legitimate humans) */}
+                <div style={{ display: "none" }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="b_hp_company"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
+                </div>
+
+                {/* Dates Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
@@ -198,7 +268,10 @@ export default function BookingModal({
                       required
                       min={getFormattedDate(0)}
                       value={checkIn}
-                      onChange={(e) => setCheckIn(e.target.value)}
+                      onChange={(e) => {
+                        setCheckIn(e.target.value);
+                        setErrorMessage(null);
+                      }}
                       className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none [color-scheme:dark]"
                     />
                   </div>
@@ -212,12 +285,16 @@ export default function BookingModal({
                       required
                       min={checkIn || getFormattedDate(1)}
                       value={checkOut}
-                      onChange={(e) => setCheckOut(e.target.value)}
+                      onChange={(e) => {
+                        setCheckOut(e.target.value);
+                        setErrorMessage(null);
+                      }}
                       className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none [color-scheme:dark]"
                     />
                   </div>
                 </div>
 
+                {/* Suite & Guests Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
@@ -268,9 +345,13 @@ export default function BookingModal({
                     <input
                       type="text"
                       required
+                      maxLength={100}
                       placeholder="e.g. Vikramaditya Sharma"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        setErrorMessage(null);
+                      }}
                       className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     />
                   </div>
@@ -282,9 +363,13 @@ export default function BookingModal({
                     <input
                       type="tel"
                       required
+                      maxLength={20}
                       placeholder="+91 98727 68514"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        setErrorMessage(null);
+                      }}
                       className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     />
                   </div>
@@ -296,9 +381,13 @@ export default function BookingModal({
                   </label>
                   <input
                     type="email"
+                    maxLength={100}
                     placeholder="guest@domain.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setErrorMessage(null);
+                    }}
                     className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                   />
                 </div>
@@ -309,6 +398,7 @@ export default function BookingModal({
                   </label>
                   <input
                     type="text"
+                    maxLength={500}
                     placeholder="e.g. Flight IXC arrival time, high floor room, extra bed"
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
@@ -339,10 +429,20 @@ export default function BookingModal({
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] text-white font-bold text-xs uppercase tracking-[0.22em] shadow-[0_4px_25px_rgba(224,43,29,0.5)] transition-all duration-300 btn-magnetic flex items-center justify-center space-x-2"
+                  disabled={isSubmitting}
+                  className="w-full py-4 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.22em] shadow-[0_4px_25px_rgba(224,43,29,0.5)] transition-all duration-300 btn-magnetic flex items-center justify-center space-x-2 cursor-pointer"
                 >
-                  <Calendar className="w-4 h-4" />
-                  <span>Submit Reservation Request</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Saving to Supabase...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Calendar className="w-4 h-4" />
+                      <span>Submit Reservation Request</span>
+                    </>
+                  )}
                 </button>
               </form>
             </div>
@@ -355,7 +455,7 @@ export default function BookingModal({
 
               <div>
                 <span className="text-[10px] font-sans uppercase tracking-[0.25em] text-[#C9A96E] font-semibold">
-                  CONFIRMATION PENDING WA APPROVAL
+                  CONFIRMATION PENDING CONCIERGE APPROVAL
                 </span>
                 <h4 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC] mt-1">
                   Booking Request #{bookingRef}
@@ -366,6 +466,10 @@ export default function BookingModal({
                 <div className="flex justify-between">
                   <span>Guest:</span>
                   <strong className="text-white">{name}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Contact Phone:</span>
+                  <strong className="text-white">{phone}</strong>
                 </div>
                 <div className="flex justify-between">
                   <span>Selected Suite:</span>
@@ -384,7 +488,7 @@ export default function BookingModal({
               </div>
 
               <p className="text-xs text-[#A8A59E] max-w-sm mx-auto font-light leading-relaxed">
-                We have generated your booking voucher and forwarded your details directly to our reservation concierge via WhatsApp.
+                Your reservation has been confirmed and saved to our database. Our concierge team has also received your request via WhatsApp.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
@@ -400,7 +504,7 @@ export default function BookingModal({
 
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-xs uppercase tracking-wider text-white transition-colors"
+                  className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-xs uppercase tracking-wider text-white transition-colors cursor-pointer"
                 >
                   Done
                 </button>

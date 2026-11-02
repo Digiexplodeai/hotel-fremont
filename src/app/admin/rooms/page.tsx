@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCurrentUser, signOutAction } from "@/actions/auth";
 import { getRoomsWithStatusAction, getBookingsAction } from "@/actions/rooms";
+import { getReservationsAction } from "@/actions/reservations";
 import RoomsManager from "@/components/admin/RoomsManager";
 import {
   BedDouble,
@@ -33,9 +34,10 @@ export default async function AdminRoomsPage() {
     redirect("/admin/login");
   }
 
-  const [roomsRes, bookingsRes] = await Promise.all([
+  const [roomsRes, bookingsRes, reservationsRes] = await Promise.all([
     getRoomsWithStatusAction(),
     getBookingsAction(),
+    getReservationsAction(),
   ]);
 
   return (
@@ -165,6 +167,7 @@ export default async function AdminRoomsPage() {
         <RoomsManager
           initialRooms={roomsRes.rooms}
           initialBookings={bookingsRes.bookings}
+          initialReservations={reservationsRes.reservations}
           isDatabase={roomsRes.isDatabase}
         />
       </main>

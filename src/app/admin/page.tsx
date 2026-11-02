@@ -6,7 +6,9 @@ import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { getR2ConfigSummary } from "@/lib/r2";
 import { getRoomsWithStatusAction, getBookingsAction } from "@/actions/rooms";
 import { getEnquiriesAction } from "@/actions/enquiries";
+import { getReservationsAction } from "@/actions/reservations";
 import MediaManager from "@/components/admin/MediaManager";
+import ReservationsList from "@/components/admin/ReservationsList";
 import {
   Database,
   Cloud,
@@ -45,15 +47,17 @@ export default async function AdminDashboardPage() {
   const supabaseConfigured = isSupabaseConfigured();
   const r2Summary = getR2ConfigSummary();
 
-  const [roomsRes, bookingsRes, enquiriesRes] = await Promise.all([
+  const [roomsRes, bookingsRes, enquiriesRes, reservationsRes] = await Promise.all([
     getRoomsWithStatusAction(),
     getBookingsAction(),
     getEnquiriesAction(),
+    getReservationsAction(),
   ]);
 
   const rooms = roomsRes.rooms;
   const bookings = bookingsRes.bookings;
   const enquiries = enquiriesRes.enquiries;
+  const reservations = reservationsRes.reservations || [];
 
   const totalKeys = rooms.length;
   const occupiedCount = rooms.filter((r) => r.status === "occupied").length;
@@ -61,6 +65,7 @@ export default async function AdminDashboardPage() {
   const cleaningCount = rooms.filter((r) => r.status === "cleaning").length;
   const occupancyRate = totalKeys > 0 ? Math.round((occupiedCount / totalKeys) * 100) : 0;
   const newLeadsCount = enquiries.filter((e) => e.status === "new").length;
+  const newReservationsCount = reservations.filter((r) => r.status === "new").length;
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const todaysArrivals = bookings.filter((b) => b.checkIn === todayStr);
@@ -422,6 +427,11 @@ export default async function AdminDashboardPage() {
               <span className="text-[#C9A96E] text-[11px]">Tape Chart Ready</span>
             </div>
           </div>
+        </div>
+
+        {/* Live Online Reservations Section (Direct from Supabase) */}
+        <div className="space-y-4 pt-2">
+          <ReservationsList initialReservations={reservations} />
         </div>
 
         {/* Media Manager Section (Integrated) */}

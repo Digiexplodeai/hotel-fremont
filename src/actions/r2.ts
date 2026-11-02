@@ -144,133 +144,152 @@ export async function confirmUploadAction({
   altText?: string;
   focalPoint?: string;
 }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return { success: false, error: "Unauthorized: Admin session required." };
-  }
-
-  // 1. Verify object exists in Cloudflare R2
-  const head = await verifyObjectExists(key);
-  if (!head.exists) {
-    return { success: false, error: "Object verification failed on Cloudflare R2 storage." };
-  }
-
-  const sizeBytes = head.size || 0;
-  const publicUrl = getPublicMediaUrl(key);
-  const bucketName = process.env.R2_BUCKET_NAME || process.env.R2_BUCKET || "hotel-fremont-media";
-
-  // 2. Connect to Supabase
-  const supabase = createAdminSupabaseClient();
-  if (!supabase) {
-    throw new Error(
-      "Supabase client is unconfigured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
-    );
-  }
-
-  let mediaId: string | undefined = undefined;
-
-  // Insert into media_assets if table exists
   try {
-    const { data: mediaRow } = await supabase
-      .from("media_assets")
-      .insert({
-        key,
-        url: publicUrl,
-        bucket: bucketName,
-        section,
-        category,
-        filename: fileName,
-        mime_type: mimeType,
-        size_bytes: sizeBytes,
-        width: width || null,
-        height: height || null,
-        blur_data_url: blurDataUrl || null,
-        alt_text: altText || null,
-        uploaded_by: user.id,
-      })
-      .select("id")
-      .single();
-
-    if (mediaRow?.id) {
-      mediaId = mediaRow.id;
+    const user = await getCurrentUser();
+    if (!user) {
+      return { success: false, error: "Unauthorized: Admin session required." };
     }
-  } catch (err) {
-    console.warn("[R2 Action] Notice: media_assets log insert skipped:", err);
-  }
 
-  // 3. Persist to image_slots table (Single Source of Truth)
-  if (slotKey) {
-    // Parse focal_x and focal_y
-    let focal_x = "50%";
-    let focal_y = "50%";
-    if (focalPoint) {
-      const parts = focalPoint.trim().split(/\s+/);
-      if (parts.length >= 2) {
-        focal_x = parts[0];
-        focal_y = parts[1];
+    // 1. Verify object exists in Cloudflare R2
+    const head = await verifyObjectExists(key);
+    if (!head.exists) {
+      return { success: false, error: "Object verification failed on Cloudflare R2 storage. Ensure file was uploaded." };
+    }
+
+    const sizeBytes = head.size || 0;
+    const publicUrl = getPublicMediaUrl(key);
+    const bucketName = process.env.R2_BUCKET_NAME || process.env.R2_BUCKET || "hotel-fremont-media";
+
+    // 2. Connect to Supabase (authenticated server client first, then admin fallback)
+    const supabase = (await createServerSupabaseClient()) || createAdminSupabaseClient();
+    if (!supabase) {
+      return {
+        success: false,
+        error: "Supabase client is unconfigured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+      };
+    }
+
+    let mediaId: string | undefined = undefined;
+
+    // Optional insert into media_assets if table exists
+    try {
+      const { data: mediaRow } = await supabase
+        .from("media_assets")
+        .insert({
+          key,
+          url: publicUrl,
+          bucket: bucketName,
+          section,
+          category,
+          filename: fileName,
+          mime_type: mimeType,
+          size_bytes: sizeBytes,
+          width: width || null,
+          height: height || null,
+          blur_data_url: blurDataUrl || null,
+          alt_text: altText || null,
+          uploaded_by: user.id,
+        })
+        .select("id")
+        .single();
+
+      if (mediaRow?.id) {
+        mediaId = mediaRow.id;
       }
+    } catch (err) {
+      console.warn("[R2 Action] Notice: media_assets log insert skipped:", err);
     }
 
-    const slotPayload = {
-      slot_key: slotKey,
-      url: publicUrl,
-      alt_text: altText || null,
-      focal_x,
-      focal_y,
-      updated_at: new Date().toISOString(),
+    // 3. Persist to image_slots table (Single Source of Truth)
+    if (slotKey) {
+      // Parse focal_x and focal_y
+      let focal_x = "50%";
+      let focal_y = "50%";
+      if (focalPoint) {
+        const parts = focalPoint.trim().split(/\s+/);
+        if (parts.length >= 2) {
+          focal_x = parts[0];
+          focal_y = parts[1];
+        }
+      }
+
+      const slotPayload = {
+        slot_key: slotKey,
+        url: publicUrl,
+        alt_text: altText || null,
+        focal_x,
+        focal_y,
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log(`[R2 Action] Upserting slot '${slotKey}' to image_slots table:`, slotPayload);
+
+      const { data: savedRows, error: upsertErr } = await supabase
+        .from("image_slots")
+        .upsert(slotPayload, { onConflict: "slot_key" })
+        .select();
+
+      if (upsertErr) {
+        console.error(`[R2 Action] Supabase error writing slot '${slotKey}':`, upsertErr);
+        return {
+          success: false,
+          error: `Failed to save slot pointer to database: ${upsertErr.message} (code: ${upsertErr.code})`,
+        };
+      }
+
+      if (!savedRows || savedRows.length === 0) {
+        console.error(`[R2 Action] Supabase upsert returned empty rows for slot '${slotKey}'`);
+        return {
+          success: false,
+          error: `Database write failed: 0 rows returned on upsert for slot '${slotKey}'. Check table RLS write policies.`,
+        };
+      }
+
+      const savedRow = savedRows[0];
+      console.log(`[R2 Action] Successfully saved row for slot '${slotKey}':`, savedRow);
+
+      // Read-back verification from database
+      const { data: readBackRow, error: readBackErr } = await supabase
+        .from("image_slots")
+        .select("slot_key, url, alt_text, focal_x, focal_y, updated_at")
+        .eq("slot_key", slotKey)
+        .single();
+
+      if (readBackErr || !readBackRow) {
+        console.error(`[R2 Action] Failed reading back slot '${slotKey}':`, readBackErr);
+        return {
+          success: false,
+          error: `Verification failed: unable to read back slot '${slotKey}' from database: ${readBackErr?.message || "Record not found"}`,
+        };
+      }
+
+      console.log(`[R2 Action] Confirmed read-back row for slot '${slotKey}':`, readBackRow);
+    }
+
+    // 4. Revalidate site paths instantly
+    try {
+      revalidatePath("/", "layout");
+      revalidatePath("/admin", "layout");
+      revalidatePath("/admin/images", "layout");
+    } catch (revErr) {
+      console.warn("[R2 Action] revalidatePath warning:", revErr);
+    }
+
+    return {
+      success: true,
+      key,
+      publicUrl,
+      mediaId,
+      sizeBytes,
     };
-
-    console.log(`[R2 Action] Upserting slot '${slotKey}' to image_slots table:`, slotPayload);
-
-    const { data: savedRows, error: upsertErr } = await supabase
-      .from("image_slots")
-      .upsert(slotPayload, { onConflict: "slot_key" })
-      .select();
-
-    if (upsertErr) {
-      console.error(`[R2 Action] Supabase error writing slot '${slotKey}':`, upsertErr);
-      throw new Error(`Failed to save slot pointer to database: ${upsertErr.message} (code: ${upsertErr.code})`);
-    }
-
-    if (!savedRows || savedRows.length === 0) {
-      console.error(`[R2 Action] Supabase upsert returned empty rows for slot '${slotKey}'`);
-      throw new Error(`Database write failed: 0 rows returned on upsert for slot '${slotKey}'.`);
-    }
-
-    const savedRow = savedRows[0];
-    console.log(`[R2 Action] Successfully saved row for slot '${slotKey}':`, savedRow);
-
-    // Read-back verification from database
-    const { data: readBackRow, error: readBackErr } = await supabase
-      .from("image_slots")
-      .select("slot_key, url, alt_text, focal_x, focal_y, updated_at")
-      .eq("slot_key", slotKey)
-      .single();
-
-    if (readBackErr || !readBackRow) {
-      console.error(`[R2 Action] Failed reading back slot '${slotKey}':`, readBackErr);
-      throw new Error(`Verification failed: unable to read back slot '${slotKey}' from database.`);
-    }
-
-    console.log(`[R2 Action] Confirmed read-back row for slot '${slotKey}':`, readBackRow);
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error("[R2 Action] Unexpected error in confirmUploadAction:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to confirm upload.",
+    };
   }
-
-  // 4. Revalidate site paths instantly
-  try {
-    revalidatePath("/");
-    revalidatePath("/admin");
-    revalidatePath("/admin/images");
-  } catch (revErr) {
-    console.warn("[R2 Action] revalidatePath warning:", revErr);
-  }
-
-  return {
-    success: true,
-    key,
-    publicUrl,
-    mediaId,
-    sizeBytes,
-  };
 }
 
 /**
@@ -285,109 +304,121 @@ export async function updateSlotMetaAction({
   altText?: string;
   focalPoint?: string;
 }) {
-  const user = await getCurrentUser();
-  if (!user) return { success: false, error: "Unauthorized" };
-
-  const supabase = createAdminSupabaseClient();
-  if (!supabase) {
-    throw new Error("Supabase client is not configured.");
-  }
-
-  // Parse focal_x and focal_y
-  let focal_x = "50%";
-  let focal_y = "50%";
-  if (focalPoint) {
-    const parts = focalPoint.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      focal_x = parts[0];
-      focal_y = parts[1];
-    }
-  }
-
-  // Fetch current row to retain url
-  const { data: existing } = await supabase
-    .from("image_slots")
-    .select("url, alt_text")
-    .eq("slot_key", slotKey)
-    .single();
-
-  const payload = {
-    slot_key: slotKey,
-    url: existing?.url || `/assets/rooms/${slotKey}.webp`,
-    alt_text: altText !== undefined ? altText : existing?.alt_text || null,
-    focal_x,
-    focal_y,
-    updated_at: new Date().toISOString(),
-  };
-
-  console.log(`[R2 Action] Updating metadata for slot '${slotKey}':`, payload);
-
-  const { data: savedRows, error: updateErr } = await supabase
-    .from("image_slots")
-    .upsert(payload, { onConflict: "slot_key" })
-    .select();
-
-  if (updateErr) {
-    console.error(`[R2 Action] Supabase error updating slot '${slotKey}':`, updateErr);
-    throw new Error(`Failed to update slot metadata: ${updateErr.message}`);
-  }
-
-  const savedRow = savedRows?.[0];
-  console.log(`[R2 Action] Saved metadata row for slot '${slotKey}':`, savedRow);
-
-  // Read back
-  const { data: readBackRow } = await supabase
-    .from("image_slots")
-    .select("slot_key, url, alt_text, focal_x, focal_y, updated_at")
-    .eq("slot_key", slotKey)
-    .single();
-
-  console.log(`[R2 Action] Confirmed read-back metadata for slot '${slotKey}':`, readBackRow);
-
   try {
-    revalidatePath("/");
-    revalidatePath("/admin");
-    revalidatePath("/admin/images");
-  } catch {}
+    const user = await getCurrentUser();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  return { success: true, slot: readBackRow };
+    const supabase = (await createServerSupabaseClient()) || createAdminSupabaseClient();
+    if (!supabase) {
+      return { success: false, error: "Supabase client is not configured." };
+    }
+
+    // Parse focal_x and focal_y
+    let focal_x = "50%";
+    let focal_y = "50%";
+    if (focalPoint) {
+      const parts = focalPoint.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        focal_x = parts[0];
+        focal_y = parts[1];
+      }
+    }
+
+    // Fetch current row to retain url
+    const { data: existing } = await supabase
+      .from("image_slots")
+      .select("url, alt_text")
+      .eq("slot_key", slotKey)
+      .single();
+
+    const payload = {
+      slot_key: slotKey,
+      url: existing?.url || `/assets/rooms/${slotKey}.webp`,
+      alt_text: altText !== undefined ? altText : existing?.alt_text || null,
+      focal_x,
+      focal_y,
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log(`[R2 Action] Updating metadata for slot '${slotKey}':`, payload);
+
+    const { data: savedRows, error: updateErr } = await supabase
+      .from("image_slots")
+      .upsert(payload, { onConflict: "slot_key" })
+      .select();
+
+    if (updateErr) {
+      console.error(`[R2 Action] Supabase error updating slot '${slotKey}':`, updateErr);
+      return { success: false, error: `Failed to update slot metadata: ${updateErr.message}` };
+    }
+
+    const savedRow = savedRows?.[0];
+    console.log(`[R2 Action] Saved metadata row for slot '${slotKey}':`, savedRow);
+
+    // Read back
+    const { data: readBackRow } = await supabase
+      .from("image_slots")
+      .select("slot_key, url, alt_text, focal_x, focal_y, updated_at")
+      .eq("slot_key", slotKey)
+      .single();
+
+    console.log(`[R2 Action] Confirmed read-back metadata for slot '${slotKey}':`, readBackRow);
+
+    try {
+      revalidatePath("/", "layout");
+      revalidatePath("/admin", "layout");
+      revalidatePath("/admin/images", "layout");
+    } catch {}
+
+    return { success: true, slot: readBackRow };
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error("[R2 Action] Unexpected error in updateSlotMetaAction:", error);
+    return { success: false, error: error.message || "Failed to update slot metadata." };
+  }
 }
 
 /**
  * Restores an image slot to its original default photography
  */
 export async function restoreSlotDefaultAction({ slotKey }: { slotKey: string }) {
-  const user = await getCurrentUser();
-  if (!user || (user.role !== "owner" && user.role !== "manager")) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  const supabase = createAdminSupabaseClient();
-  if (!supabase) {
-    throw new Error("Supabase client is not configured.");
-  }
-
-  console.log(`[R2 Action] Restoring slot '${slotKey}' to default (deleting row in image_slots)...`);
-
-  const { error: delErr } = await supabase
-    .from("image_slots")
-    .delete()
-    .eq("slot_key", slotKey);
-
-  if (delErr) {
-    console.error(`[R2 Action] Error deleting slot pointer '${slotKey}':`, delErr);
-    throw new Error(`Failed to restore default in database: ${delErr.message}`);
-  }
-
-  console.log(`[R2 Action] Deleted slot pointer for '${slotKey}'. Slot restored to default asset.`);
-
   try {
-    revalidatePath("/");
-    revalidatePath("/admin");
-    revalidatePath("/admin/images");
-  } catch {}
+    const user = await getCurrentUser();
+    if (!user || (user.role !== "owner" && user.role !== "manager")) {
+      return { success: false, error: "Unauthorized" };
+    }
 
-  return { success: true, message: `Slot '${slotKey}' restored to factory default.` };
+    const supabase = (await createServerSupabaseClient()) || createAdminSupabaseClient();
+    if (!supabase) {
+      return { success: false, error: "Supabase client is not configured." };
+    }
+
+    console.log(`[R2 Action] Restoring slot '${slotKey}' to default (deleting row in image_slots)...`);
+
+    const { error: delErr } = await supabase
+      .from("image_slots")
+      .delete()
+      .eq("slot_key", slotKey);
+
+    if (delErr) {
+      console.error(`[R2 Action] Error deleting slot pointer '${slotKey}':`, delErr);
+      return { success: false, error: `Failed to restore default in database: ${delErr.message}` };
+    }
+
+    console.log(`[R2 Action] Deleted slot pointer for '${slotKey}'. Slot restored to default asset.`);
+
+    try {
+      revalidatePath("/", "layout");
+      revalidatePath("/admin", "layout");
+      revalidatePath("/admin/images", "layout");
+    } catch {}
+
+    return { success: true, message: `Slot '${slotKey}' restored to factory default.` };
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error("[R2 Action] Unexpected error in restoreSlotDefaultAction:", error);
+    return { success: false, error: error.message || "Failed to restore default." };
+  }
 }
 
 /**

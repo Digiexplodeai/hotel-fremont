@@ -10,6 +10,8 @@ import {
   createBookingAction,
   updateBookingStatusAction,
 } from "@/actions/rooms";
+import { ReservationRecord } from "@/actions/reservations";
+import ReservationsList from "@/components/admin/ReservationsList";
 import { roomCategories } from "@/data/rooms";
 import {
   BedDouble,
@@ -31,7 +33,8 @@ import {
 
 interface RoomsManagerProps {
   initialRooms: PhysicalRoom[];
-  initialBookings: BookingRecord[];
+  initialBookings?: BookingRecord[];
+  initialReservations?: ReservationRecord[];
   isDatabase: boolean;
 }
 
@@ -78,7 +81,8 @@ const statusConfig: Record<
 
 export default function RoomsManager({
   initialRooms,
-  initialBookings,
+  initialBookings = [],
+  initialReservations = [],
   isDatabase,
 }: RoomsManagerProps) {
   const [rooms, setRooms] = useState<PhysicalRoom[]>(initialRooms);
@@ -337,7 +341,7 @@ export default function RoomsManager({
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span>Reservations ({bookings.length})</span>
+            <span>Reservations ({initialReservations.length})</span>
           </button>
         </div>
 
@@ -651,107 +655,7 @@ export default function RoomsManager({
       {/* TAB 3: BOOKINGS & RESERVATIONS LIST */}
       {/* ======================================================== */}
       {activeTab === "bookings" && (
-        <div className="bg-[#151518] border border-white/10 rounded-xl overflow-hidden shadow-md">
-          <div className="p-4 border-b border-white/10 flex items-center justify-between">
-            <h3 className="text-sm font-serif font-bold text-[#F7F3EC]">
-              All Reservations ({bookings.length})
-            </h3>
-            <span className="text-xs text-[#A8A59E] font-mono">
-              {isDatabase ? "Synced with Supabase" : "Demo & Fallback State"}
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-black/40 text-[#A8A59E] font-mono border-b border-white/10 uppercase text-[10px]">
-                <tr>
-                  <th className="py-3 px-4">Code / Guest</th>
-                  <th className="py-3 px-4">Category &amp; Key</th>
-                  <th className="py-3 px-4">Dates &amp; Stay</th>
-                  <th className="py-3 px-4">Total / Advance</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-[#F7F3EC]">
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-white/[0.02] transition">
-                    <td className="py-3 px-4">
-                      <div className="font-mono text-[11px] text-[#C9A96E] font-bold">
-                        {booking.bookingCode}
-                      </div>
-                      <div className="font-medium text-white mt-0.5">{booking.guestName}</div>
-                      <div className="text-[11px] text-[#A8A59E]">{booking.guestPhone}</div>
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <div className="font-medium">{booking.categoryName}</div>
-                      <div className="text-[11px] text-[#A8A59E] font-mono">
-                        Key #{booking.roomNumber || "Unassigned"} · {booking.guestsCount} Guests
-                      </div>
-                    </td>
-
-                    <td className="py-3 px-4 font-mono">
-                      <div>In: {booking.checkIn}</div>
-                      <div>Out: {booking.checkOut}</div>
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <div className="font-mono font-bold text-white">
-                        ₹{booking.totalAmount.toLocaleString("en-IN")}
-                      </div>
-                      <div className="text-[11px] text-emerald-400 font-mono">
-                        Paid: ₹{booking.advancePaid.toLocaleString("en-IN")}
-                      </div>
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-                          booking.status === "confirmed"
-                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/30"
-                            : booking.status === "checked_in"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                            : booking.status === "checked_out"
-                            ? "bg-slate-500/10 text-slate-400 border border-slate-500/30"
-                            : "bg-rose-500/10 text-rose-400 border border-rose-500/30"
-                        }`}
-                      >
-                        {booking.status.replace("_", " ")}
-                      </span>
-                    </td>
-
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => setSelectedBookingForVoucher(booking)}
-                          className="px-2.5 py-1.5 rounded-lg border border-white/10 hover:border-[#C9A96E] text-[#A8A59E] hover:text-[#C9A96E] transition flex items-center gap-1 text-[11px] cursor-pointer"
-                        >
-                          <Printer className="w-3.5 h-3.5" />
-                          <span>Voucher</span>
-                        </button>
-
-                        {booking.status === "confirmed" && (
-                          <button
-                            onClick={async () => {
-                              await updateBookingStatusAction(booking.id, "checked_in");
-                              setBookings((prev) =>
-                                prev.map((b) => (b.id === booking.id ? { ...b, status: "checked_in" } : b))
-                              );
-                            }}
-                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition text-[11px] cursor-pointer"
-                          >
-                            Check-In
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ReservationsList initialReservations={initialReservations} />
       )}
 
       {/* ======================================================== */}
