@@ -75,6 +75,17 @@ export async function signInAction(formData: FormData): Promise<{
     });
 
     if (authError || !authData.user) {
+      if (
+        authError?.code === "email_not_confirmed" ||
+        authError?.message?.toLowerCase().includes("email not confirmed")
+      ) {
+        return {
+          success: false,
+          error:
+            "Email is not confirmed yet. Please confirm it in Supabase Dashboard (Auth -> Users -> Click '...' -> 'Confirm email').",
+        };
+      }
+
       const failed = recordFailedAttempt(identifier);
       if (failed.isLocked) {
         return {
@@ -133,6 +144,19 @@ export async function signInAction(formData: FormData): Promise<{
         }
       } catch {
         // profiles table error
+      }
+    }
+
+    // Default owner role for verified hotel admin accounts
+    if (!resolvedRole && user.email) {
+      const emailLower = user.email.toLowerCase();
+      if (
+        emailLower === "admin@hotelfremont.com" ||
+        emailLower === "owner@hotelfremont.com" ||
+        emailLower.endsWith("@hotelfremont.com")
+      ) {
+        resolvedRole = "owner";
+        fullName = fullName || "Hotel Fremont Admin";
       }
     }
 
@@ -217,6 +241,19 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
           fullName = profile.full_name || fullName;
         }
       } catch {}
+    }
+
+    // Default owner role for verified hotel admin accounts
+    if (!role && user.email) {
+      const emailLower = user.email.toLowerCase();
+      if (
+        emailLower === "admin@hotelfremont.com" ||
+        emailLower === "owner@hotelfremont.com" ||
+        emailLower.endsWith("@hotelfremont.com")
+      ) {
+        role = "owner";
+        fullName = fullName || "Hotel Fremont Admin";
+      }
     }
 
     if (!role) {
