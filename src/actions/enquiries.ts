@@ -15,11 +15,19 @@ export interface EnquiryRecord {
   phone: string;
   email?: string;
   dates?: string;
+  checkIn?: string;
+  checkOut?: string;
   guests?: number;
+  roomsRequested?: number;
+  nights?: number;
+  referenceCode?: string;
+  roomType?: string;
+  roomTypeCode?: string;
   details?: Record<string, any>;
   status: EnquiryStatus;
   notes?: string;
   createdAt: string;
+  capacityOverride?: boolean;
 }
 
 export interface SubmitEnquiryInput {
@@ -315,6 +323,10 @@ export async function getEnquiriesAction(): Promise<{
         details.eventType = r.event_type;
       }
 
+      const nightsCalculated = r.nights 
+        ? Number(r.nights) 
+        : (r.check_in && r.check_out ? Math.max(1, Math.round((new Date(r.check_out).getTime() - new Date(r.check_in).getTime()) / 86400000)) : 1);
+
       return {
         id: r.id,
         type,
@@ -322,11 +334,19 @@ export async function getEnquiriesAction(): Promise<{
         phone: r.phone || "",
         email: r.email || undefined,
         dates,
+        checkIn: r.check_in || undefined,
+        checkOut: r.check_out || undefined,
         guests: r.guests || undefined,
+        roomsRequested: Number(r.rooms_requested) || 1,
+        nights: nightsCalculated,
+        referenceCode: r.reference_code || `FRM-${r.id.slice(0, 6).toUpperCase()}`,
+        roomType: r.room_type || undefined,
+        roomTypeCode: r.room_type_code || undefined,
         details,
         status,
         notes: r.special_request || undefined,
         createdAt: r.created_at || new Date().toISOString(),
+        capacityOverride: Boolean(r.capacity_override),
       };
     });
 
@@ -345,12 +365,14 @@ export async function getEnquiriesAction(): Promise<{
 
 /**
  * Update enquiry status and staff notes in public.reservations
+ * Supports management capacity_override when inventory guard detects overbooking.
  */
 export async function updateEnquiryStatusAction(
   enquiryId: string,
   status: EnquiryStatus,
-  notes?: string
-): Promise<{ success: boolean; error?: string }> {
+  notes?: string,
+  override: boolean = false
+): Promise<{ success: boolean; requiresOverride?: boolean; error?: string }> {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -365,6 +387,9 @@ export async function updateEnquiryStatusAction(
     const updatePayload: Record<string, any> = {
       status,
     };
+    if (override) {
+      updatePayload.capacity_override = true;
+    }
     if (notes !== undefined) {
       updatePayload.special_request = notes;
     }
@@ -374,6 +399,15 @@ export async function updateEnquiryStatusAction(
       .from("reservations")
       .update(updatePayload)
       .eq("id", enquiryId);
+
+    // Check for OVERBOOKING_GUARD trigger exception
+    if (error && error.message?.includes("OVERBOOKING_GUARD")) {
+      return {
+        success: false,
+        requiresOverride: true,
+        error: "Capacity limit reached for these dates. Management override required to confirm this booking.",
+      };
+    }
 
     // If check constraint rejects 'in_discussion', 'converted', or 'closed',
     // fallback to corresponding allowed status ('contacted', 'confirmed', 'cancelled')
@@ -396,6 +430,13 @@ export async function updateEnquiryStatusAction(
     }
 
     if (error) {
+      if (error.message?.includes("OVERBOOKING_GUARD")) {
+        return {
+          success: false,
+          requiresOverride: true,
+          error: "Capacity limit reached for these dates. Management override required to confirm this booking.",
+        };
+      }
       console.error(`[Enquiries] Failed updating status for ${enquiryId}:`, error);
       return { success: false, error: error.message };
     }

@@ -132,6 +132,11 @@ export default function EnquiriesManager({
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
   const [noteEdit, setNoteEdit] = useState<string>("");
+  const [overbookingModal, setOverbookingModal] = useState<{
+    enquiryId: string;
+    newStatus: EnquiryStatus;
+    message: string;
+  } | null>(null);
 
   // Top Statistics (Calculated strictly from real Supabase rows)
   const total = enquiries.length;
@@ -195,11 +200,11 @@ export default function EnquiriesManager({
   });
 
   // Handle status update
-  const handleStatusChange = async (enquiryId: string, newStatus: EnquiryStatus) => {
+  const handleStatusChange = async (enquiryId: string, newStatus: EnquiryStatus, override: boolean = false) => {
     setIsUpdating(enquiryId);
     setErrorBanner(null);
     try {
-      const res = await updateEnquiryStatusAction(enquiryId, newStatus);
+      const res = await updateEnquiryStatusAction(enquiryId, newStatus, undefined, override);
       if (res.success) {
         setEnquiries((prev) =>
           prev.map((e) => (e.id === enquiryId ? { ...e, status: newStatus } : e))
@@ -208,7 +213,14 @@ export default function EnquiriesManager({
           setSelectedEnquiry((prev) => (prev ? { ...prev, status: newStatus } : null));
         }
         setSuccessBanner(`Lead marked as ${statusConfig[newStatus]?.label || newStatus}`);
+        setOverbookingModal(null);
         setTimeout(() => setSuccessBanner(null), 3000);
+      } else if (res.requiresOverride) {
+        setOverbookingModal({
+          enquiryId,
+          newStatus,
+          message: res.error || "Inventory limit reached. Management override required to confirm.",
+        });
       } else {
         setErrorBanner(res.error || "Failed to update lead status in Supabase.");
       }
@@ -484,7 +496,12 @@ export default function EnquiriesManager({
                             >
                               {tcfg.label}
                             </span>
-                            <div className="text-[10px] text-[#A8A59E] mt-1 font-mono">
+                            {item.referenceCode && (
+                              <div className="text-[10px] text-[#C9A96E] mt-1 font-mono font-bold tracking-wider">
+                                {item.referenceCode}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-[#A8A59E] mt-0.5 font-mono">
                               {new Date(item.createdAt).toLocaleDateString("en-IN", {
                                 month: "short",
                                 day: "numeric",
@@ -493,30 +510,40 @@ export default function EnquiriesManager({
                           </td>
 
                           <td className="py-3 px-4">
+                            {(item.roomType || item.details?.suite) && (
+                              <div className="text-[#C9A96E] font-medium text-xs truncate max-w-[170px]">
+                                {item.roomType || item.details?.suite}
+                              </div>
+                            )}
                             {item.dates && (
-                              <div className="text-white font-medium flex items-center gap-1">
+                              <div className="text-white font-medium flex items-center gap-1 mt-0.5">
                                 <Calendar className="w-3 h-3 text-[#C9A96E]" />
                                 <span>{item.dates}</span>
+                                {item.nights && item.nights > 0 && (
+                                  <span className="text-[10px] text-[#A8A59E] font-mono">({item.nights}n)</span>
+                                )}
                               </div>
                             )}
-                            {item.guests && (
-                              <div className="text-[11px] text-[#A8A59E] flex items-center gap-1 mt-0.5">
-                                <Users className="w-3 h-3 text-[#A8A59E]" />
-                                <span>{item.guests} Guests</span>
-                              </div>
-                            )}
-                            {item.details?.suite && (
-                              <div className="text-[11px] text-[#C9A96E] truncate max-w-[160px]">
-                                {item.details.suite}
-                              </div>
-                            )}
+                            <div className="text-[11px] text-[#A8A59E] flex items-center gap-2 mt-0.5">
+                              {item.roomsRequested && item.roomsRequested > 0 && (
+                                <span className="font-mono text-white/90">
+                                  {item.roomsRequested} {item.roomsRequested === 1 ? "Room" : "Rooms"}
+                                </span>
+                              )}
+                              {item.guests && (
+                                <span className="flex items-center gap-0.5">
+                                  <Users className="w-3 h-3 text-[#A8A59E]" />
+                                  <span>{item.guests}</span>
+                                </span>
+                              )}
+                            </div>
                             {item.details?.eventType && (
                               <div className="text-[11px] text-purple-300 truncate max-w-[160px]">
                                 {item.details.eventType}
                               </div>
                             )}
                             {item.details?.totalAmount ? (
-                              <div className="text-[10px] text-emerald-400 font-mono font-semibold">
+                              <div className="text-[10px] text-emerald-400 font-mono font-semibold mt-0.5">
                                 ₹{Number(item.details.totalAmount).toLocaleString("en-IN")}
                               </div>
                             ) : null}
@@ -641,8 +668,24 @@ export default function EnquiriesManager({
               </a>
             </div>
 
-            {/* Guest Info Box */}
+            {/* Guest & Reservation Info Box */}
             <div className="p-3.5 rounded-lg bg-black/40 border border-white/5 space-y-2 text-xs">
+              {selectedEnquiry.referenceCode && (
+                <div className="flex items-center justify-between pb-1 border-b border-white/5">
+                  <span className="text-[#A8A59E]">Booking Reference:</span>
+                  <span className="font-mono text-[#C9A96E] font-bold text-sm tracking-wider">
+                    {selectedEnquiry.referenceCode}
+                  </span>
+                </div>
+              )}
+              {(selectedEnquiry.roomType || selectedEnquiry.details?.suite) && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[#A8A59E]">Suite Category:</span>
+                  <span className="text-white font-medium">
+                    {selectedEnquiry.roomType || selectedEnquiry.details?.suite}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <span className="text-[#A8A59E]">Phone Number:</span>
                 <span className="font-mono text-white font-medium">{selectedEnquiry.phone}</span>
@@ -655,8 +698,19 @@ export default function EnquiriesManager({
               )}
               {selectedEnquiry.dates && (
                 <div className="flex items-center justify-between">
-                  <span className="text-[#A8A59E]">Requested Dates:</span>
-                  <span className="text-[#C9A96E] font-medium">{selectedEnquiry.dates}</span>
+                  <span className="text-[#A8A59E]">Stay Dates:</span>
+                  <span className="text-[#C9A96E] font-medium">
+                    {selectedEnquiry.dates}
+                    {selectedEnquiry.nights && selectedEnquiry.nights > 0 ? ` (${selectedEnquiry.nights} Nights)` : ""}
+                  </span>
+                </div>
+              )}
+              {selectedEnquiry.roomsRequested && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[#A8A59E]">Rooms Requested:</span>
+                  <span className="text-white font-mono font-medium">
+                    {selectedEnquiry.roomsRequested} {selectedEnquiry.roomsRequested === 1 ? "Room" : "Rooms"}
+                  </span>
                 </div>
               )}
               {selectedEnquiry.guests && (
@@ -666,9 +720,9 @@ export default function EnquiriesManager({
                 </div>
               )}
               {selectedEnquiry.details?.totalAmount && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[#A8A59E]">Estimated Total:</span>
-                  <span className="text-emerald-400 font-mono font-bold">
+                <div className="flex items-center justify-between border-t border-white/5 pt-1.5">
+                  <span className="text-[#A8A59E]">Estimated Total (incl. GST):</span>
+                  <span className="text-emerald-400 font-mono font-bold text-sm">
                     ₹{Number(selectedEnquiry.details.totalAmount).toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -739,6 +793,51 @@ export default function EnquiriesManager({
           </div>
         )}
       </div>
+
+      {/* Overbooking Capacity Warning & Explicit Override Modal */}
+      {overbookingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#151518] border border-amber-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl text-[#F7F3EC] space-y-4">
+            <div className="flex items-center gap-3 text-amber-400">
+              <div className="p-2.5 rounded-full bg-amber-500/10 border border-amber-500/30">
+                <AlertCircle className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="font-serif font-bold text-lg text-white">
+                  Inventory Capacity Warning
+                </h3>
+                <span className="text-[11px] text-amber-400/90 font-mono">
+                  Database Overbooking Guard Active
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#A8A59E] leading-relaxed">
+              {overbookingModal.message}
+            </p>
+
+            <div className="p-3 rounded-lg bg-black/40 border border-white/10 text-xs text-amber-200/90 space-y-1">
+              <p className="font-semibold text-white">Management Notice:</p>
+              <p>Confirming this lead will exceed 12-room inventory on the requested dates. Only proceed if you have verified physical suite availability or guest rearrangement.</p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setOverbookingModal(null)}
+                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#A8A59E] hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleStatusChange(overbookingModal.enquiryId, overbookingModal.newStatus, true)}
+                className="px-4 py-2 rounded-lg bg-[#E02B1D] hover:bg-[#c42215] text-white text-xs font-semibold transition cursor-pointer shadow-md"
+              >
+                Confirm with Management Override
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -68,7 +68,22 @@ export default async function AdminDashboardPage() {
   const newReservationsCount = reservations.filter((r) => r.status === "new").length;
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const todaysArrivals = bookings.filter((b) => b.checkIn === todayStr);
+  
+  // Confirmed in-house reservations active tonight
+  const confirmedTonight = reservations.filter(
+    (r) => (r.status === "confirmed" || r.status === "converted") && r.check_in <= todayStr && r.check_out > todayStr
+  );
+  const roomsOccupiedTonight = Math.max(
+    occupiedCount,
+    confirmedTonight.reduce((sum, r) => sum + (r.rooms_requested || 1), 0)
+  );
+  const liveOccupancyRate = Math.round((roomsOccupiedTonight / 12) * 100);
+
+  // Confirmed arrivals today
+  const confirmedArrivalsToday = reservations.filter(
+    (r) => (r.status === "confirmed" || r.status === "converted") && r.check_in === todayStr
+  );
+  const todaysArrivalsCount = confirmedArrivalsToday.length + bookings.filter((b) => b.checkIn === todayStr).length;
 
   return (
     <div className="min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col">
@@ -210,24 +225,24 @@ export default async function AdminDashboardPage() {
         {/* Live Operational Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-[#A8A59E]">Live Occupancy</span>
+            <span className="text-xs font-mono uppercase text-[#A8A59E]">Rooms Occupied Tonight</span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-mono font-bold text-[#C9A96E]">{occupancyRate}%</span>
-              <span className="text-xs text-[#A8A59E]">({occupiedCount}/12 In-House)</span>
+              <span className="text-3xl font-mono font-bold text-[#C9A96E]">{roomsOccupiedTonight}/12</span>
+              <span className="text-xs text-[#A8A59E]">({liveOccupancyRate}%)</span>
             </div>
             <div className="mt-3 text-[11px] text-emerald-400 font-mono">
-              {availableCount} Rooms Available Today
+              {Math.max(0, 12 - roomsOccupiedTonight)} Keys Available Tonight
             </div>
           </div>
 
           <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-[#A8A59E]">Today&apos;s Arrivals</span>
+            <span className="text-xs font-mono uppercase text-[#A8A59E]">Arrivals Today</span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-mono font-bold text-white">{todaysArrivals.length}</span>
+              <span className="text-3xl font-mono font-bold text-white">{todaysArrivalsCount}</span>
               <span className="text-xs text-[#A8A59E]">Guests Arriving</span>
             </div>
             <div className="mt-3 text-[11px] text-[#C9A96E] font-mono">
-              VIP Transfers Scheduled
+              VIP Transfers &amp; Check-In Ready
             </div>
           </div>
 

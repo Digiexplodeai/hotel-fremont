@@ -11,6 +11,8 @@ import {
   updateBookingStatusAction,
 } from "@/actions/rooms";
 import { ReservationRecord } from "@/actions/reservations";
+import { updateRoomTypeAction, CalendarDaySummary, CalendarDayStay } from "@/actions/roomTypes";
+import { RoomTypeConfig, DEFAULT_ROOM_TYPES, formatINR } from "@/config/hotel";
 import ReservationsList from "@/components/admin/ReservationsList";
 import { roomCategories } from "@/data/rooms";
 import {
@@ -29,12 +31,21 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  Settings,
+  Edit,
+  Save,
+  DoorClosed,
+  AlertCircle,
+  Users,
+  MessageSquare,
 } from "lucide-react";
 
 interface RoomsManagerProps {
   initialRooms: PhysicalRoom[];
   initialBookings?: BookingRecord[];
   initialReservations?: ReservationRecord[];
+  initialRoomTypes?: RoomTypeConfig[];
+  initialCalendar?: CalendarDaySummary[];
   isDatabase: boolean;
 }
 
@@ -83,13 +94,39 @@ export default function RoomsManager({
   initialRooms,
   initialBookings = [],
   initialReservations = [],
+  initialRoomTypes = DEFAULT_ROOM_TYPES,
+  initialCalendar = [],
   isDatabase,
 }: RoomsManagerProps) {
   const [rooms, setRooms] = useState<PhysicalRoom[]>(initialRooms);
   const [bookings, setBookings] = useState<BookingRecord[]>(initialBookings);
-  const [activeTab, setActiveTab] = useState<"board" | "tape-chart" | "bookings">("board");
+  const [roomTypes, setRoomTypes] = useState<RoomTypeConfig[]>(initialRoomTypes);
+  const [calendar, setCalendar] = useState<CalendarDaySummary[]>(initialCalendar);
+  const [activeTab, setActiveTab] = useState<"board" | "tape-chart" | "inventory" | "bookings">("board");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState<string | null>(null);
+
+  // Room Type Edit Modal State
+  const [editingRoomType, setEditingRoomType] = useState<RoomTypeConfig | null>(null);
+  const [editForm, setEditForm] = useState<{
+    name: string;
+    pricePerNight: number;
+    totalRooms: number;
+    maxGuests: number;
+    isActive: boolean;
+  }>({
+    name: "",
+    pricePerNight: 5499,
+    totalRooms: 6,
+    maxGuests: 3,
+    isActive: true,
+  });
+  const [editWarning, setEditWarning] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [isSavingRoomType, setIsSavingRoomType] = useState(false);
+
+  // Selected Day for In-House Stays inspection
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<CalendarDaySummary | null>(null);
 
   // New Booking Modal State
   const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
@@ -145,6 +182,67 @@ export default function RoomsManager({
       }
     } finally {
       setIsUpdatingStatus(null);
+    }
+  };
+
+  // Open Room Type editor
+  const handleOpenEditRoomType = (rt: RoomTypeConfig) => {
+    setEditingRoomType(rt);
+    setEditForm({
+      name: rt.name,
+      pricePerNight: rt.pricePerNight,
+      totalRooms: rt.totalRooms,
+      maxGuests: rt.maxGuests,
+      isActive: rt.isActive,
+    });
+    setEditWarning(null);
+    setEditError(null);
+  };
+
+  // Save Room Type updates
+  const handleSaveRoomType = async (forceOverride: boolean = false) => {
+    if (!editingRoomType) return;
+    setIsSavingRoomType(true);
+    setEditError(null);
+    try {
+      const res = await updateRoomTypeAction(editingRoomType.code, {
+        name: editForm.name,
+        pricePerNight: Number(editForm.pricePerNight),
+        totalRooms: Number(editForm.totalRooms),
+        maxGuests: Number(editForm.maxGuests),
+        isActive: editForm.isActive,
+        forceOverride,
+      });
+
+      if (!res.success) {
+        if (res.warning) {
+          setEditWarning(res.warning);
+        } else {
+          setEditError(res.error || "Failed to update suite configuration.");
+        }
+        return;
+      }
+
+      // Update local state
+      setRoomTypes((prev) =>
+        prev.map((rt) =>
+          rt.code === editingRoomType.code
+            ? {
+                ...rt,
+                name: editForm.name,
+                pricePerNight: Number(editForm.pricePerNight),
+                totalRooms: Number(editForm.totalRooms),
+                maxGuests: Number(editForm.maxGuests),
+                isActive: editForm.isActive,
+              }
+            : rt
+        )
+      );
+      setEditingRoomType(null);
+    } catch (err: any) {
+      setEditError(err?.message || "Failed to save configuration.");
+    } finally {
+      setIsSavingRoomType(false);
     }
   };
 
@@ -329,7 +427,21 @@ export default function RoomsManager({
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Tape Chart Calendar</span>
+            <span>60-Day Availability</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("inventory")}
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-md text-xs font-medium transition cursor-pointer flex items-center justify-center gap-2 ${
+              activeTab === "inventory"
+                ? "bg-[#C9A96E] text-[#0E0E10] font-semibold shadow-sm"
+                : "text-[#A8A59E] hover:text-white"
+            }`}
+          >
+            <Settings className="w-3.5 h-3.5" />
+            <span>
+              Suites &amp; Rates ({roomTypes.reduce((acc, r) => acc + (r.isActive ? r.totalRooms : 0), 0)} Keys)
+            </span>
           </button>
 
           <button
@@ -503,156 +615,254 @@ export default function RoomsManager({
       )}
 
       {/* ======================================================== */}
-      {/* TAB 2: VISUAL TAPE CHART CALENDAR */}
+      {/* TAB 2: 60-DAY AVAILABILITY CALENDAR & OCCUPANCY MATRIX */}
       {/* ======================================================== */}
       {activeTab === "tape-chart" && (
-        <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-md space-y-4">
-          {/* Timeline Navigation */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#C9A96E]" />
-              <h3 className="text-sm font-serif font-bold text-[#F7F3EC]">
-                12-Room Availability Timeline (14-Day Tape Chart)
-              </h3>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  const d = new Date(timelineStart);
-                  d.setDate(d.getDate() - 7);
-                  setTimelineStart(d);
-                }}
-                className="p-1.5 rounded-lg border border-white/10 hover:border-white/20 text-[#A8A59E] hover:text-white transition"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setTimelineStart(new Date())}
-                className="px-2.5 py-1 rounded-lg border border-white/10 text-xs text-[#A8A59E] hover:text-white transition"
-              >
-                Today
-              </button>
-              <button
-                onClick={() => {
-                  const d = new Date(timelineStart);
-                  d.setDate(d.getDate() + 7);
-                  setTimelineStart(d);
-                }}
-                className="p-1.5 rounded-lg border border-white/10 hover:border-white/20 text-[#A8A59E] hover:text-white transition"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Tape Chart Grid */}
-          <div className="overflow-x-auto pb-4">
-            <div className="min-w-[900px]">
-              {/* Header: Dates */}
-              <div className="grid grid-cols-[140px_repeat(14,1fr)] gap-1 border-b border-white/10 pb-2 text-center text-xs">
-                <div className="text-left font-mono text-[#A8A59E] pl-2 font-bold">Room Key</div>
-                {timelineDays.map((d, idx) => {
-                  const isToday = d.toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10);
-                  const dayNum = d.getDate();
-                  const monthStr = d.toLocaleDateString("en-US", { month: "short" });
-                  const weekDay = d.toLocaleDateString("en-US", { weekday: "narrow" });
-
-                  return (
-                    <div
-                      key={idx}
-                      className={`p-1 rounded ${
-                        isToday ? "bg-[#C9A96E]/20 text-[#C9A96E] font-bold border border-[#C9A96E]/30" : "text-[#A8A59E]"
-                      }`}
-                    >
-                      <div className="text-[10px]">{weekDay}</div>
-                      <div className="font-mono text-xs">{dayNum} {monthStr}</div>
-                    </div>
-                  );
-                })}
+        <div className="space-y-4">
+          <div className="bg-[#151518] border border-white/10 rounded-xl p-5 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#C9A96E]" />
+                  <h3 className="text-base font-serif font-bold text-white">
+                    60-Day Availability &amp; Occupancy Calendar
+                  </h3>
+                </div>
+                <p className="text-xs text-[#A8A59E] mt-0.5">
+                  Live inventory across all 12 keys. Click any date to view in-house guest stays and room allocations.
+                </p>
               </div>
 
-              {/* Rows: 12 Rooms */}
-              <div className="divide-y divide-white/5">
-                {rooms.map((room) => {
-                  return (
-                    <div
-                      key={room.roomNumber}
-                      className="grid grid-cols-[140px_repeat(14,1fr)] gap-1 items-center py-2 text-xs hover:bg-white/[0.02]"
-                    >
-                      {/* Room Label */}
-                      <div className="flex items-center justify-between pr-2 pl-2">
-                        <span className="font-mono font-bold text-white">#{room.roomNumber}</span>
-                        <span className="text-[10px] text-[#A8A59E] truncate max-w-[80px]">
-                          {room.categorySlug.split("-")[0]}
+              <div className="flex items-center gap-2 text-xs">
+                <span className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[#C9A96E]">
+                  Total Hotel Keys: 12 Rooms
+                </span>
+              </div>
+            </div>
+
+            {/* 60-Day Matrix Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-2.5 pt-4">
+              {calendar.slice(0, 56).map((day) => {
+                const isToday = day.date === new Date().toISOString().slice(0, 10);
+                const isSoldOut = day.totalOccupied >= day.totalInventory;
+                const isHighOccupancy = day.occupancyPercentage >= 75;
+
+                return (
+                  <div
+                    key={day.date}
+                    onClick={() => setSelectedCalendarDay(day)}
+                    className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between hover:scale-[1.02] hover:shadow-lg ${
+                      isToday
+                        ? "bg-[#C9A96E]/10 border-[#C9A96E] shadow-[0_0_15px_rgba(201,169,110,0.15)]"
+                        : isSoldOut
+                        ? "bg-rose-950/30 border-rose-600/40 hover:border-rose-500"
+                        : isHighOccupancy
+                        ? "bg-amber-950/20 border-amber-600/30 hover:border-amber-500"
+                        : "bg-[#0E0E10]/80 border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    {/* Date Header */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-[#A8A59E]">
+                        {day.dayOfWeek}
+                      </span>
+                      <span
+                        className={`text-xs font-mono font-bold ${
+                          isToday ? "text-[#C9A96E]" : "text-white"
+                        }`}
+                      >
+                        {new Date(day.date).toLocaleDateString("en-IN", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+
+                    {/* Occupancy Indicator */}
+                    <div className="my-2.5">
+                      <div className="flex items-baseline justify-between mb-1">
+                        <span className="text-[10px] uppercase font-mono text-[#A8A59E]">
+                          Booked
+                        </span>
+                        <span
+                          className={`text-xs font-mono font-bold ${
+                            isSoldOut
+                              ? "text-[#E02B1D]"
+                              : isHighOccupancy
+                              ? "text-amber-400"
+                              : "text-emerald-400"
+                          }`}
+                        >
+                          {day.totalOccupied}/12
                         </span>
                       </div>
 
-                      {/* 14 Day Columns */}
-                      {timelineDays.map((day, dIdx) => {
-                        const dateStr = day.toISOString().slice(0, 10);
-
-                        // Find booking for this room & date
-                        const matchingBooking = bookings.find((b) => {
-                          if (b.status === "cancelled" || b.status === "no_show") return false;
-                          if (b.roomNumber !== room.roomNumber) return false;
-                          return dateStr >= b.checkIn && dateStr < b.checkOut;
-                        });
-
-                        const isStart = matchingBooking?.checkIn === dateStr;
-
-                        return (
-                          <div
-                            key={dIdx}
-                            className={`h-8 rounded flex items-center justify-center text-[10px] transition-all relative ${
-                              matchingBooking
-                                ? "bg-[#E02B1D]/25 border border-[#E02B1D]/40 text-white font-medium cursor-pointer hover:bg-[#E02B1D]/40"
-                                : room.status === "occupied" && dateStr === new Date().toISOString().slice(0, 10)
-                                ? "bg-rose-950/40 border border-rose-800/40 text-rose-300"
-                                : "bg-black/20 hover:bg-white/5 border border-white/[0.02]"
-                            }`}
-                            onClick={() => {
-                              if (matchingBooking) {
-                                setSelectedBookingForVoucher(matchingBooking);
-                              }
-                            }}
-                            title={
-                              matchingBooking
-                                ? `${matchingBooking.guestName} (${matchingBooking.bookingCode})\n${matchingBooking.checkIn} to ${matchingBooking.checkOut}`
-                                : `Room ${room.roomNumber} is open`
-                            }
-                          >
-                            {isStart && (
-                              <span className="truncate px-1 text-[9px] font-bold text-[#F7F3EC]">
-                                {matchingBooking.guestName.split(" ")[0]}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
+                      {/* Mini Progress Bar */}
+                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            isSoldOut
+                              ? "bg-[#E02B1D]"
+                              : isHighOccupancy
+                              ? "bg-amber-400"
+                              : "bg-emerald-400"
+                          }`}
+                          style={{ width: `${Math.min(100, day.occupancyPercentage)}%` }}
+                        />
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
 
-          {/* Legend */}
-          <div className="flex flex-wrap items-center gap-4 text-xs pt-2 border-t border-white/5 text-[#A8A59E]">
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-[#E02B1D]/40 border border-[#E02B1D]" />
-              <span>Confirmed Reservation (Click for Voucher)</span>
+                    {/* Suite-wise breakdown badge */}
+                    <div className="pt-2 border-t border-white/5 space-y-0.5 text-[10px] font-mono">
+                      <div className="flex justify-between text-[#A8A59E]">
+                        <span>Deluxe:</span>
+                        <span className="text-white">{day.byRoomType["deluxe-king"]?.booked || 0}/6</span>
+                      </div>
+                      <div className="flex justify-between text-[#A8A59E]">
+                        <span>Premier:</span>
+                        <span className="text-white">{day.byRoomType["premier-executive"]?.booked || 0}/3</span>
+                      </div>
+                      <div className="flex justify-between text-[#A8A59E]">
+                        <span>Royal:</span>
+                        <span className="text-white">{day.byRoomType["royal-fremont"]?.booked || 0}/2</span>
+                      </div>
+                      <div className="flex justify-between text-[#A8A59E]">
+                        <span>Penthouse:</span>
+                        <span className="text-white">{day.byRoomType["presidential-penthouse"]?.booked || 0}/1</span>
+                      </div>
+                    </div>
+
+                    {day.activeStays.length > 0 && (
+                      <span className="mt-2 text-[9px] text-[#C9A96E] font-medium text-center block hover:underline">
+                        {day.activeStays.length} In-House Stay{day.activeStays.length > 1 ? "s" : ""} &rarr;
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-black/20 border border-white/10" />
-              <span>Available for Booking</span>
+
+            {/* Legend */}
+            <div className="flex flex-wrap items-center gap-5 text-xs pt-4 mt-4 border-t border-white/10 text-[#A8A59E]">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500/60" />
+                <span>Available (&lt; 75% booked)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-500/60" />
+                <span>High Demand (&ge; 75% booked)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded bg-rose-500/40 border border-[#E02B1D]" />
+                <span>Sold Out (12/12 Rooms Occupied)</span>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* ======================================================== */}
-      {/* TAB 3: BOOKINGS & RESERVATIONS LIST */}
+      {/* TAB 3: SUITES & RATES INVENTORY CONFIGURATION (12 KEYS) */}
+      {/* ======================================================== */}
+      {activeTab === "inventory" && (
+        <div className="space-y-6">
+          {/* Header Banner */}
+          <div className="bg-[#151518] border border-white/10 rounded-xl p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Settings className="w-4 h-4 text-[#C9A96E]" />
+                <h3 className="text-base font-serif font-bold text-white">
+                  12 Keys Inventory &amp; Rate Configuration
+                </h3>
+              </div>
+              <p className="text-xs text-[#A8A59E] mt-0.5 max-w-2xl">
+                Database single source of truth for all room categories, total keys, pricing, and guest capacity. Changes reflect instantly on the public website and reservation engine.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="px-4 py-2 rounded-xl bg-black/40 border border-white/10 text-right">
+                <span className="text-[10px] uppercase font-mono text-[#A8A59E] block">Total Property Keys</span>
+                <span className="text-white font-mono font-bold text-base">
+                  {roomTypes.reduce((acc, r) => acc + (r.isActive ? r.totalRooms : 0), 0)} Rooms
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Room Types Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {roomTypes.map((rt) => {
+              return (
+                <div
+                  key={rt.code}
+                  className="bg-[#151518] border border-white/10 hover:border-[#C9A96E]/30 rounded-xl p-5 shadow-md flex flex-col justify-between space-y-4 transition"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-base font-serif font-bold text-white">
+                          {rt.name}
+                        </h4>
+                        {rt.isActive ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-mono text-[#A8A59E]">
+                        Code: {rt.code}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => handleOpenEditRoomType(rt)}
+                      className="px-3 py-1.5 rounded-lg bg-black/40 hover:bg-white/10 border border-white/10 text-xs text-[#C9A96E] hover:text-white transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>Edit Rates &amp; Keys</span>
+                    </button>
+                  </div>
+
+                  {/* Attributes Grid */}
+                  <div className="grid grid-cols-3 gap-2.5 p-3 rounded-lg bg-black/40 border border-white/5 text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase font-mono text-[#A8A59E] block">Rate / Night</span>
+                      <span className="text-sm font-mono font-bold text-[#E02B1D]">
+                        {formatINR(rt.pricePerNight)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-mono text-[#A8A59E] block">Total Rooms</span>
+                      <span className="text-sm font-mono font-bold text-white">
+                        {rt.totalRooms} {rt.totalRooms === 1 ? "Key" : "Keys"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-mono text-[#A8A59E] block">Max Guests</span>
+                      <span className="text-sm font-mono font-bold text-[#C9A96E]">
+                        {rt.maxGuests} Guests
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-[#A8A59E] flex items-center justify-between border-t border-white/5 pt-2">
+                    <span>Tax Line: 18% Luxury GST applicable</span>
+                    <span className="font-mono text-[10px]">Sort Order: {rt.sortOrder}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB 4: BOOKINGS & RESERVATIONS LIST */}
       {/* ======================================================== */}
       {activeTab === "bookings" && (
         <ReservationsList initialReservations={initialReservations} />
@@ -1018,6 +1228,274 @@ export default function RoomsManager({
                   Hotel Fremont · Authorized Guest Voucher · Generated on {new Date().toLocaleDateString("en-IN")}
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL: EDIT SUITE & RATES INVENTORY CONFIGURATION */}
+      {/* ======================================================== */}
+      {editingRoomType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg bg-[#151518] border border-[#C9A96E]/30 rounded-2xl shadow-2xl p-6 text-[#F7F3EC] space-y-5">
+            <div className="flex items-start justify-between border-b border-white/10 pb-3">
+              <div>
+                <h3 className="text-lg font-serif font-bold text-white">
+                  Edit Suite Configuration
+                </h3>
+                <span className="text-[11px] font-mono text-[#C9A96E]">
+                  Code: {editingRoomType.code}
+                </span>
+              </div>
+              <button
+                onClick={() => setEditingRoomType(null)}
+                className="p-1 rounded-lg text-[#A8A59E] hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Error or Warning Banner */}
+            {editError && (
+              <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{editError}</span>
+              </div>
+            )}
+
+            {editWarning && (
+              <div className="p-3.5 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-200 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-amber-300">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>Inventory Conflict Warning</span>
+                </div>
+                <p className="leading-relaxed">{editWarning}</p>
+                <button
+                  type="button"
+                  onClick={() => handleSaveRoomType(true)}
+                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs transition cursor-pointer"
+                >
+                  Force Override &amp; Save
+                </button>
+              </div>
+            )}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSaveRoomType(false);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  Suite Display Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Rate per Night (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={editForm.pricePerNight}
+                    onChange={(e) => setEditForm({ ...editForm, pricePerNight: Number(e.target.value) })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Total Rooms (Keys) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    max={20}
+                    value={editForm.totalRooms}
+                    onChange={(e) => setEditForm({ ...editForm, totalRooms: Number(e.target.value) })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Max Guests / Room *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    max={10}
+                    value={editForm.maxGuests}
+                    onChange={(e) => setEditForm({ ...editForm, maxGuests: Number(e.target.value) })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Inventory Status
+                  </label>
+                  <select
+                    value={editForm.isActive ? "active" : "inactive"}
+                    onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === "active" })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                  >
+                    <option value="active">Active (Available on Site)</option>
+                    <option value="inactive">Inactive (Hidden)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setEditingRoomType(null)}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-[#A8A59E] hover:text-white transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingRoomType}
+                  className="px-5 py-2.5 rounded-xl bg-[#E02B1D] hover:bg-[#c42215] disabled:opacity-50 text-white font-semibold text-xs tracking-wider uppercase transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{isSavingRoomType ? "Saving to Supabase..." : "Save Configuration"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL: IN-HOUSE STAYS INSPECTION FOR CALENDAR DAY */}
+      {/* ======================================================== */}
+      {selectedCalendarDay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-xl bg-[#151518] border border-[#C9A96E]/30 rounded-2xl shadow-2xl p-6 text-[#F7F3EC] space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-white/10 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#C9A96E]" />
+                  <h3 className="text-lg font-serif font-bold text-white">
+                    In-House Stays: {new Date(selectedCalendarDay.date).toLocaleDateString("en-IN", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-mono font-bold text-[#E02B1D]">
+                    {selectedCalendarDay.totalOccupied} of 12 Keys Booked ({selectedCalendarDay.occupancyPercentage}% Occupancy)
+                  </span>
+                  <span className="text-[#A8A59E] text-xs">·</span>
+                  <span className="text-xs font-mono text-emerald-400">
+                    {Math.max(0, 12 - selectedCalendarDay.totalOccupied)} Rooms Available
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedCalendarDay(null)}
+                className="p-1 rounded-lg text-[#A8A59E] hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* List of confirmed in-house bookings */}
+            <div className="space-y-3">
+              {selectedCalendarDay.activeStays.length === 0 ? (
+                <div className="py-8 text-center text-[#A8A59E] space-y-2">
+                  <DoorClosed className="w-8 h-8 mx-auto text-[#C9A96E]/60" />
+                  <p className="text-sm font-medium text-white">All 12 Keys Vacant</p>
+                  <p className="text-xs text-[#A8A59E]">
+                    No confirmed guest reservations staying in-house on this night.
+                  </p>
+                </div>
+              ) : (
+                selectedCalendarDay.activeStays.map((stay) => {
+                  const cleanPhone = stay.guestPhone.replace(/\D/g, "").slice(-10);
+                  const waUrl = `https://wa.me/91${cleanPhone}?text=Hello%20${encodeURIComponent(
+                    stay.guestName
+                  )},%20greeting%20from%20Hotel%20Fremont%20concierge.`;
+
+                  return (
+                    <div
+                      key={stay.reservationId}
+                      className="p-4 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition space-y-2 text-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-sm">{stay.guestName}</span>
+                          <span className="px-1.5 py-0.5 rounded bg-black/60 border border-white/10 font-mono text-[10px] text-[#C9A96E]">
+                            {stay.referenceCode}
+                          </span>
+                        </div>
+                        <span className="font-mono text-xs text-emerald-400 font-semibold">
+                          {stay.roomsCount} {stay.roomsCount === 1 ? "Room" : "Rooms"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[#A8A59E]">
+                        <span className="text-[#C9A96E] font-medium">{stay.roomTypeName}</span>
+                        <span className="font-mono text-[11px]">
+                          {stay.checkIn} to {stay.checkOut}
+                        </span>
+                      </div>
+
+                      {/* Quick Contact Actions */}
+                      <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/30 font-medium text-[11px] flex items-center gap-1 transition"
+                        >
+                          <MessageSquare className="w-3 h-3" />
+                          <span>WhatsApp</span>
+                        </a>
+                        <a
+                          href={`tel:+91${cleanPhone}`}
+                          className="px-3 py-1 rounded-lg bg-black/40 hover:bg-white/10 text-white border border-white/10 font-medium text-[11px] flex items-center gap-1 transition"
+                        >
+                          <Phone className="w-3 h-3 text-[#C9A96E]" />
+                          <span>Call +91 {cleanPhone}</span>
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="pt-2 text-right">
+              <button
+                onClick={() => setSelectedCalendarDay(null)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs text-white transition cursor-pointer"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
