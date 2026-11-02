@@ -186,7 +186,7 @@ export async function confirmUploadAction({
         height: height || null,
         blur_data_url: blurDataUrl || null,
         alt_text: altText || null,
-        uploaded_by: user.isFallbackAdmin ? null : user.id,
+        uploaded_by: user.id,
       })
       .select("id")
       .single();

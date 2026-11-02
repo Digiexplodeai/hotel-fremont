@@ -15,6 +15,9 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata = {
   title: "12 Keys & Reservations | Hotel Fremont Admin",
   robots: {

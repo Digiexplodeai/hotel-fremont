@@ -8,7 +8,7 @@ import {
 } from "@/lib/r2";
 
 export async function GET(req: NextRequest) {
-  if (!isAuthorizedAdmin(req)) {
+  if (!(await isAuthorizedAdmin(req))) {
     return NextResponse.json(
       { error: "Unauthorized: Admin authorization required to list media." },
       { status: 401 }
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!isAuthorizedAdmin(req)) {
+  if (!(await isAuthorizedAdmin(req))) {
     return NextResponse.json(
       { error: "Unauthorized: Admin authorization required to delete media." },
       { status: 401 }

@@ -17,6 +17,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Explicit Admin Users Registry (Verified system administrators)
+CREATE TABLE IF NOT EXISTS public.admin_users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL UNIQUE,
+  role TEXT NOT NULL DEFAULT 'owner' CHECK (role IN ('owner', 'manager', 'front_desk', 'admin')),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Helper to get user role in RLS policies
 CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS TEXT AS $$

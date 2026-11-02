@@ -11,7 +11,7 @@ import {
 
 export async function POST(req: NextRequest) {
   // 1. Authenticate admin
-  if (!isAuthorizedAdmin(req)) {
+  if (!(await isAuthorizedAdmin(req))) {
     return NextResponse.json(
       { error: "Unauthorized: Admin authorization required to upload media." },
       { status: 401 }

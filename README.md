@@ -114,9 +114,9 @@ http://localhost:3000
 http://localhost:3000/admin/login
 ```
 
-### Admin Credentials
-- **Master Admin Access Key:** `fremont-admin-2026`
-- **Staff Credentials:** Email &amp; Password authenticated via Supabase Auth.
+### Admin Access
+- Authenticate via Supabase Auth (Email & Password) at `/admin/login`.
+- Manage rooms, reservations, guest enquiries, and website photography in the Command Center.
 
 ---
 
@@ -126,15 +126,15 @@ The project is pre-configured for seamless production deployment on **Netlify** 
 
 1. Push your repository to GitHub.
 2. In Netlify Dashboard, create a new site from your Git repository.
-3. Configure the following environment variables in **Netlify &gt; Site settings &gt; Environment variables**:
+3. Configure the following environment variables in **Netlify > Site settings > Environment variables**:
    - `NEXT_PUBLIC_SUPABASE_URL`: `https://gtfkgsbkalldvlueveks.supabase.co`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: `sb_publishable__...`
+   - `SUPABASE_SERVICE_ROLE_KEY`: `<your-supabase-service-role-key>`
    - `R2_ACCOUNT_ID`: `93888554ef9d9e0b8c18b322683a9652`
    - `R2_ACCESS_KEY_ID`: `73da086d59ec3361f3c8922ebea6cd80`
    - `R2_SECRET_ACCESS_KEY`: `<your-r2-secret-key>`
    - `R2_BUCKET_NAME`: `hotel-fremont-media`
    - `PUBLIC_R2_PUBLIC_URL`: `https://pub-583d3181aad14cfaac7a1be83ef68da2.r2.dev`
-   - `ADMIN_MASTER_KEY`: `fremont-admin-2026`
 4. Deploy! Netlify will automatically build the Next.js App Router application with edge media rendering and server actions.
 
 ---
