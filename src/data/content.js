@@ -63,7 +63,7 @@ export const siteConfig = {
     ctaPrimary: "Book Your Stay",
     ctaSecondary: "Explore Suites",
     // Replace with local video or high-res photography
-    bgImage: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000",
+    bgImage: "/assets/hero/hero-suite.webp",
     videoUrl: null, // Optional mp4 video stream url if available
   },
 
@@ -88,7 +88,7 @@ export const siteConfig = {
     // High-resolution photography for about section
     imagePrimary: "/assets/hero/hero-room-1.webp",
     imageSecondary: "/assets/hero/hero-room-2.webp",
-    imageInterior: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=900",
+    imageInterior: "/assets/hero/hero-lobby.webp",
   },
 
   rooms: roomCategories,
@@ -149,8 +149,8 @@ export const siteConfig = {
       { name: "Charred Bhatti Murgh", desc: "Free-range chicken steeped in crushed spices, mustard oil and pomegranate reduction.", price: "₹795" },
       { name: "Saffron Tres Leches & Pistachio Tuile", desc: "Kashmiri saffron-infused sponge soaked in cardamom milk with Iranian pistachios.", price: "₹450" }
     ],
-    imagePrimary: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200",
-    imageSecondary: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&q=80&w=800",
+    imagePrimary: "/assets/placeholder.svg",
+    imageSecondary: "/assets/placeholder.svg",
   },
 
   events: {
@@ -164,7 +164,7 @@ export const siteConfig = {
         area: "7,500 sq.ft",
         type: "Weddings, Receptions & Galas",
         desc: "Pillarless grand hall with crystal chandelier ceilings, motorized stage lighting, bridal vanity suite, and private pre-function lobby.",
-        image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000",
+        image: "/assets/placeholder.svg",
       },
       {
         name: "The Fremont Terrace Lawn",
@@ -172,7 +172,7 @@ export const siteConfig = {
         area: "5,000 sq.ft",
         type: "Cocktail Evenings & Sangeet",
         desc: "Open-air landscaped terrace under the starlit sky, featuring live barbecue counters and ambient fire pits.",
-        image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=1000",
+        image: "/assets/placeholder.svg",
       },
       {
         name: "The Executive Boardroom",
@@ -180,20 +180,20 @@ export const siteConfig = {
         area: "1,200 sq.ft",
         type: "Board Meetings & Strategic Conclaves",
         desc: "Equipped with 85-inch 4K conferencing display, noise-cancelling directional mics, and dedicated butler refreshments.",
-        image: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&q=80&w=1000",
+        image: "/assets/placeholder.svg",
       }
     ]
   },
 
   gallery: [
-    { id: 1, title: "Hotel Fremont Facade at Dusk", category: "Architecture", src: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1200", span: "col-span-2 row-span-2" },
-    { id: 2, title: "Royal Fremont Suite Master Bedroom", category: "Suites", src: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
-    { id: 3, title: "Aura Fine Dining & Cocktail Bar", category: "Dining", src: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
-    { id: 4, title: "Grand Ballroom Wedding Setup", category: "Events", src: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-2" },
-    { id: 5, title: "Presidential Penthouse Living Lounge", category: "Suites", src: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
-    { id: 6, title: "Italian Marble En-Suite Bathroom", category: "Suites", src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
-    { id: 7, title: "Chef's Signature Tandoor Platter", category: "Dining", src: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000", span: "col-span-1 row-span-1" },
-    { id: 8, title: "Deluxe King Room Sanctuary", category: "Suites", src: "/assets/hero/hero-room-1.webp", span: "col-span-1 row-span-1" },
+    { id: 1, title: "Hotel Fremont Facade at Dusk", category: "Architecture", src: "/assets/hero/hero-lobby.webp", span: "col-span-2 row-span-2" },
+    { id: 2, title: "The Royal Fremont Suite", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
+    { id: 3, title: "Aura Fine Dining & Cocktail Bar", category: "Dining", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
+    { id: 4, title: "Grand Fremont Ballroom", category: "Events", src: "/assets/placeholder.svg", span: "col-span-1 row-span-2" },
+    { id: 5, title: "Presidential Penthouse", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
+    { id: 6, title: "Premier Executive Suite", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
+    { id: 7, title: "The Fremont Terrace Lawn", category: "Events", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
+    { id: 8, title: "Deluxe King Room Sanctuary", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
   ],
 
   testimonials: [

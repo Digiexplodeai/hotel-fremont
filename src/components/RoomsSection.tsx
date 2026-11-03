@@ -18,16 +18,25 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
   const { slots } = useSiteSlots();
 
   const rooms = (siteConfig.rooms as RoomType[]).map((room) => {
-    const mainSlot = slots[`rooms.${room.id}.main`];
-    const g1Slot = slots[`rooms.${room.id}.gallery.1`];
-    const g2Slot = slots[`rooms.${room.id}.gallery.2`];
+    const slug = room.slug || room.id;
+    const mainSlot = slots[`rooms.${slug}.main`];
+    const mainUrl = mainSlot?.url || "/assets/placeholder.svg";
+    const mainAlt = mainSlot?.altText || room.name || room.title;
+
+    // Gallery slots: main image is always thumbnail #1 (index 0)
+    const galleryUrls: string[] = [mainUrl];
+    for (let i = 1; i <= 4; i++) {
+      const gSlot = slots[`rooms.${slug}.gallery-${i}`] || slots[`rooms.${slug}.gallery.${i}`];
+      if (gSlot?.url && gSlot.url.trim() !== "" && gSlot.url !== "/assets/placeholder.svg") {
+        galleryUrls.push(gSlot.url);
+      }
+    }
+
     return {
       ...room,
-      image: mainSlot?.url || room.image,
-      gallery: [
-        g1Slot?.url || room.gallery?.[0] || room.image,
-        g2Slot?.url || room.gallery?.[1] || room.image,
-      ],
+      image: mainUrl,
+      altText: mainAlt,
+      gallery: galleryUrls,
     };
   });
 

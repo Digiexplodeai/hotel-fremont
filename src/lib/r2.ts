@@ -117,6 +117,7 @@ export function getR2Client(): S3Client {
     },
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",
+    forcePathStyle: true,
   });
 
   return cachedS3Client;

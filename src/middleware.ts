@@ -12,6 +12,11 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith("/admin");
   const isAdminApi = pathname.startsWith("/api/admin");
 
+  // Allow temporary r2-diagnose route in development without session cookies
+  if (pathname === "/api/admin/r2-diagnose" && process.env.NODE_ENV !== "production") {
+    return response;
+  }
+
   if (!isAdminRoute && !isAdminApi) {
     return response;
   }

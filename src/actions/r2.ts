@@ -85,8 +85,8 @@ export async function requestPresignedUploadUrl({
     const uniqueId = randomUUID().substring(0, 8);
     const objectKey = `site/${section}/${cleanBase}-${Date.now()}-${uniqueId}.${cleanExt}`;
 
-    // 5. Generate Presigned PUT URL (valid for 120 seconds)
-    // Explicitly sign only 'host' to avoid signature mismatch and R2 flexible checksum issues
+    // 5. Generate Presigned PUT URL (valid for 600 seconds / 10 minutes)
+    // Explicitly sign 'host' and 'content-type' to match the browser payload exactly
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: objectKey,
@@ -94,8 +94,8 @@ export async function requestPresignedUploadUrl({
     });
 
     const uploadUrl = await getSignedUrl(s3, command, {
-      expiresIn: 120,
-      signableHeaders: new Set(["host"]),
+      expiresIn: 600,
+      signableHeaders: new Set(["host", "content-type"]),
     });
     const publicUrl = getPublicMediaUrl(objectKey);
 

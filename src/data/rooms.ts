@@ -76,12 +76,8 @@ export const roomCategories: RoomCategory[] = [
       "Safe Locker",
       "24/7 Room Service"
     ],
-    image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000",
-    gallery: [
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1200",
-      "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1200",
-      "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1200",
-    ]
+    image: "/assets/placeholder.svg",
+    gallery: []
   },
   {
     slug: "premier-executive",
@@ -115,12 +111,8 @@ export const roomCategories: RoomCategory[] = [
       "Balcony",
       "Smart Climate Control"
     ],
-    image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000",
-    gallery: [
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1200",
-      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=1200",
-      "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&q=80&w=1200",
-    ]
+    image: "/assets/placeholder.svg",
+    gallery: []
   },
   {
     slug: "royal-fremont",
@@ -154,12 +146,8 @@ export const roomCategories: RoomCategory[] = [
       "Powder Room",
       "Panoramic Terrace"
     ],
-    image: "/assets/rooms/royal-fremont-suite.webp",
-    gallery: [
-      "/assets/rooms/royal-fremont-suite.webp",
-      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=1200",
-      "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=1200",
-    ]
+    image: "/assets/placeholder.svg",
+    gallery: []
   },
   {
     slug: "presidential-penthouse",
@@ -193,12 +181,8 @@ export const roomCategories: RoomCategory[] = [
       "Sauna & Steam",
       "VIP Elevator"
     ],
-    image: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1000",
-    gallery: [
-      "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1200",
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200",
-      "/assets/hero/hero-room-2.webp",
-    ]
+    image: "/assets/placeholder.svg",
+    gallery: []
   }
 ];
 

@@ -1,0 +1,62 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#151518" />
+      <stop offset="50%" stop-color="#0E0E10" />
+      <stop offset="100%" stop-color="#18181C" />
+    </linearGradient>
+    <radialGradient id="goldGlow" cx="50%" cy="45%" r="40%">
+      <stop offset="0%" stop-color="#C9A96E" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#C9A96E" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="redGlow" cx="50%" cy="55%" r="35%">
+      <stop offset="0%" stop-color="#E02B1D" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#E02B1D" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="800" fill="url(#bg)" />
+  <circle cx="600" cy="360" r="320" fill="url(#goldGlow)" />
+  <circle cx="600" cy="440" r="280" fill="url(#redGlow)" />
+
+  <!-- Frame / Border -->
+  <rect x="30" y="30" width="1140" height="740" rx="16" stroke="#C9A96E" stroke-opacity="0.2" stroke-width="1.5" />
+  <rect x="42" y="42" width="1116" height="716" rx="12" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1" />
+
+  <!-- Corner Accents -->
+  <path d="M 30 70 L 30 30 L 70 30" stroke="#C9A96E" stroke-width="2" stroke-opacity="0.6" fill="none" />
+  <path d="M 1170 70 L 1170 30 L 1130 30" stroke="#C9A96E" stroke-width="2" stroke-opacity="0.6" fill="none" />
+  <path d="M 30 730 L 30 770 L 70 770" stroke="#C9A96E" stroke-width="2" stroke-opacity="0.6" fill="none" />
+  <path d="M 1170 730 L 1170 770 L 1130 770" stroke="#C9A96E" stroke-width="2" stroke-opacity="0.6" fill="none" />
+
+  <!-- Center Emblem (Stylized F crest) -->
+  <g transform="translate(600, 340)">
+    <!-- Outer Diamond -->
+    <path d="M 0 -60 L 50 0 L 0 60 L -50 0 Z" stroke="#C9A96E" stroke-width="1.5" stroke-opacity="0.5" fill="#0E0E10" fill-opacity="0.6" />
+    <!-- Inner Diamond -->
+    <path d="M 0 -48 L 40 0 L 0 48 L -40 0 Z" stroke="#E02B1D" stroke-width="1.5" stroke-opacity="0.7" fill="none" />
+    
+    <!-- Stylized F -->
+    <path d="M -12 -22 L 14 -22 L 14 -16 L -4 -16 L -4 -4 L 10 -4 L 10 2 L -4 2 L -4 24 L -12 24 Z" fill="#F7F3EC" />
+  </g>
+
+  <!-- Typography -->
+  <!-- Brand Wordmark -->
+  <text x="600" y="455" text-anchor="middle" font-family="'Cinzel', 'Playfair Display', Georgia, serif" font-size="28" font-weight="700" letter-spacing="8" fill="#F7F3EC">
+    HOTEL FREMONT
+  </text>
+
+  <!-- Accent Divider -->
+  <line x1="520" y1="480" x2="680" y2="480" stroke="#C9A96E" stroke-width="1" stroke-opacity="0.6" />
+  <circle cx="600" cy="480" r="3" fill="#E02B1D" />
+
+  <!-- Subtitle -->
+  <text x="600" y="515" text-anchor="middle" font-family="'Montserrat', -apple-system, sans-serif" font-size="13" font-weight="500" letter-spacing="4" fill="#C9A96E">
+    CURATED LUXURY SANCTUARY
+  </text>
+  <text x="600" y="540" text-anchor="middle" font-family="'Montserrat', -apple-system, sans-serif" font-size="11" font-weight="400" letter-spacing="2" fill="#A8A59E" fill-opacity="0.7">
+    AIRPORT ROAD · SECTOR 80 · MOHALI
+  </text>
+</svg>
+

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Maximize2, Sparkles } from "lucide-react";
 import { siteConfig } from "@/data/content";
+import { useSiteSlots } from "@/context/SiteSlotsContext";
 import GalleryLightbox, { GalleryItem } from "./GalleryLightbox";
 
 const categories = ["All", "Architecture", "Suites", "Dining", "Events"];
@@ -13,8 +14,66 @@ export default function GallerySection() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
+  const { slots } = useSiteSlots();
 
-  const galleryItems = siteConfig.gallery as GalleryItem[];
+  const galleryItems: GalleryItem[] = [
+    {
+      id: 1,
+      title: "Hotel Fremont Facade at Dusk",
+      category: "Architecture",
+      src: slots["hero.slide_3"]?.url || "/assets/hero/hero-lobby.webp",
+      span: "col-span-2 row-span-2",
+    },
+    {
+      id: 2,
+      title: "The Royal Fremont Suite",
+      category: "Suites",
+      src: slots["rooms.royal-fremont.main"]?.url || "/assets/placeholder.svg",
+      span: "col-span-1 row-span-1",
+    },
+    {
+      id: 3,
+      title: "Aura Fine Dining & Cocktail Bar",
+      category: "Dining",
+      src: slots["dining.banner_primary"]?.url || "/assets/placeholder.svg",
+      span: "col-span-1 row-span-1",
+    },
+    {
+      id: 4,
+      title: "Grand Fremont Ballroom",
+      category: "Events",
+      src: slots["events.venue_1"]?.url || "/assets/placeholder.svg",
+      span: "col-span-1 row-span-2",
+    },
+    {
+      id: 5,
+      title: "Presidential Penthouse",
+      category: "Suites",
+      src: slots["rooms.presidential-penthouse.main"]?.url || "/assets/placeholder.svg",
+      span: "col-span-1 row-span-1",
+    },
+    {
+      id: 6,
+      title: "Premier Executive Suite",
+      category: "Suites",
+      src: slots["rooms.premier-executive.main"]?.url || "/assets/placeholder.svg",
+      span: "col-span-1 row-span-1",
+    },
+    {
+      id: 7,
+      title: "The Fremont Terrace Lawn",
+      category: "Events",
+      src: slots["events.venue_2"]?.url || "/assets/placeholder.svg",
+      span: "col-span-1 row-span-1",
+    },
+    {
+      id: 8,
+      title: "Deluxe King Room Sanctuary",
+      category: "Suites",
+      src: slots["rooms.deluxe-king.main"]?.url || "/assets/placeholder.svg",
+      span: "col-span-1 row-span-1",
+    },
+  ];
 
   const filteredItems =
     activeCategory === "All"

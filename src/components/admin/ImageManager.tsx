@@ -196,57 +196,272 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
     isCustomR2: false,
     isRequired: false,
   },
+  // Deluxe King Room (5 slots: Main + Gallery 1-4)
   {
     key: "rooms.deluxe-king.main",
-    label: "Deluxe King Room Card Cover",
+    label: "Deluxe King Room: Main Cover",
     section: "rooms",
-    location: "Suites Grid Card 1 (6 Rooms: 101-106)",
-    recommendedSize: "1200×800 px",
-    aspectRatio: "3:2 Landscape",
-    currentUrl: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000",
+    location: "Suites Grid Card & Modal Main View (Rooms 101-106)",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
     altText: "Deluxe King Room",
     focalPoint: "50% 50%",
     isCustomR2: false,
     isRequired: true,
   },
   {
-    key: "rooms.premier-executive.main",
-    label: "Premier Executive Suite Card Cover",
+    key: "rooms.deluxe-king.gallery-1",
+    label: "Deluxe King Room: Gallery 1",
     section: "rooms",
-    location: "Suites Grid Card 2 (3 Suites: 201-203)",
-    recommendedSize: "1200×800 px",
-    aspectRatio: "3:2 Landscape",
-    currentUrl: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000",
+    location: "View Suite Modal Thumbnail & Gallery View 2",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Deluxe King Room - View 1",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.deluxe-king.gallery-2",
+    label: "Deluxe King Room: Gallery 2",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 3",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Deluxe King Room - View 2",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.deluxe-king.gallery-3",
+    label: "Deluxe King Room: Gallery 3",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 4",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Deluxe King Room - View 3",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.deluxe-king.gallery-4",
+    label: "Deluxe King Room: Gallery 4",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 5",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Deluxe King Room - View 4",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+
+  // Premier Executive Suite (5 slots: Main + Gallery 1-4)
+  {
+    key: "rooms.premier-executive.main",
+    label: "Premier Executive Suite: Main Cover",
+    section: "rooms",
+    location: "Suites Grid Card & Modal Main View (Suites 201-203)",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
     altText: "Premier Executive Suite",
     focalPoint: "50% 50%",
     isCustomR2: false,
     isRequired: true,
   },
   {
-    key: "rooms.royal-fremont.main",
-    label: "The Royal Fremont Suite Card Cover",
+    key: "rooms.premier-executive.gallery-1",
+    label: "Premier Executive Suite: Gallery 1",
     section: "rooms",
-    location: "Suites Grid Card 3 (2 Suites: 301-302)",
-    recommendedSize: "1200×800 px",
-    aspectRatio: "3:2 Landscape",
-    currentUrl: "/assets/rooms/royal-fremont-suite.webp",
+    location: "View Suite Modal Thumbnail & Gallery View 2",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Premier Executive Suite - View 1",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.premier-executive.gallery-2",
+    label: "Premier Executive Suite: Gallery 2",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 3",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Premier Executive Suite - View 2",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.premier-executive.gallery-3",
+    label: "Premier Executive Suite: Gallery 3",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 4",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Premier Executive Suite - View 3",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.premier-executive.gallery-4",
+    label: "Premier Executive Suite: Gallery 4",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 5",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Premier Executive Suite - View 4",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+
+  // The Royal Fremont Suite (5 slots: Main + Gallery 1-4)
+  {
+    key: "rooms.royal-fremont.main",
+    label: "The Royal Fremont Suite: Main Cover",
+    section: "rooms",
+    location: "Suites Grid Card & Modal Main View (Suites 301-302)",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
     altText: "The Royal Fremont Suite",
     focalPoint: "50% 50%",
     isCustomR2: false,
     isRequired: true,
   },
   {
-    key: "rooms.presidential-penthouse.main",
-    label: "Presidential Penthouse Card Cover",
+    key: "rooms.royal-fremont.gallery-1",
+    label: "The Royal Fremont Suite: Gallery 1",
     section: "rooms",
-    location: "Suites Grid Card 4 (1 Penthouse: 401)",
-    recommendedSize: "1200×800 px",
-    aspectRatio: "3:2 Landscape",
-    currentUrl: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1000",
+    location: "View Suite Modal Thumbnail & Gallery View 2",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "The Royal Fremont Suite - View 1",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.royal-fremont.gallery-2",
+    label: "The Royal Fremont Suite: Gallery 2",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 3",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "The Royal Fremont Suite - View 2",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.royal-fremont.gallery-3",
+    label: "The Royal Fremont Suite: Gallery 3",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 4",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "The Royal Fremont Suite - View 3",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.royal-fremont.gallery-4",
+    label: "The Royal Fremont Suite: Gallery 4",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 5",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "The Royal Fremont Suite - View 4",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+
+  // Presidential Penthouse (5 slots: Main + Gallery 1-4)
+  {
+    key: "rooms.presidential-penthouse.main",
+    label: "Presidential Penthouse: Main Cover",
+    section: "rooms",
+    location: "Suites Grid Card & Modal Main View (Room 401)",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
     altText: "Presidential Penthouse",
     focalPoint: "50% 50%",
     isCustomR2: false,
     isRequired: true,
+  },
+  {
+    key: "rooms.presidential-penthouse.gallery-1",
+    label: "Presidential Penthouse: Gallery 1",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 2",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Presidential Penthouse - View 1",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.presidential-penthouse.gallery-2",
+    label: "Presidential Penthouse: Gallery 2",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 3",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Presidential Penthouse - View 2",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.presidential-penthouse.gallery-3",
+    label: "Presidential Penthouse: Gallery 3",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 4",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Presidential Penthouse - View 3",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "rooms.presidential-penthouse.gallery-4",
+    label: "Presidential Penthouse: Gallery 4",
+    section: "rooms",
+    location: "View Suite Modal Thumbnail & Gallery View 5",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Presidential Penthouse - View 4",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
   },
   {
     key: "dining.banner_primary",
@@ -255,7 +470,7 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
     location: "Dining Section full-width showcase banner",
     recommendedSize: "1920×820 px",
     aspectRatio: "21:9 Ultra-wide",
-    currentUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200",
+    currentUrl: "/assets/placeholder.svg",
     altText: "Aura Gourmet Restaurant and Lounge",
     focalPoint: "50% 50%",
     isCustomR2: false,
@@ -268,7 +483,7 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
     location: "Events Section Card 1 (Up to 600 Guests)",
     recommendedSize: "1200×825 px",
     aspectRatio: "16:11 Aspect",
-    currentUrl: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000",
+    currentUrl: "/assets/placeholder.svg",
     altText: "The Grand Fremont Ballroom",
     focalPoint: "50% 50%",
     isCustomR2: false,
@@ -281,7 +496,7 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
     location: "Events Section Card 2 (Up to 350 Guests)",
     recommendedSize: "1200×825 px",
     aspectRatio: "16:11 Aspect",
-    currentUrl: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=1000",
+    currentUrl: "/assets/placeholder.svg",
     altText: "The Fremont Terrace Lawn",
     focalPoint: "50% 50%",
     isCustomR2: false,
@@ -294,7 +509,7 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
     location: "Events Section Card 3 (Up to 35 Delegates)",
     recommendedSize: "1200×825 px",
     aspectRatio: "16:11 Aspect",
-    currentUrl: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&q=80&w=1000",
+    currentUrl: "/assets/placeholder.svg",
     altText: "The Executive Boardroom",
     focalPoint: "50% 50%",
     isCustomR2: false,
@@ -303,14 +518,14 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
 ];
 
 const INITIAL_GALLERY: GalleryItemUI[] = [
-  { id: "g1", title: "Hotel Fremont Facade at Dusk", category: "Architecture", url: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1200", displayOrder: 1, isActive: true },
-  { id: "g2", title: "Royal Fremont Suite Master Bedroom", category: "Suites", url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000", displayOrder: 2, isActive: true },
-  { id: "g3", title: "Aura Fine Dining & Cocktail Bar", category: "Dining", url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000", displayOrder: 3, isActive: true },
-  { id: "g4", title: "Grand Ballroom Wedding Setup", category: "Events", url: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000", displayOrder: 4, isActive: true },
-  { id: "g5", title: "Presidential Penthouse Living Lounge", category: "Suites", url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000", displayOrder: 5, isActive: true },
-  { id: "g6", title: "Italian Marble En-Suite Bathroom", category: "Suites", url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1000", displayOrder: 6, isActive: true },
-  { id: "g7", title: "Chef's Signature Tandoor Platter", category: "Dining", url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000", displayOrder: 7, isActive: true },
-  { id: "g8", title: "Deluxe King Room Sanctuary", category: "Suites", url: "/assets/hero/hero-room-1.webp", displayOrder: 8, isActive: true },
+  { id: "g1", title: "Hotel Fremont Facade at Dusk", category: "Architecture", url: "/assets/hero/hero-lobby.webp", displayOrder: 1, isActive: true },
+  { id: "g2", title: "The Royal Fremont Suite", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 2, isActive: true },
+  { id: "g3", title: "Aura Fine Dining & Cocktail Bar", category: "Dining", url: "/assets/placeholder.svg", displayOrder: 3, isActive: true },
+  { id: "g4", title: "Grand Fremont Ballroom", category: "Events", url: "/assets/placeholder.svg", displayOrder: 4, isActive: true },
+  { id: "g5", title: "Presidential Penthouse", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 5, isActive: true },
+  { id: "g6", title: "Premier Executive Suite", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 6, isActive: true },
+  { id: "g7", title: "The Fremont Terrace Lawn", category: "Events", url: "/assets/placeholder.svg", displayOrder: 7, isActive: true },
+  { id: "g8", title: "Deluxe King Room Sanctuary", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 8, isActive: true },
 ];
 
 const SECTIONS = [
@@ -318,7 +533,7 @@ const SECTIONS = [
   { id: "branding", label: "Branding & Logo", icon: Folder },
   { id: "hero", label: "Hero Slideshow", icon: ImageIcon },
   { id: "heritage", label: "Heritage & Story", icon: Folder },
-  { id: "rooms", label: "Rooms & Suites", icon: Folder },
+  { id: "rooms", label: "Rooms & Suites (20 Slots)", icon: Folder },
   { id: "dining", label: "Dining & Bar", icon: Folder },
   { id: "events", label: "Events & Banquets", icon: Folder },
   { id: "gallery", label: "Visual Journal Gallery", icon: Sparkles },
@@ -395,8 +610,15 @@ function mergeSlotsWithInitial(
 ): ImageSlotUI[] {
   if (!initialMap) return baseSlots;
   return baseSlots.map((slot) => {
-    const custom = initialMap[slot.key];
-    if (custom && custom.isCustom) {
+    // Resolve both direct key and dot/dash alternate keys
+    const altKey = slot.key.includes(".gallery-")
+      ? slot.key.replace(".gallery-", ".gallery.")
+      : slot.key.includes(".gallery.")
+      ? slot.key.replace(".gallery.", ".gallery-")
+      : slot.key;
+
+    const custom = initialMap[slot.key] || initialMap[altKey];
+    if (custom && custom.isCustom && custom.url && custom.url !== "/assets/placeholder.svg") {
       return {
         ...slot,
         currentUrl: custom.url,
@@ -405,7 +627,11 @@ function mergeSlotsWithInitial(
         isCustomR2: true,
       };
     }
-    return slot;
+    return {
+      ...slot,
+      currentUrl: slot.currentUrl || "/assets/placeholder.svg",
+      isCustomR2: false,
+    };
   });
 }
 
@@ -508,6 +734,8 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     setErrorBanner(null);
     setUploadProgress(10);
     setStatusMessage("Requesting presigned upload URL from Cloudflare R2...");
+    setIsProcessing(true);
+    let uploadSucceeded = false;
 
     try {
       // 1. Pre-process file
@@ -547,12 +775,17 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
-            reject(new Error(`R2 upload rejected (HTTP ${xhr.status}). Ensure R2 Bucket CORS is configured.`));
+            reject(new Error(`Upload to Cloudflare R2 failed (HTTP ${xhr.status}).`));
           }
         };
 
         xhr.onerror = () => {
-          reject(new Error("Network error during direct R2 upload. Check CORS permissions on R2 bucket."));
+          // Cloudflare R2 suppresses CORS headers on 403 errors, causing browser to trigger onerror
+          reject(
+            new Error(
+              "Storage rejected the upload (likely 403 Access Denied or signature mismatch). Check R2 API token permissions."
+            )
+          );
         };
 
         xhr.send(processed.blob);
@@ -581,6 +814,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
       setUploadProgress(100);
       setStatusMessage("Image successfully updated on Cloudflare R2!");
+      uploadSucceeded = true;
 
       // Update local state with cache-busting timestamp
       const confirmedUrl = confirmRes.publicUrl
@@ -604,8 +838,36 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
       }, 1000);
     } catch (err: unknown) {
       const error = err as Error;
-      setErrorBanner(error.message);
-      setUploadProgress(0);
+      let detailedError = error.message;
+
+      // In development mode, query server-side diagnostic helper to surface exact R2 error code
+      if (process.env.NODE_ENV !== "production") {
+        try {
+          const diagRes = await fetch("/api/admin/r2-diagnose");
+          if (diagRes.ok) {
+            const diagData = await diagRes.json();
+            const r2Code =
+              diagData.diagnostics?.presignedPutServerFetch?.extractedCode ||
+              diagData.diagnostics?.directServerPut?.code;
+            const r2Msg =
+              diagData.diagnostics?.presignedPutServerFetch?.extractedMessage ||
+              diagData.diagnostics?.directServerPut?.message;
+            if (r2Code) {
+              detailedError += `\n\n[Diagnostic Details]: Cloudflare R2 returned ${r2Code} (${r2Msg || "Access Denied"}).\nRoot cause: ${diagData.rootCause}`;
+            }
+          }
+        } catch {
+          // Ignore diagnostic fetch failure
+        }
+      }
+
+      setErrorBanner(detailedError);
+    } finally {
+      setIsProcessing(false);
+      if (!uploadSucceeded) {
+        setUploadProgress(0);
+        setStatusMessage(null);
+      }
     }
   };
 
@@ -757,8 +1019,8 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                       Cloudflare R2
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-[#A8A59E] border border-white/5">
-                      Default Asset
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 font-semibold">
+                      <AlertCircle className="w-2.5 h-2.5" /> Empty Slot
                     </span>
                   )}
                 </div>
@@ -803,10 +1065,14 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                       setPreviewBlobUrl(null);
                       setErrorBanner(null);
                     }}
-                    className="py-2 px-3 rounded-lg bg-[#E02B1D] hover:bg-[#c42215] text-white text-xs font-semibold tracking-wide transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                    className={`py-2 px-3 rounded-lg text-white text-xs font-semibold tracking-wide transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
+                      slot.isCustomR2
+                        ? "bg-[#E02B1D] hover:bg-[#c42215]"
+                        : "bg-amber-600/90 hover:bg-amber-600"
+                    }`}
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Change Image</span>
+                    <span>{slot.isCustomR2 ? "Change Image" : "Upload Image"}</span>
                   </button>
 
                   <div className="flex items-center gap-1.5">
@@ -835,10 +1101,10 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                     {slot.isCustomR2 && (
                       <button
                         onClick={() => handleRestoreDefault(slot)}
-                        className="py-2 px-2.5 rounded-lg bg-[#1E1E22] hover:bg-amber-950/40 text-amber-400 border border-white/10 text-xs transition"
-                        title="Restore factory default"
+                        className="py-2 px-2.5 rounded-lg bg-[#1E1E22] hover:bg-red-950/40 text-red-400 border border-white/10 text-xs transition"
+                        title="Remove image (Revert to empty placeholder)"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
 
@@ -1038,6 +1304,30 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                     className="h-full bg-gradient-to-r from-[#E02B1D] to-[#C9A96E] transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
+                </div>
+              </div>
+            )}
+
+            {/* Error Alert inside Modal */}
+            {errorBanner && (
+              <div className="p-3.5 bg-red-950/60 border border-red-800/80 rounded-xl text-xs text-red-200 flex flex-col gap-2">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 whitespace-pre-wrap">
+                    <p className="font-semibold text-red-300">Upload Issue Detected:</p>
+                    <p className="mt-0.5 text-red-200 text-[11px] leading-relaxed">{errorBanner}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-red-900/40">
+                  <button
+                    type="button"
+                    onClick={handleExecuteUpload}
+                    disabled={isProcessing || !selectedFile}
+                    className="px-3 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-white font-semibold text-[11px] flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isProcessing ? "animate-spin" : ""}`} />
+                    <span>Retry Upload</span>
+                  </button>
                 </div>
               </div>
             )}

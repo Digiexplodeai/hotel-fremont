@@ -115,41 +115,61 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
                 </div>
               </div>
 
-              {/* Thumbnails Row */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                {room.gallery.map((imgUrl, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImageIndex(i)}
-                    className={`relative aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all bg-[#0E0E10] ${
-                      activeImageIndex === i
-                        ? "border-[#E02B1D] ring-2 ring-[#E02B1D]/40"
-                        : "border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                  >
-                    {!failedImages[`thumb-${room.id}-${i}`] ? (
-                      <Image
-                        src={imgUrl}
-                        alt={`Thumbnail ${i + 1}`}
-                        fill
-                        className="object-cover"
-                        onError={() =>
-                          setFailedImages((prev) => ({
-                            ...prev,
-                            [`thumb-${room.id}-${i}`]: true,
-                          }))
+              {/* Thumbnails Row - Only displayed if more than 1 image exists */}
+              {room.gallery && room.gallery.length > 1 && (
+                <div
+                  className="grid gap-2 sm:gap-3"
+                  style={{
+                    gridTemplateColumns: `repeat(${Math.min(room.gallery.length, 5)}, minmax(0, 1fr))`,
+                  }}
+                  role="tablist"
+                  aria-label={`${room.title} image gallery`}
+                >
+                  {room.gallery.map((imgUrl, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      role="tab"
+                      aria-selected={activeImageIndex === i}
+                      aria-label={`${room.title} - View ${i + 1}${i === 0 ? " (Main Room Cover)" : ""}`}
+                      onClick={() => setActiveImageIndex(i)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setActiveImageIndex(i);
                         }
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center p-2 bg-[#1A1A1E]">
-                        <span className="text-[9px] uppercase tracking-wider text-[#C9A96E] font-sans">
-                          View {i + 1}
-                        </span>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
+                      }}
+                      className={`relative aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all bg-[#0E0E10] focus:outline-none focus:ring-2 focus:ring-[#C9A96E] ${
+                        activeImageIndex === i
+                          ? "border-[#E02B1D] ring-2 ring-[#E02B1D]/40"
+                          : "border-transparent opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      {!failedImages[`thumb-${room.id}-${i}`] ? (
+                        <Image
+                          src={imgUrl}
+                          alt={`${room.title} thumbnail ${i + 1}`}
+                          fill
+                          sizes="150px"
+                          className="object-cover"
+                          onError={() =>
+                            setFailedImages((prev) => ({
+                              ...prev,
+                              [`thumb-${room.id}-${i}`]: true,
+                            }))
+                          }
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center p-2 bg-[#1A1A1E]">
+                          <span className="text-[9px] uppercase tracking-wider text-[#C9A96E] font-sans">
+                            View {i + 1}
+                          </span>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Inclusions summary */}
               <div className="mt-6 p-4 rounded-xl bg-[#0E0E10]/70 border border-[#C9A96E]/20">

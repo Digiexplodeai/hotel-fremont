@@ -22,29 +22,43 @@ export const DEFAULT_SLOTS: Record<string, { url: string; altText: string; focal
 
   "about.image_primary": { url: "/assets/hero/hero-room-1.webp", altText: "Hotel Fremont Suite Sanctuary", focalPoint: "50% 50%" },
   "about.image_secondary": { url: "/assets/hero/hero-room-2.webp", altText: "Luxury Interior", focalPoint: "50% 50%" },
-  "about.image_interior": { url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=900", altText: "Architectural Interior", focalPoint: "50% 50%" },
+  "about.image_interior": { url: "/assets/hero/hero-suite.webp", altText: "Architectural Interior", focalPoint: "50% 50%" },
 
-  "rooms.deluxe-king.main": { url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000", altText: "Deluxe King Room", focalPoint: "50% 50%" },
-  "rooms.deluxe-king.gallery.1": { url: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1000", altText: "Deluxe King Room Detail", focalPoint: "50% 50%" },
-  "rooms.deluxe-king.gallery.2": { url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1000", altText: "Deluxe King Bathroom", focalPoint: "50% 50%" },
+  // Deluxe King Room (1 Main + 4 Gallery slots)
+  "rooms.deluxe-king.main": { url: "/assets/placeholder.svg", altText: "Deluxe King Room", focalPoint: "50% 50%" },
+  "rooms.deluxe-king.gallery-1": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 1", focalPoint: "50% 50%" },
+  "rooms.deluxe-king.gallery-2": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 2", focalPoint: "50% 50%" },
+  "rooms.deluxe-king.gallery-3": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 3", focalPoint: "50% 50%" },
+  "rooms.deluxe-king.gallery-4": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 4", focalPoint: "50% 50%" },
 
-  "rooms.premier-executive.main": { url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1000", altText: "Premier Executive Suite", focalPoint: "50% 50%" },
-  "rooms.premier-executive.gallery.1": { url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000", altText: "Executive Suite Living Area", focalPoint: "50% 50%" },
-  "rooms.premier-executive.gallery.2": { url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000", altText: "Executive Suite Bed View", focalPoint: "50% 50%" },
+  // Premier Executive Suite (1 Main + 4 Gallery slots)
+  "rooms.premier-executive.main": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite", focalPoint: "50% 50%" },
+  "rooms.premier-executive.gallery-1": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 1", focalPoint: "50% 50%" },
+  "rooms.premier-executive.gallery-2": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 2", focalPoint: "50% 50%" },
+  "rooms.premier-executive.gallery-3": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 3", focalPoint: "50% 50%" },
+  "rooms.premier-executive.gallery-4": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 4", focalPoint: "50% 50%" },
 
-  "rooms.royal-fremont.main": { url: "/assets/rooms/royal-fremont-suite.webp", altText: "The Royal Fremont Suite", focalPoint: "50% 50%" },
-  "rooms.royal-fremont.gallery.1": { url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=1000", altText: "Royal Fremont Alcove", focalPoint: "50% 50%" },
-  "rooms.royal-fremont.gallery.2": { url: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1000", altText: "Royal Fremont Champagne Bar", focalPoint: "50% 50%" },
+  // The Royal Fremont Suite (1 Main + 4 Gallery slots)
+  "rooms.royal-fremont.main": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite", focalPoint: "50% 50%" },
+  "rooms.royal-fremont.gallery-1": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 1", focalPoint: "50% 50%" },
+  "rooms.royal-fremont.gallery-2": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 2", focalPoint: "50% 50%" },
+  "rooms.royal-fremont.gallery-3": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 3", focalPoint: "50% 50%" },
+  "rooms.royal-fremont.gallery-4": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 4", focalPoint: "50% 50%" },
 
-  "rooms.presidential-penthouse.main": { url: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=1000", altText: "Presidential Penthouse", focalPoint: "50% 50%" },
-  "rooms.presidential-penthouse.gallery.1": { url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1000", altText: "Penthouse Terrace", focalPoint: "50% 50%" },
-  "rooms.presidential-penthouse.gallery.2": { url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1000", altText: "Penthouse Dining", focalPoint: "50% 50%" },
+  // Presidential Penthouse (1 Main + 4 Gallery slots)
+  "rooms.presidential-penthouse.main": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse", focalPoint: "50% 50%" },
+  "rooms.presidential-penthouse.gallery-1": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 1", focalPoint: "50% 50%" },
+  "rooms.presidential-penthouse.gallery-2": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 2", focalPoint: "50% 50%" },
+  "rooms.presidential-penthouse.gallery-3": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 3", focalPoint: "50% 50%" },
+  "rooms.presidential-penthouse.gallery-4": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 4", focalPoint: "50% 50%" },
 
-  "dining.banner_primary": { url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200", altText: "Aura Gourmet Restaurant and Lounge", focalPoint: "50% 50%" },
+  // Aura Dining
+  "dining.banner_primary": { url: "/assets/placeholder.svg", altText: "Aura Gourmet Restaurant and Lounge", focalPoint: "50% 50%" },
 
-  "events.venue_1": { url: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000", altText: "The Grand Fremont Ballroom", focalPoint: "50% 50%" },
-  "events.venue_2": { url: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=1000", altText: "The Fremont Terrace Lawn", focalPoint: "50% 50%" },
-  "events.venue_3": { url: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&q=80&w=1000", altText: "The Executive Boardroom", focalPoint: "50% 50%" },
+  // Banquets & Events Venues
+  "events.venue_1": { url: "/assets/placeholder.svg", altText: "The Grand Fremont Ballroom", focalPoint: "50% 50%" },
+  "events.venue_2": { url: "/assets/placeholder.svg", altText: "The Fremont Terrace Lawn", focalPoint: "50% 50%" },
+  "events.venue_3": { url: "/assets/placeholder.svg", altText: "The Executive Boardroom", focalPoint: "50% 50%" },
 };
 
 /**
@@ -95,13 +109,24 @@ export async function getImageSlotsMap(): Promise<Record<string, SlotData>> {
         const focalY = row.focal_y || "50%";
         const focalPoint = `${focalX} ${focalY}`;
 
-        map[row.slot_key] = {
+        const slotData: SlotData = {
           url: finalUrl,
           altText: row.alt_text || DEFAULT_SLOTS[row.slot_key]?.altText || "Hotel Fremont",
           focalPoint,
           isCustom: true,
           updatedAt: row.updated_at,
         };
+
+        map[row.slot_key] = slotData;
+
+        // Ensure both gallery-X and gallery.X keys resolve to the same slot
+        if (row.slot_key.includes(".gallery-")) {
+          const dotKey = row.slot_key.replace(".gallery-", ".gallery.");
+          map[dotKey] = slotData;
+        } else if (row.slot_key.includes(".gallery.")) {
+          const dashKey = row.slot_key.replace(".gallery.", ".gallery-");
+          map[dashKey] = slotData;
+        }
 
         console.log(`  -> Slot '${row.slot_key}' mapped to: ${finalUrl}`);
       }
