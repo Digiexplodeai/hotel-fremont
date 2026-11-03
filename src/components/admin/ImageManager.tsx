@@ -838,30 +838,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
       }, 1000);
     } catch (err: unknown) {
       const error = err as Error;
-      let detailedError = error.message;
-
-      // In development mode, query server-side diagnostic helper to surface exact R2 error code
-      if (process.env.NODE_ENV !== "production") {
-        try {
-          const diagRes = await fetch("/api/admin/r2-diagnose");
-          if (diagRes.ok) {
-            const diagData = await diagRes.json();
-            const r2Code =
-              diagData.diagnostics?.presignedPutServerFetch?.extractedCode ||
-              diagData.diagnostics?.directServerPut?.code;
-            const r2Msg =
-              diagData.diagnostics?.presignedPutServerFetch?.extractedMessage ||
-              diagData.diagnostics?.directServerPut?.message;
-            if (r2Code) {
-              detailedError += `\n\n[Diagnostic Details]: Cloudflare R2 returned ${r2Code} (${r2Msg || "Access Denied"}).\nRoot cause: ${diagData.rootCause}`;
-            }
-          }
-        } catch {
-          // Ignore diagnostic fetch failure
-        }
-      }
-
-      setErrorBanner(detailedError);
+      setErrorBanner(error.message);
     } finally {
       setIsProcessing(false);
       if (!uploadSucceeded) {
