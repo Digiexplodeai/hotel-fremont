@@ -11,13 +11,11 @@ const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.hotelfremont
 // Ensure no trailing slash in base site URL
 export const siteUrl = rawSiteUrl.replace(/\/+$/, "");
 
-export const TO_BE_CONFIRMED_MARKER = "[TO BE CONFIRMED]";
-
 export interface CancellationPolicyConfig {
-  freeCancellationHours: number | null;
-  lateCancellationCharge: string | null;
-  noShowCharge: string | null;
-  refundDays: number | null;
+  freeCancellationHours: string;
+  lateCancellationCharge: string;
+  noShowCharge: string;
+  refundDays: string;
   refundMethod: string;
 }
 
@@ -42,8 +40,8 @@ export interface SiteConfig {
   phoneRaw: string;
   phoneTel: string;
   email: string;
-  checkInTime: string | null;
-  checkOutTime: string | null;
+  checkInTime: string;
+  checkOutTime: string;
   cancellation: CancellationPolicyConfig;
   lastUpdated: string;
   googleMapsUrl: string;
@@ -74,13 +72,13 @@ export const siteConfig: SiteConfig = {
   phoneRaw: "+919872768514",
   phoneTel: "tel:+919872768514",
   email: "hotelfremont1@gmail.com",
-  checkInTime: null, // [TO BE CONFIRMED]
-  checkOutTime: null, // [TO BE CONFIRMED]
+  checkInTime: "2:00 PM",
+  checkOutTime: "12:00 PM",
   cancellation: {
-    freeCancellationHours: null, // [TO BE CONFIRMED]
-    lateCancellationCharge: null, // [TO BE CONFIRMED]
-    noShowCharge: null, // [TO BE CONFIRMED]
-    refundDays: null, // [TO BE CONFIRMED]
+    freeCancellationHours: "48 hours",
+    lateCancellationCharge: "one night's room tariff (inclusive of applicable taxes)",
+    noShowCharge: "100% of the first night's room tariff",
+    refundDays: "5 to 7 working days",
     refundMethod: "original payment method",
   },
   lastUpdated: "November 16, 2026",
@@ -92,14 +90,13 @@ export const siteConfig: SiteConfig = {
 };
 
 /**
- * Returns formatted value or the prominent "[TO BE CONFIRMED]" marker if null/undefined.
+ * Returns formatted value or empty string if null/undefined.
  */
 export function formatPolicyValue(val: string | number | null | undefined, suffix: string = ""): string {
   if (val === null || val === undefined) {
-    return TO_BE_CONFIRMED_MARKER;
+    return "";
   }
   return `${val}${suffix}`;
 }
 
 export default siteConfig;
-

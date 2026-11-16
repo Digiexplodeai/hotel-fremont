@@ -1222,7 +1222,7 @@ export default function RoomsManager({
                   <strong>Check-in Requirement:</strong> Valid Government-issued photo identification (Aadhaar / Passport / Driving License) is mandatory for all staying guests upon arrival.
                 </p>
                 <p>
-                  <strong>Cancellation Policy:</strong> Free cancellation up to 24 hours prior to check-in. For late cancellations or no-shows, a 1-night retention fee applies.
+                  <strong>Cancellation Policy:</strong> Free cancellation up to 48 hours prior to check-in. For late cancellations or no-shows, a 1-night retention fee applies.
                 </p>
                 <p className="text-center pt-2 font-mono text-gray-400">
                   Hotel Fremont · Authorized Guest Voucher · Generated on {new Date().toLocaleDateString("en-IN")}

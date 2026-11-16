@@ -279,7 +279,7 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
                 </button>
 
                 <p className="text-[10px] text-center text-[#A8A59E]">
-                  Guaranteed Best Rates &bull; Free Cancellation Up to 24h Before Check-In
+                  Guaranteed Best Rates &bull; Free Cancellation Up to 48 Hours Before Check-In
                 </p>
               </div>
             </div>

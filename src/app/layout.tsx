@@ -108,6 +108,8 @@ export default function RootLayout({
     email: siteConfig.email,
     priceRange: "₹₹₹₹",
     numberOfRooms: TOTAL_ROOMS, // Exactly 12 rooms & suites
+    checkinTime: "14:00",
+    checkoutTime: "12:00",
     founder: {
       "@type": "Person",
       name: siteConfig.proprietorName,

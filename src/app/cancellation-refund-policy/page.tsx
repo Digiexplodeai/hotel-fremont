@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import PolicyLayout from "@/components/PolicyLayout";
-import { siteConfig, formatPolicyValue, TO_BE_CONFIRMED_MARKER } from "@/lib/site-config";
-import Link from "next/link";
-import { RotateCcw, Clock, AlertCircle, CreditCard, Mail, Phone, CheckCircle2 } from "lucide-react";
+import { siteConfig } from "@/lib/site-config";
+import { RotateCcw, Clock, AlertCircle, CreditCard, Mail, Phone, CalendarCheck } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Cancellation & Refund Policy | Hotel Fremont",
@@ -21,24 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default function CancellationRefundPolicyPage() {
-  const { cancellation } = siteConfig;
-
-  const freeHoursDisplay = formatPolicyValue(cancellation.freeCancellationHours, " hours");
-  const lateChargeDisplay = formatPolicyValue(cancellation.lateCancellationCharge);
-  const noShowDisplay = formatPolicyValue(cancellation.noShowCharge);
-  const refundDaysDisplay = formatPolicyValue(cancellation.refundDays, " business days");
-  const refundMethodDisplay = cancellation.refundMethod;
-
-  const renderValueOrBadge = (val: string) => {
-    if (val === TO_BE_CONFIRMED_MARKER) {
-      return (
-        <span className="inline-block px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-semibold">
-          {TO_BE_CONFIRMED_MARKER}
-        </span>
-      );
-    }
-    return <span className="font-semibold text-[#F7F3EC]">{val}</span>;
-  };
+  const { cancellation, checkInTime } = siteConfig;
 
   return (
     <PolicyLayout
@@ -49,7 +31,7 @@ export default function CancellationRefundPolicyPage() {
       <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6">
         <div>
           <h2 className="text-xl font-serif font-bold text-[#F7F3EC] m-0 border-none pb-1">
-            Summary of Cancellation & Refund Terms
+            Summary of Cancellation &amp; Refund Terms
           </h2>
           <p className="text-xs sm:text-sm text-[#A8A59E] m-0">
             Applicable to all direct website bookings and reservation deposits processed for Hotel Fremont.
@@ -61,31 +43,31 @@ export default function CancellationRefundPolicyPage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E] block">
               Free Cancellation Window
             </span>
-            <div className="text-sm">{renderValueOrBadge(freeHoursDisplay)}</div>
-            <p className="text-[11px] text-[#A8A59E]">Prior to scheduled standard check-in time.</p>
+            <div className="text-sm font-semibold text-[#F7F3EC]">{cancellation.freeCancellationHours}</div>
+            <p className="text-[11px] text-[#A8A59E]">Prior to scheduled standard check-in time ({checkInTime}).</p>
           </div>
 
           <div className="bg-[#0E0E10] border border-white/5 rounded-xl p-4 space-y-1.5">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E] block">
               Late Cancellation Charge
             </span>
-            <div className="text-sm">{renderValueOrBadge(lateChargeDisplay)}</div>
-            <p className="text-[11px] text-[#A8A59E]">Applicable when cancelled past the free window.</p>
+            <div className="text-sm font-semibold text-[#F7F3EC]">{cancellation.lateCancellationCharge}</div>
+            <p className="text-[11px] text-[#A8A59E]">Applicable when cancelled less than {cancellation.freeCancellationHours} before check-in.</p>
           </div>
 
           <div className="bg-[#0E0E10] border border-white/5 rounded-xl p-4 space-y-1.5">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E] block">
               No-Show Charge
             </span>
-            <div className="text-sm">{renderValueOrBadge(noShowDisplay)}</div>
-            <p className="text-[11px] text-[#A8A59E]">When guest fails to arrive without notice.</p>
+            <div className="text-sm font-semibold text-[#F7F3EC]">{cancellation.noShowCharge}</div>
+            <p className="text-[11px] text-[#A8A59E]">When guest fails to arrive without prior notice.</p>
           </div>
 
           <div className="bg-[#0E0E10] border border-white/5 rounded-xl p-4 space-y-1.5">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E] block">
               Refund Timeline
             </span>
-            <div className="text-sm">{renderValueOrBadge(refundDaysDisplay)}</div>
+            <div className="text-sm font-semibold text-[#F7F3EC]">{cancellation.refundDays}</div>
             <p className="text-[11px] text-[#A8A59E]">From date of verified cancellation approval.</p>
           </div>
 
@@ -93,7 +75,7 @@ export default function CancellationRefundPolicyPage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E] block">
               Refund Settlement Method
             </span>
-            <div className="text-sm font-semibold text-[#F7F3EC]">{refundMethodDisplay}</div>
+            <div className="text-sm font-semibold text-[#F7F3EC]">{cancellation.refundMethod}</div>
             <p className="text-[11px] text-[#A8A59E]">Reversed back to original payment method via Razorpay.</p>
           </div>
         </div>
@@ -103,37 +85,23 @@ export default function CancellationRefundPolicyPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <Clock className="w-5 h-5 text-[#C9A96E]" />
-          <span>1. Cancellation Windows & Associated Charges</span>
+          <span>1. Cancellation Windows &amp; Associated Charges</span>
         </h2>
         <p>
-          Because Hotel Fremont maintains an exclusive sanctuary of only 12 luxury keys, late cancellations significantly impact our availability. Our cancellation rules are applied as follows:
+          Because Hotel Fremont operates an intimate boutique sanctuary of only 12 luxury keys, cancellations directly affect room availability. Our cancellation rules are applied as follows:
         </p>
         <ul className="space-y-3 list-disc pl-6 text-[#A8A59E]">
           <li>
-            <strong className="text-[#F7F3EC]">Free Cancellation:</strong> You may cancel your reservation with zero penalty if notice is received at least{" "}
-            {freeHoursDisplay === TO_BE_CONFIRMED_MARKER ? (
-              <span className="font-mono text-xs text-amber-300 font-semibold">[TO BE CONFIRMED]</span>
-            ) : (
-              freeHoursDisplay
-            )}{" "}
-            prior to scheduled check-in date and time.
+            <strong className="text-[#F7F3EC]">Free Cancellation:</strong> Cancellations made at least {cancellation.freeCancellationHours} (48 hours or more) before the scheduled check-in time ({checkInTime} on the arrival date) are eligible for a <strong>full refund of the amount paid</strong> with zero penalty.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">Late Cancellation:</strong> Cancellations submitted within less than the free cancellation window will be subject to a cancellation fee of{" "}
-            {lateChargeDisplay === TO_BE_CONFIRMED_MARKER ? (
-              <span className="font-mono text-xs text-amber-300 font-semibold">[TO BE CONFIRMED]</span>
-            ) : (
-              lateChargeDisplay
-            )}.
+            <strong className="text-[#F7F3EC]">Late Cancellation:</strong> Cancellations made less than {cancellation.freeCancellationHours} before the scheduled check-in time will incur a retention fee of <strong>{cancellation.lateCancellationCharge}</strong>, and the balance (if any) will be refunded.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">No-Show Policy:</strong> Guests who do not arrive on the scheduled check-in date without prior documented written notice will be treated as a No-Show. The room reservation will be released for re-allocation and a fee of{" "}
-            {noShowDisplay === TO_BE_CONFIRMED_MARKER ? (
-              <span className="font-mono text-xs text-amber-300 font-semibold">[TO BE CONFIRMED]</span>
-            ) : (
-              noShowDisplay
-            )}{" "}
-            will be retained.
+            <strong className="text-[#F7F3EC]">No-Show Policy:</strong> Guests who fail to arrive on the scheduled check-in date without prior documented written notice will be treated as a No-Show. In such cases, <strong>{cancellation.noShowCharge}</strong> is retained, and the remaining nights of the booking will be released for re-allocation.
+          </li>
+          <li>
+            <strong className="text-[#F7F3EC]">Early Check-Out:</strong> In the event of an early check-out or departure after arrival, no refund will be provided for unused nights unless approved in advance by hotel management.
           </li>
         </ul>
       </section>
@@ -142,7 +110,7 @@ export default function CancellationRefundPolicyPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <CreditCard className="w-5 h-5 text-[#C9A96E]" />
-          <span>2. Refund Mechanism & Payment Gateway Reversals</span>
+          <span>2. Refund Mechanism &amp; Payment Gateway Reversals</span>
         </h2>
         <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 space-y-3">
           <div className="flex items-center gap-2 text-sm font-serif font-semibold text-[#F7F3EC]">
@@ -157,16 +125,10 @@ export default function CancellationRefundPolicyPage() {
               <strong>All eligible refunds for online bookings are credited strictly back to the original source payment method</strong> (credit card, debit card, net banking account, or UPI handle) utilized at the time of reservation.
             </li>
             <li>
-              <strong>No Cash Refunds:</strong> Under no circumstances will refunds for digital online payments be remitted in cash or transferred to an alternate account.
+              <strong>No Cash Refunds:</strong> Under no circumstances will refunds for digital online payments be remitted in cash or transferred to an alternate third-party account.
             </li>
             <li>
-              <strong>Refund Timeline:</strong> Once cancellation is verified by hotel management, the refund instruction is triggered through <strong>Razorpay</strong>. The amount typically reflects in the customer&apos;s account within{" "}
-              {refundDaysDisplay === TO_BE_CONFIRMED_MARKER ? (
-                <span className="font-mono text-xs text-amber-300 font-semibold">[TO BE CONFIRMED]</span>
-              ) : (
-                refundDaysDisplay
-              )}
-              , depending on your issuing bank&apos;s settlement schedule.
+              <strong>Refund Timeline:</strong> Refunds are processed within <strong>{cancellation.refundDays}</strong> after the cancellation is verified by hotel management, credited directly to the {cancellation.refundMethod} via <strong>Razorpay</strong>, subject to your issuing bank&apos;s settlement schedule.
             </li>
           </ul>
         </div>
@@ -186,7 +148,7 @@ export default function CancellationRefundPolicyPage() {
               <span>Written Request via Email (Recommended)</span>
             </div>
             <p className="text-xs text-[#A8A59E] leading-relaxed">
-              Send an email to <a href={`mailto:${siteConfig.email}`} className="text-[#F7F3EC] underline font-medium">{siteConfig.email}</a> stating your <strong>Booking Reference Code</strong>, registered guest name, and arrival dates.
+              Send an email to <a href={`mailto:${siteConfig.email}`} className="text-[#F7F3EC] underline font-medium">{siteConfig.email}</a> stating your <strong>Booking Reference Code</strong> (e.g. <code>FRM-XXXXXX</code>), registered guest name, and arrival dates.
             </p>
           </div>
 
@@ -206,7 +168,7 @@ export default function CancellationRefundPolicyPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <AlertCircle className="w-5 h-5 text-[#C9A96E]" />
-          <span>4. Peak Dates, Banquets & Group Bookings</span>
+          <span>4. Peak Dates, Banquets &amp; Group Bookings</span>
         </h2>
         <p>
           Reservations booked under non-refundable promotional tariffs, wedding banquet venue agreements (Grand Fremont Ballroom or Fremont Lawn), or peak holiday periods (such as New Year Eve celebrations) may be subject to specialized contractual cancellation terms indicated on your booking agreement. In the event of a conflict, terms in your signed event contract supersede general website policies.
@@ -215,4 +177,3 @@ export default function CancellationRefundPolicyPage() {
     </PolicyLayout>
   );
 }
-

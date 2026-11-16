@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PolicyLayout from "@/components/PolicyLayout";
-import { siteConfig, formatPolicyValue, TO_BE_CONFIRMED_MARKER } from "@/lib/site-config";
+import { siteConfig } from "@/lib/site-config";
 import Link from "next/link";
 import { Scale, Clock, ShieldAlert, CreditCard, Building, AlertTriangle, FileCheck } from "lucide-react";
 
@@ -21,9 +21,6 @@ export const metadata: Metadata = {
 };
 
 export default function TermsAndConditionsPage() {
-  const checkInDisplay = formatPolicyValue(siteConfig.checkInTime);
-  const checkOutDisplay = formatPolicyValue(siteConfig.checkOutTime);
-
   return (
     <PolicyLayout
       title="Terms and Conditions"
@@ -43,7 +40,7 @@ export default function TermsAndConditionsPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <FileCheck className="w-5 h-5 text-[#C9A96E]" />
-          <span>1. Booking & Confirmation Process</span>
+          <span>1. Booking, Confirmation &amp; Cancellation Rules</span>
         </h2>
         <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
@@ -51,6 +48,9 @@ export default function TermsAndConditionsPage() {
           </li>
           <li>
             <strong className="text-[#F7F3EC]">Binding Confirmation:</strong> A reservation is considered confirmed only after the required advance payment or authorization has been successfully validated and an official booking confirmation voucher containing a unique reference code (e.g. <code>FRM-XXXXXX</code>) is issued via email or WhatsApp.
+          </li>
+          <li>
+            <strong className="text-[#F7F3EC]">Cancellation &amp; Refund Rules:</strong> All cancellations, no-shows, and refunds are governed strictly by our <Link href="/cancellation-refund-policy" className="text-[#C9A96E] underline hover:text-white transition-colors">Cancellation &amp; Refund Policy</Link>. Notice provided at least {siteConfig.cancellation.freeCancellationHours} before check-in qualifies for a full refund. Cancellations made less than {siteConfig.cancellation.freeCancellationHours} prior to check-in retain {siteConfig.cancellation.lateCancellationCharge}. No-shows retain {siteConfig.cancellation.noShowCharge}, and early departures are non-refundable for unused nights unless approved by management.
           </li>
           <li>
             <strong className="text-[#F7F3EC]">Guest Occupancy Limits:</strong> Each suite category maintains strict maximum guest occupancy limits to guarantee fire safety and refined comfort. Exceeding designated room capacity without prior written concierge approval is strictly prohibited.
@@ -62,7 +62,7 @@ export default function TermsAndConditionsPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <CreditCard className="w-5 h-5 text-[#C9A96E]" />
-          <span>2. Tariff, Currency & Goods and Services Tax (GST)</span>
+          <span>2. Tariff, Currency &amp; Goods and Services Tax (GST)</span>
         </h2>
         <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
@@ -81,7 +81,7 @@ export default function TermsAndConditionsPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <Clock className="w-5 h-5 text-[#C9A96E]" />
-          <span>3. Check-In & Check-Out Schedule</span>
+          <span>3. Check-In &amp; Check-Out Schedule</span>
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-[#151518] border border-white/10 rounded-xl p-5 space-y-2">
@@ -89,13 +89,7 @@ export default function TermsAndConditionsPage() {
               Standard Check-In
             </span>
             <div className="text-lg font-serif font-bold text-[#F7F3EC]">
-              {checkInDisplay === TO_BE_CONFIRMED_MARKER ? (
-                <span className="inline-block px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs">
-                  {TO_BE_CONFIRMED_MARKER}
-                </span>
-              ) : (
-                checkInDisplay
-              )}
+              {siteConfig.checkInTime}
             </div>
             <p className="text-xs text-[#A8A59E]">
               Early arrival is subject to availability upon request. Guaranteed early check-in before standard hours may incur a supplemental day tariff.
@@ -107,13 +101,7 @@ export default function TermsAndConditionsPage() {
               Standard Check-Out
             </span>
             <div className="text-lg font-serif font-bold text-[#F7F3EC]">
-              {checkOutDisplay === TO_BE_CONFIRMED_MARKER ? (
-                <span className="inline-block px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs">
-                  {TO_BE_CONFIRMED_MARKER}
-                </span>
-              ) : (
-                checkOutDisplay
-              )}
+              {siteConfig.checkOutTime}
             </div>
             <p className="text-xs text-[#A8A59E]">
               Late check-out requires prior management clearance. Unauthorized late departures will incur additional half-day or full-day charges.
@@ -153,7 +141,7 @@ export default function TermsAndConditionsPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <AlertTriangle className="w-5 h-5 text-[#C9A96E]" />
-          <span>5. Guest Conduct, Decorum & Property Damages</span>
+          <span>5. Guest Conduct, Decorum &amp; Property Damages</span>
         </h2>
         <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
@@ -202,7 +190,7 @@ export default function TermsAndConditionsPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <Scale className="w-5 h-5 text-[#C9A96E]" />
-          <span>8. Governing Law & Exclusive Jurisdiction</span>
+          <span>8. Governing Law &amp; Exclusive Jurisdiction</span>
         </h2>
         <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 text-sm text-[#A8A59E] leading-relaxed">
           These Terms and Conditions, all reservations, and any dispute or controversy arising out of or related to your relationship with Hotel Fremont shall be governed by, interpreted, and construed strictly in accordance with the substantive <strong>laws of the Republic of India</strong>.
@@ -218,7 +206,7 @@ export default function TermsAndConditionsPage() {
           <Building className="w-5 h-5 text-[#C9A96E]" />
           <span>9. Official Contact Information</span>
         </h2>
-        <p>For any queries regarding these Terms & Conditions, please contact:</p>
+        <p>For any queries regarding these Terms &amp; Conditions, please contact:</p>
         <div className="bg-[#151518] border border-white/10 rounded-xl p-5 text-xs sm:text-sm space-y-1.5 text-[#A8A59E]">
           <p className="text-[#F7F3EC] font-semibold">{siteConfig.siteName}</p>
           <p>Proprietor: {siteConfig.proprietorName}</p>
@@ -230,4 +218,3 @@ export default function TermsAndConditionsPage() {
     </PolicyLayout>
   );
 }
-
