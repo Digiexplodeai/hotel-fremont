@@ -28,7 +28,7 @@ export default function EventsSection() {
   };
 
   return (
-    <section id="events" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">
+    <section id="events" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Subtle Ambient Red Glow */}
       <div className="absolute top-1/2 right-0 w-96 h-96 bg-[#E02B1D]/5 rounded-full blur-3xl pointer-events-none" />
 

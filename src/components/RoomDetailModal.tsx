@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, BedDouble, Maximize2, Users, Eye, Calendar, Sparkles } from "lucide-react";
 import { RoomCategory } from "@/data/rooms";
+import { lockScroll, unlockScroll } from "@/lib/scroll";
 
 export type RoomType = RoomCategory;
 
@@ -30,11 +31,13 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
     };
     if (room) {
       window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      lockScroll();
+    } else {
+      unlockScroll();
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      unlockScroll();
     };
   }, [room, onClose]);
 
@@ -42,7 +45,7 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         {/* Backdrop with blur & light-dismiss */}
         <motion.div
           initial={{ opacity: 0 }}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Phone, Mail, MapPin, ArrowUp } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { useSiteSlots } from "@/context/SiteSlotsContext";
+import { navigateToSection } from "@/lib/scroll";
 
 function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -56,11 +57,28 @@ export default function Footer() {
   const logoUrl = slots["branding.logo"]?.url || "/assets/logo.png";
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const lenis = typeof window !== "undefined" ? (window as any).__lenis : null;
+    if (lenis && typeof lenis.scrollTo === "function") {
+      lenis.scrollTo(0, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleQuickLink = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href === "#" || href === "/#") {
+      e.preventDefault();
+      scrollToTop();
+      return;
+    }
+    if (href.includes("#")) {
+      e.preventDefault();
+      navigateToSection(href);
+    }
   };
 
   return (
-    <footer id="contact" className="relative bg-[#09090B] text-[#F7F3EC] border-t border-white/10 pt-20 pb-28 sm:pb-16 overflow-hidden">
+    <footer id="contact" className="relative bg-[#09090B] text-[#F7F3EC] border-t border-white/10 pt-20 pb-28 sm:pb-16 overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Background Accent */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#C9A96E]/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -113,6 +131,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
+                    onClick={(e) => handleQuickLink(e, link.href)}
                     className="text-xs text-[#A8A59E] hover:text-[#E02B1D] transition-colors link-underline inline-block font-sans"
                   >
                     {link.label}

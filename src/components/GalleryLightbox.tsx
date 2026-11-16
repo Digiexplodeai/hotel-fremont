@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { lockScroll, unlockScroll } from "@/lib/scroll";
 
 export interface GalleryItem {
   id: number;
@@ -37,12 +38,14 @@ export default function GalleryLightbox({
 
     if (currentIndex !== null) {
       window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      lockScroll();
+    } else {
+      unlockScroll();
     }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      unlockScroll();
     };
   }, [currentIndex, onClose, onNext, onPrev]);
 
@@ -52,7 +55,7 @@ export default function GalleryLightbox({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
         {/* Dark Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}

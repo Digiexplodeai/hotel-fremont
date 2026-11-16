@@ -8,7 +8,7 @@ export default function LocationSection() {
   const { location, contact } = siteConfig;
 
   return (
-    <section id="location" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">
+    <section id="location" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Subtle Background Lighting */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#E02B1D]/5 rounded-full blur-[140px] pointer-events-none" />
 

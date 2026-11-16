@@ -14,7 +14,7 @@ export default function AboutIntro() {
   const secondaryImage = slots["about.image_secondary"]?.url || about.imageSecondary;
 
   return (
-    <section id="about" className="relative py-20 lg:py-28 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">
+    <section id="about" className="relative py-20 lg:py-28 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Background Lighting */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-[#C9A96E]/5 rounded-full blur-3xl pointer-events-none" />
 

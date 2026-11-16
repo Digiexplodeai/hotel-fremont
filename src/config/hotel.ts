@@ -26,7 +26,7 @@ export const HOTEL_CONFIG = {
   gstRate: 0.18, // 18% Luxury Hotel GST (editable)
   gstPercentageLabel: "18%",
   maxStayNights: 30,
-  maxRoomsPerBooking: 3,
+  maxRoomsPerBooking: 12,
   totalHotelKeys: 12,
   currencySymbol: "₹",
   refCodePrefix: "FRM-",

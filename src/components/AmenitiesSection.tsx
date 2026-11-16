@@ -29,7 +29,7 @@ export default function AmenitiesSection() {
   const { amenities } = siteConfig;
 
   return (
-    <section id="amenities" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">
+    <section id="amenities" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Background radial gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#C9A96E]/5 rounded-full blur-[160px] pointer-events-none" />
 

@@ -20,6 +20,7 @@ import {
 import { HOTEL_CONFIG, RoomTypeConfig, DEFAULT_ROOM_TYPES, validateIndianPhone, formatINR } from "@/config/hotel";
 import { submitReservationAction } from "@/actions/reservations";
 import { getRoomTypesAction, getRoomAvailabilityAction, RoomAvailabilityResult } from "@/actions/roomTypes";
+import { lockScroll, unlockScroll } from "@/lib/scroll";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -143,13 +144,15 @@ export default function BookingModal({
     };
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      lockScroll();
       setIsSubmitted(false);
       setErrorMessage(null);
+    } else {
+      unlockScroll();
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      unlockScroll();
     };
   }, [isOpen, onClose]);
 
@@ -172,15 +175,17 @@ export default function BookingModal({
     });
   }, [availability, roomTypes]);
 
-  // Max rooms guest can select (up to rooms_left, max 3)
-  const maxRoomsAllowed = Math.min(Math.max(1, roomsLeft), HOTEL_CONFIG.maxRoomsPerBooking);
+  // Max rooms guest can select (dynamically driven by actual rooms left in category)
+  const maxRoomsAllowed = Math.max(0, roomsLeft);
 
-  // Ensure roomsRequested does not exceed maxRoomsAllowed
+  // Automatically adjust existing room selection if availability decreases
   useEffect(() => {
-    if (roomsRequested > maxRoomsAllowed) {
-      setRoomsRequested(maxRoomsAllowed);
+    if (roomsLeft > 0 && roomsRequested > roomsLeft) {
+      setRoomsRequested(roomsLeft);
+    } else if (roomsLeft <= 0 && roomsRequested !== 1) {
+      setRoomsRequested(1);
     }
-  }, [maxRoomsAllowed, roomsRequested]);
+  }, [roomsLeft, roomsRequested]);
 
   // Clamp guests whenever activeRoom changes
   useEffect(() => {
@@ -312,7 +317,7 @@ export default function BookingModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         {/* Backdrop with blur & dismiss */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -521,15 +526,21 @@ export default function BookingModal({
                     </label>
                     <select
                       value={roomsRequested}
-                      disabled={isCurrentRoomSoldOut}
+                      disabled={isCurrentRoomSoldOut || maxRoomsAllowed <= 0}
                       onChange={(e) => setRoomsRequested(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none disabled:opacity-50"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none disabled:opacity-50 cursor-pointer"
                     >
-                      {Array.from({ length: Math.max(1, maxRoomsAllowed) }, (_, i) => i + 1).map((n) => (
-                        <option key={n} value={n}>
-                          {n} {n === 1 ? "Room" : "Rooms"}
+                      {maxRoomsAllowed > 0 ? (
+                        Array.from({ length: maxRoomsAllowed }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n}>
+                            {n} {n === 1 ? "Room" : "Rooms"}
+                          </option>
+                        ))
+                      ) : (
+                        <option value={1} disabled>
+                          0 Rooms Available (Sold Out)
                         </option>
-                      ))}
+                      )}
                     </select>
                   </div>
 

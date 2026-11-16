@@ -41,7 +41,7 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
   });
 
   return (
-    <section id="rooms" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden">
+    <section id="rooms" className="relative py-24 lg:py-32 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Decorative Gold & Red Lighting Gradients */}
       <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#C9A96E]/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-10 left-0 w-[500px] h-[500px] bg-[#E02B1D]/5 rounded-full blur-[120px] pointer-events-none" />

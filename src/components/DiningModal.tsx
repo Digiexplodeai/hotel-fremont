@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Clock, Users, Utensils, CheckCircle2, Phone, Sparkles } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { submitPublicEnquiryAction } from "@/actions/enquiries";
+import { lockScroll, unlockScroll } from "@/lib/scroll";
 
 interface DiningModalProps {
   isOpen: boolean;
@@ -33,13 +34,15 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
     };
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      lockScroll();
       setIsSubmitted(false);
       setErrorMessage(null);
+    } else {
+      unlockScroll();
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      unlockScroll();
     };
   }, [isOpen, onClose]);
 
@@ -102,7 +105,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         {/* Backdrop with blur & light dismiss */}
         <motion.div
           initial={{ opacity: 0 }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Preloader from "@/components/Preloader";
 import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
@@ -19,7 +19,31 @@ import Footer from "@/components/Footer";
 import FloatingMobileActions from "@/components/FloatingMobileActions";
 import BookingModal from "@/components/BookingModal";
 
-import { IntroProvider } from "@/context/IntroContext";
+import { IntroProvider, useIntro } from "@/context/IntroContext";
+import { scrollToSection } from "@/lib/scroll";
+
+/**
+ * Handles automatic scrolling to section hashes (e.g. /#rooms, /#dining)
+ * once the intro sequence is complete or on direct navigation.
+ */
+function HashScrollHandler() {
+  const { isIntroDone } = useIntro();
+
+  useEffect(() => {
+    if (!isIntroDone || typeof window === "undefined") return;
+
+    if (window.location.hash) {
+      const hash = window.location.hash;
+      // Slight delay for Lenis, layout calculations and font settling
+      const timer = setTimeout(() => {
+        scrollToSection(hash);
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [isIntroDone]);
+
+  return null;
+}
 
 export default function HomeClient() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -55,6 +79,7 @@ export default function HomeClient() {
       <SmoothScroll>
         <Preloader />
         <CustomCursor />
+        <HashScrollHandler />
 
         {/* Main Page Layout */}
         <div className="relative min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col selection:bg-[#E02B1D] selection:text-white">
@@ -66,8 +91,7 @@ export default function HomeClient() {
             <Hero
               onCheckAvailability={(data) => handleOpenBooking(data)}
               onExploreSuites={() => {
-                const roomsEl = document.getElementById("rooms");
-                roomsEl?.scrollIntoView({ behavior: "smooth" });
+                scrollToSection("rooms");
               }}
             />
 

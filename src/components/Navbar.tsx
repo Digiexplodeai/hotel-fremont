@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Calendar, ArrowRight, MapPin } from "lucide-react";
+import { Phone, Calendar, ArrowRight, MapPin, X } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { useIntro } from "@/context/IntroContext";
 import { useSiteSlots } from "@/context/SiteSlotsContext";
+import { extractTargetId, navigateToSection, lockScroll, unlockScroll } from "@/lib/scroll";
 
 interface NavbarProps {
   onOpenBooking: () => void;
@@ -93,9 +94,9 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
   // Body scroll lock while mobile menu is open & close on Escape key
   useEffect(() => {
     if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
+      lockScroll();
     } else {
-      document.body.style.overflow = "unset";
+      unlockScroll();
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -106,31 +107,19 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = "unset";
+      unlockScroll();
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [mobileMenuOpen]);
 
-  // Smooth scroll using Lenis or native fallback
+  // Smooth scroll using centralized navigateToSection
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    const targetId = href.replace("#", "");
-    const targetEl = document.getElementById(targetId);
-    if (!targetEl) return;
-
-    const headerHeight = isScrolled ? 64 : 80;
-    const lenis = (typeof window !== "undefined" ? (window as any).__lenis : null);
-
-    if (lenis) {
-      lenis.scrollTo(targetEl, { offset: -headerHeight, duration: 1.2 });
-    } else {
-      const top = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
-
-    if (mobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
+    navigateToSection(href, () => {
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    });
   };
 
   const navLinks = siteConfig.navLinks;
@@ -158,7 +147,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             isScrolled ? "h-16" : "h-20"
           }`}
         >
-          {/* Column 1: Left Logo Wrapper with reserved width (w-[170px] lg:w-[190px] xl:w-[200px] 2xl:w-[220px]) */}
+          {/* Column 1: Left Logo Wrapper with reserved width */}
           <div className="w-[170px] lg:w-[190px] xl:w-[200px] 2xl:w-[220px] shrink-0 flex items-center justify-start">
             <Link
               href="/"
@@ -182,7 +171,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
           {/* Column 2: Centre Nav Links - Always centered with generous breathing room */}
           <nav className="hidden lg:flex items-center justify-center gap-4 xl:gap-5.5 2xl:gap-8 whitespace-nowrap text-[11px] xl:text-[12px] tracking-[0.16em] xl:tracking-[0.18em] uppercase font-medium px-2">
             {navLinks.map((item) => {
-              const targetId = item.href.replace("#", "");
+              const targetId = extractTargetId(item.href);
               const isActive = activeSection === targetId;
 
               return (
@@ -196,7 +185,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
                 >
                   <span>{item.label}</span>
 
-                  {/* Underline on hover (draws left to right) */}
+                  {/* Underline on hover or active (draws left to right) */}
                   <span
                     className={`absolute bottom-0 left-0 w-full h-[2px] bg-[#E02B1D] origin-left transition-transform duration-300 ease-out pointer-events-none ${
                       isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
@@ -241,8 +230,9 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
               {/* Animated Hamburger Icon */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="w-10 h-10 flex flex-col items-center justify-center space-y-1.5 text-[#F7F3EC] focus:outline-none cursor-pointer"
+                className="w-11 h-11 flex flex-col items-center justify-center space-y-1.5 text-[#F7F3EC] focus:outline-none cursor-pointer"
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileMenuOpen}
               >
                 <span
                   className={`w-6 h-[2px] bg-current transform transition-all duration-300 ${
@@ -265,7 +255,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
         </div>
       </header>
 
-      {/* Fullscreen Mobile Navigation Overlay (z-[60]) */}
+      {/* Fullscreen Mobile Navigation Overlay (z-[70]) */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -274,34 +264,72 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[60] bg-[#0E0E10]/98 backdrop-blur-2xl flex flex-col justify-between pt-24 pb-8 px-6 lg:hidden"
+            className="fixed inset-0 z-[70] bg-[#0E0E10]/98 backdrop-blur-2xl flex flex-col justify-between pt-6 pb-8 px-6 lg:hidden overflow-y-auto"
           >
-            <div className="flex flex-col space-y-4 my-auto">
+            {/* Top Bar with Logo & Prominent Touch-Friendly Close (X) Button */}
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center p-1 focus:outline-none"
+                aria-label="Hotel Fremont Home"
+              >
+                <Image
+                  src={logoUrl}
+                  alt="Hotel Fremont"
+                  width={280}
+                  height={28}
+                  style={{ width: "auto" }}
+                  className="h-8 sm:h-9 object-contain object-left block"
+                />
+              </Link>
+
+              {/* Large, High-Contrast 48x48px Tap Target Close Button */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#151518] hover:bg-[#E02B1D] text-[#F7F3EC] border border-white/20 hover:border-[#E02B1D] transition-all duration-200 flex items-center justify-center cursor-pointer shadow-lg active:scale-95 shrink-0 focus:outline-none focus:ring-2 focus:ring-[#E02B1D]"
+                aria-label="Close navigation menu"
+                title="Close navigation menu"
+              >
+                <X className="w-5 h-5 sm:w-6 sm:h-6 text-[#F7F3EC]" />
+              </button>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="flex flex-col space-y-3 my-auto py-6">
               <span className="text-[11px] font-sans tracking-[0.3em] text-[#C9A96E] uppercase font-semibold">
                 Hotel Fremont Navigation
               </span>
 
-              {navLinks.map((item, index) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 + index * 0.05, duration: 0.35 }}
-                >
-                  <a
-                    href={item.href}
-                    onClick={(e) => handleNavClick(e, item.href)}
-                    className="flex items-center justify-between text-2xl font-serif tracking-wider text-[#F7F3EC] hover:text-[#E02B1D] py-2.5 border-b border-white/5 transition-colors"
+              {navLinks.map((item, index) => {
+                const targetId = extractTargetId(item.href);
+                const isActive = activeSection === targetId;
+
+                return (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.05 + index * 0.04, duration: 0.3 }}
                   >
-                    <span>{item.label}</span>
-                    <ArrowRight className="w-4 h-4 text-[#C9A96E] opacity-60" />
-                  </a>
-                </motion.div>
-              ))}
+                    <a
+                      href={item.href}
+                      onClick={(e) => handleNavClick(e, item.href)}
+                      className={`flex items-center justify-between text-2xl sm:text-3xl font-serif tracking-wider py-3 border-b border-white/5 transition-colors cursor-pointer ${
+                        isActive ? "text-[#E02B1D]" : "text-[#F7F3EC] hover:text-[#E02B1D]"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ArrowRight className={`w-5 h-5 transition-transform ${isActive ? "text-[#E02B1D] translate-x-1" : "text-[#C9A96E] opacity-60"}`} />
+                    </a>
+                  </motion.div>
+                );
+              })}
             </div>
 
             {/* Mobile Footer CTAs */}
-            <div className="pt-6 border-t border-white/10 space-y-4">
+            <div className="pt-4 border-t border-white/10 space-y-4 shrink-0">
               <div className="flex items-center space-x-2 text-xs text-[#C9A96E]">
                 <MapPin className="w-3.5 h-3.5 text-[#E02B1D] shrink-0" />
                 <span>{siteConfig.contact.address}</span>

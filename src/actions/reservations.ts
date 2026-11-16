@@ -122,8 +122,8 @@ export async function submitReservationAction(input: SubmitReservationInput): Pr
     }
 
     const roomsRequested = Number(input.roomsRequested) || 1;
-    if (roomsRequested < 1 || roomsRequested > HOTEL_CONFIG.maxRoomsPerBooking) {
-      return { success: false, error: `You can book between 1 and ${HOTEL_CONFIG.maxRoomsPerBooking} rooms per reservation.` };
+    if (roomsRequested < 1 || roomsRequested > HOTEL_CONFIG.totalHotelKeys) {
+      return { success: false, error: `You can book between 1 and ${HOTEL_CONFIG.totalHotelKeys} rooms per reservation.` };
     }
 
     const guests = Number(input.guests);
@@ -184,30 +184,90 @@ export async function submitReservationAction(input: SubmitReservationInput): Pr
         return { success: false, error: "Check-out date must be strictly after check-in." };
       }
 
-      // If RPC doesn't exist yet (e.g. migration pending), attempt safe direct fallback insert
-      if (msg.includes("function") && msg.includes("does not exist")) {
-        console.warn("[Reservation] create_reservation RPC missing. Falling back to direct insert.");
-        const fallbackRoom = DEFAULT_ROOM_TYPES.find((r) => r.code === roomTypeCode) || DEFAULT_ROOM_TYPES[0];
-        const subtotal = diffNights * fallbackRoom.pricePerNight * roomsRequested;
-        const total = Math.round(subtotal * 1.18);
+      // If RPC doesn't exist or returns legacy 3-room constraint error, complete using verified server-side fallback
+      if (
+        msg.includes("INVALID_ROOMS") ||
+        (msg.includes("function") && msg.includes("does not exist"))
+      ) {
+        console.warn("[Reservation] Using server-side verified fallback for reservation creation:", msg);
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const dbClient = serviceKey ? createSupabaseClient(supabaseUrl, serviceKey) : client;
+
+        // Fetch room type info
+        const { data: rtRows } = await dbClient
+          .from("room_types")
+          .select("*")
+          .eq("code", roomTypeCode)
+          .eq("is_active", true)
+          .limit(1);
+
+        const roomInfo = (rtRows && rtRows.length > 0)
+          ? {
+              code: rtRows[0].code,
+              name: rtRows[0].name,
+              pricePerNight: Number(rtRows[0].price_per_night),
+              totalRooms: Number(rtRows[0].total_rooms),
+              maxGuests: Number(rtRows[0].max_guests),
+            }
+          : DEFAULT_ROOM_TYPES.find((r) => r.code === roomTypeCode) || DEFAULT_ROOM_TYPES[0];
+
+        // Validate guest capacity
+        if (guests > roomInfo.maxGuests * roomsRequested) {
+          return {
+            success: false,
+            error: `${roomInfo.name} accommodates up to ${roomInfo.maxGuests * roomsRequested} guests across ${roomsRequested} room(s).`,
+          };
+        }
+
+        // Validate real inventory availability
+        const { data: availData } = await dbClient.rpc("get_room_availability", {
+          p_check_in: input.checkIn,
+          p_check_out: input.checkOut,
+        });
+
+        if (availData && Array.isArray(availData)) {
+          const matchAvail = availData.find((a: any) => a.code === roomTypeCode);
+          if (matchAvail && matchAvail.rooms_left < roomsRequested) {
+            return {
+              success: false,
+              error: `${roomInfo.name} has only ${matchAvail.rooms_left} room(s) available for your selected dates (${roomsRequested} requested).`,
+            };
+          }
+        }
+
+        const subtotal = diffNights * roomInfo.pricePerNight * roomsRequested;
+        const gst = Math.round(subtotal * HOTEL_CONFIG.gstRate);
+        const total = subtotal + gst;
         const refCode = `FRM-${Math.floor(100000 + Math.random() * 900000)}`;
 
-        const { error: insertErr } = await client.from("reservations").insert({
+        const { error: insertErr } = await dbClient.from("reservations").insert({
           check_in: input.checkIn,
           check_out: input.checkOut,
-          room_type: fallbackRoom.name,
+          room_type: roomInfo.name,
+          room_type_code: roomInfo.code,
           guests,
+          rooms_requested: roomsRequested,
+          nights: diffNights,
           full_name: fullName,
           phone: phoneCheck.cleanPhone,
-          email,
+          email: email || null,
           special_request: specialRequest,
           estimated_total: total,
+          reference_code: refCode,
           status: "new",
+          channel: "room_reservation",
         });
 
         if (insertErr) {
+          console.error("[Reservation] Direct insert error:", insertErr.message);
           return { success: false, error: insertErr.message };
         }
+
+        try {
+          revalidatePath("/admin");
+          revalidatePath("/admin/rooms");
+          revalidatePath("/admin/enquiries");
+        } catch {}
 
         return {
           success: true,
