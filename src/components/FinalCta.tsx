@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Calendar, Phone, Sparkles, ShieldCheck } from "lucide-react";
 import { siteConfig } from "@/data/content";
 
@@ -86,7 +87,12 @@ export default function FinalCta({ onOpenBooking }: FinalCtaProps) {
           <span className="text-white/20">&bull;</span>
           <div className="flex items-center space-x-1.5">
             <ShieldCheck className="w-4 h-4 text-[#C9A96E]" />
-            <span>Instant Confirmation & Flexible Cancellation</span>
+            <span>
+              Instant Confirmation | Cancellation as per{" "}
+              <Link href="/cancellation-refund-policy" className="underline hover:text-white transition-colors">
+                policy
+              </Link>
+            </span>
           </div>
         </div>
       </div>

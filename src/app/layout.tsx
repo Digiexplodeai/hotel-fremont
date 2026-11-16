@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Manrope } from "next/font/google";
 import "./globals.css";
-import { siteConfig } from "@/data/content";
+import { siteConfig as contentConfig } from "@/data/content";
 import { TOTAL_ROOMS, HOTEL_REPUTATION } from "@/data/rooms";
 import { CONTACT } from "@/data/contact";
+import { siteConfig } from "@/lib/site-config";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -46,21 +47,21 @@ export const metadata: Metadata = {
   authors: [{ name: "Hotel Fremont Hospitality" }],
   creator: "Hotel Fremont",
   publisher: "Hotel Fremont",
-  metadataBase: new URL("https://hotelfremont.com"),
+  metadataBase: new URL(siteConfig.siteUrl),
   alternates: {
-    canonical: "/",
+    canonical: siteConfig.siteUrl,
   },
   openGraph: {
     title: "Hotel Fremont | Luxury Boutique Hotel near Airport Road, Mohali",
     description:
       "Stay Beyond Ordinary. An intimate 12-key 5-star boutique hotel in Mohali, Punjab, minutes from Chandigarh Airport. 12 luxury rooms and suites, fine dining, and banquet venues.",
-    url: "https://hotelfremont.com",
-    siteName: "Hotel Fremont",
+    url: siteConfig.siteUrl,
+    siteName: siteConfig.siteName,
     locale: "en_IN",
     type: "website",
     images: [
       {
-        url: "/assets/logo.png",
+        url: `${siteConfig.siteUrl}/assets/logo.png`,
         width: 1200,
         height: 630,
         alt: "Hotel Fremont",
@@ -72,7 +73,7 @@ export const metadata: Metadata = {
     title: "Hotel Fremont | Luxury Hotel near Airport Road, Mohali",
     description:
       "Stay Beyond Ordinary at Hotel Fremont, Sector 80, Airport Road, Mohali. 12 bespoke rooms & suites, 10 mins from Chandigarh Airport.",
-    images: ["/assets/logo.png"],
+    images: [`${siteConfig.siteUrl}/assets/logo.png`],
   },
   icons: {
     icon: [
@@ -96,17 +97,21 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Hotel",
-    name: siteConfig.brand.name,
-    legalName: siteConfig.brand.legalName,
-    alternateName: siteConfig.brand.logoWordmark,
-    description: siteConfig.brand.shortDescription,
-    image: "https://hotelfremont.com/assets/logo.png",
-    logo: "https://hotelfremont.com/assets/logo.png",
-    url: "https://hotelfremont.com",
-    telephone: CONTACT.phoneRaw, // +919872768514
-    email: siteConfig.contact.email,
+    name: siteConfig.siteName,
+    legalName: contentConfig.brand.legalName,
+    alternateName: contentConfig.brand.logoWordmark,
+    description: contentConfig.brand.shortDescription,
+    image: `${siteConfig.siteUrl}/assets/logo.png`,
+    logo: `${siteConfig.siteUrl}/assets/logo.png`,
+    url: siteConfig.siteUrl,
+    telephone: siteConfig.phoneRaw, // +919872768514
+    email: siteConfig.email,
     priceRange: "₹₹₹₹",
     numberOfRooms: TOTAL_ROOMS, // Exactly 12 rooms & suites
+    founder: {
+      "@type": "Person",
+      name: siteConfig.proprietorName,
+    },
     starRating: {
       "@type": "Rating",
       ratingValue: "5",
@@ -119,7 +124,7 @@ export default function RootLayout({
     },
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Airport Road, Sector 80",
+      streetAddress: "Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road",
       addressLocality: "SAS Nagar, Mohali",
       addressRegion: "Punjab",
       postalCode: "140308",
@@ -146,7 +151,7 @@ export default function RootLayout({
         closes: "23:59",
       },
     ],
-    amenityFeature: siteConfig.amenities.map((a) => ({
+    amenityFeature: contentConfig.amenities.map((a: any) => ({
       "@type": "LocationFeatureSpecification",
       name: a.title,
       value: true,

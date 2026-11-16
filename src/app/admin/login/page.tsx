@@ -87,7 +87,7 @@ function LoginForm() {
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@hotelfremont.com"
+                placeholder="hotelfremont1@gmail.com"
                 className="w-full bg-[#0E0E10] border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white placeholder-[#A8A59E]/40 focus:outline-none focus:border-[#E02B1D] transition"
                 required
                 autoFocus

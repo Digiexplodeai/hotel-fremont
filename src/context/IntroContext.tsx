@@ -14,11 +14,21 @@ const IntroContext = createContext<IntroContextType>({
   completeIntro: () => {},
 });
 
-export function IntroProvider({ children }: { children: React.ReactNode }) {
-  const [isIntroActive, setIsIntroActive] = useState(true);
-  const [isIntroDone, setIsIntroDone] = useState(false);
+export function IntroProvider({
+  children,
+  skipIntro = false,
+}: {
+  children: React.ReactNode;
+  skipIntro?: boolean;
+}) {
+  const [isIntroActive, setIsIntroActive] = useState(!skipIntro);
+  const [isIntroDone, setIsIntroDone] = useState(skipIntro);
 
   useEffect(() => {
+    if (skipIntro) {
+      return;
+    }
+
     // Disable automatic browser scroll restoration on reload so user always begins at the top (Hero)
     if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";

@@ -8,6 +8,19 @@
 [functions]
   node_bundler = "esbuild"
 
+# Redirect non-www hotelfremont.in to www.hotelfremont.in (Permanent 301)
+[[redirects]]
+  from = "https://hotelfremont.in/*"
+  to = "https://www.hotelfremont.in/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://hotelfremont.in/*"
+  to = "https://www.hotelfremont.in/:splat"
+  status = 301
+  force = true
+
 # Security Headers
 [[headers]]
   for = "/*"

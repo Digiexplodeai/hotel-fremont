@@ -158,14 +158,14 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar: Copyright, Legal & Back to Top */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#A8A59E]/70 space-y-4 sm:space-y-0">
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-[#A8A59E]/70 gap-4">
           <div>{footer.copyright}</div>
 
-          <div className="flex items-center space-x-6">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-6 gap-y-2">
             {footer.legalLinks.map((item) => (
-              <a key={item.label} href={item.href} className="hover:text-white transition-colors">
+              <Link key={item.label} href={item.href} className="hover:text-white transition-colors">
                 {item.label}
-              </a>
+              </Link>
             ))}
 
             <button

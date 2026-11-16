@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { siteConfig } from '@/lib/site-config';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/admin/', '/admin'],
     },
-    sitemap: 'https://hotelfremont.com/sitemap.xml',
+    sitemap: `${siteConfig.siteUrl}/sitemap.xml`,
   };
 }

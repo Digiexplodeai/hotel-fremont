@@ -151,10 +151,11 @@ export async function signInAction(formData: FormData): Promise<{
     if (!resolvedRole && user.email) {
       const emailLower = user.email.toLowerCase();
       if (
-        emailLower === "admin@hotelfremont.com" ||
-        emailLower === "owner@hotelfremont.com" ||
+        emailLower === "hotelfremont1@gmail.com" ||
+        emailLower === "admin@hotelfremont.in" ||
+        emailLower === "owner@hotelfremont.in" ||
         emailLower === "sagarkiisha3@gmail.com" ||
-        emailLower.endsWith("@hotelfremont.com")
+        emailLower.endsWith("@hotelfremont.in")
       ) {
         resolvedRole = "owner";
         fullName = fullName || "Hotel Fremont Admin";
@@ -248,9 +249,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     if (!role && user.email) {
       const emailLower = user.email.toLowerCase();
       if (
-        emailLower === "admin@hotelfremont.com" ||
-        emailLower === "owner@hotelfremont.com" ||
-        emailLower.endsWith("@hotelfremont.com")
+        emailLower === "hotelfremont1@gmail.com" ||
+        emailLower === "admin@hotelfremont.in" ||
+        emailLower === "owner@hotelfremont.in" ||
+        emailLower.endsWith("@hotelfremont.in")
       ) {
         role = "owner";
         fullName = fullName || "Hotel Fremont Admin";
