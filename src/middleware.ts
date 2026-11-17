@@ -108,11 +108,14 @@ export async function middleware(request: NextRequest) {
   const isAuthenticatedAdmin = Boolean(
     user && (
       (metaRole && ALLOWED_ADMIN_ROLES.includes(metaRole.toLowerCase())) ||
-      emailLower === "hotelfremont1@gmail.com" ||
+      emailLower === "admin@hotelfremont.com" ||
+      emailLower === "owner@hotelfremont.com" ||
+      emailLower.endsWith("@hotelfremont.com") ||
       emailLower === "admin@hotelfremont.in" ||
       emailLower === "owner@hotelfremont.in" ||
-      emailLower === "sagarkiisha3@gmail.com" ||
-      emailLower.endsWith("@hotelfremont.in")
+      emailLower.endsWith("@hotelfremont.in") ||
+      emailLower === "hotelfremont1@gmail.com" ||
+      emailLower === "sagarkiisha3@gmail.com"
     )
   );
 
