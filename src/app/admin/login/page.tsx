@@ -12,7 +12,8 @@ export const dynamic = "force-dynamic";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") || "/admin";
+  const rawNext = searchParams.get("next");
+  const nextUrl = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/admin";
 
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState("");
