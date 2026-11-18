@@ -146,9 +146,10 @@ Add the following to your deployment environment (Vercel / Netlify / `.env.local
 | `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Client & Server | Razorpay Key ID for client checkout popup |
 | `RAZORPAY_KEY_SECRET` | Server only | Razorpay Key Secret (never expose to client) |
 | `RAZORPAY_WEBHOOK_SECRET` | Server only | Secret used to verify webhook event signatures |
-| `HOTEL_NOTIFY_EMAIL` | Server | Notification inbox for paid bookings (default: `hotelfremont1@gmail.com`) |
-| `RESEND_API_KEY` | Server (optional) | Resend API key to deliver branded guest voucher emails |
-| `RESEND_FROM_EMAIL` | Server (optional) | From address (default: `Hotel Fremont <bookings@hotelfremont.in>`) |
+| `ADMIN_EMAILS` | Server | Comma-separated admin email addresses for notifications (e.g. `admin@hotelfremont.com, manager@hotelfremont.com`) |
+| `FROM_EMAIL` | Server | Sender address for Resend emails (e.g. `Hotel Fremont <bookings@hotelfremont.in>`) |
+| `HOTEL_NOTIFY_EMAIL` | Server | Fallback notification inbox for paid bookings (default: `hotelfremont1@gmail.com`) |
+| `RESEND_API_KEY` | Server | Resend API key to deliver branded guest voucher emails |
 
 ### Webhook Configuration in Razorpay Dashboard
 1. Go to **Razorpay Dashboard > Settings > Webhooks > Add New Webhook**.

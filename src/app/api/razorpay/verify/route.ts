@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyRazorpayPaymentSignature } from "@/lib/razorpay";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import { sendBookingConfirmationEmails } from "@/lib/email";
 import { DEFAULT_ROOM_TYPES } from "@/config/hotel";
 
 export async function POST(req: NextRequest) {
@@ -144,27 +143,6 @@ export async function POST(req: NextRequest) {
     } catch (resErr) {
       console.warn("[Payment Verify] Reservations sync warning:", resErr);
     }
-
-    // 6. Send confirmation emails asynchronously
-    sendBookingConfirmationEmails({
-      bookingRef: booking.booking_ref,
-      accessToken: booking.access_token,
-      guestName: booking.guest_name,
-      phone: booking.phone,
-      email: booking.email,
-      roomCategory:
-        DEFAULT_ROOM_TYPES.find((r) => r.code === booking.room_category)?.name ||
-        booking.room_category,
-      roomsRequested: booking.rooms_requested || 1,
-      checkIn: booking.check_in,
-      checkOut: booking.check_out,
-      nights: booking.nights,
-      guests: booking.guests,
-      totalAmount: Number(booking.total_amount),
-      currency: booking.currency || "INR",
-      razorpayPaymentId: razorpay_payment_id,
-      specialRequests: booking.special_requests || undefined,
-    }).catch((emailErr) => console.warn("[Email error]:", emailErr));
 
     return NextResponse.json({
       success: true,

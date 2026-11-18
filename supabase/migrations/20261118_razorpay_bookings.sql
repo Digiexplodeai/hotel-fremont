@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   paid_at TIMESTAMPTZ,
-  expires_at TIMESTAMPTZ NOT NULL
+  expires_at TIMESTAMPTZ NOT NULL,
+  confirmation_email_sent BOOLEAN NOT NULL DEFAULT false,
+  confirmation_email_sent_at TIMESTAMPTZ
 );
 
 -- Ensure all required columns exist if the table was created previously with older schema
@@ -96,6 +98,14 @@ BEGIN
 
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bookings' AND column_name = 'expires_at') THEN
     ALTER TABLE public.bookings ADD COLUMN expires_at TIMESTAMPTZ;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bookings' AND column_name = 'confirmation_email_sent') THEN
+    ALTER TABLE public.bookings ADD COLUMN confirmation_email_sent BOOLEAN DEFAULT false;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bookings' AND column_name = 'confirmation_email_sent_at') THEN
+    ALTER TABLE public.bookings ADD COLUMN confirmation_email_sent_at TIMESTAMPTZ;
   END IF;
 END $$;
 
