@@ -52,6 +52,32 @@ function isClientRateLimited(): boolean {
   }
 }
 
+// Dynamically load Razorpay standard checkout script on demand
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(false);
+      return;
+    }
+    if ((window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true));
+      existing.addEventListener("error", () => resolve(false));
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 export default function BookingModal({
   isOpen,
   onClose,
@@ -76,6 +102,7 @@ export default function BookingModal({
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
+  const [agreedToPolicy, setAgreedToPolicy] = useState(false);
   const [honeypot, setHoneypot] = useState("");
 
   // Live Inventory State
@@ -235,8 +262,13 @@ export default function BookingModal({
       return;
     }
 
-    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setErrorMessage("Please enter a valid email address or leave it blank.");
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMessage("Please enter a valid email address for your booking confirmation voucher.");
+      return;
+    }
+
+    if (!agreedToPolicy) {
+      setErrorMessage("Please accept the Terms and Conditions and Cancellation & Refund Policy to proceed.");
       return;
     }
 
@@ -268,49 +300,114 @@ export default function BookingModal({
     setIsSubmitting(true);
 
     try {
-      const res = await submitReservationAction({
-        fullName: name.trim(),
-        phone: phoneCheck.cleanPhone,
-        email: email.trim() || undefined,
-        checkIn,
-        checkOut,
-        roomTypeCode: activeRoom.code,
-        guests,
-        roomsRequested,
-        specialRequest: specialRequests.trim() || undefined,
-        honeypot: honeypot.trim() || undefined,
+      // 1. Ensure Razorpay Standard Checkout SDK is loaded
+      const scriptReady = await loadRazorpayScript();
+      if (!scriptReady || !(window as any).Razorpay) {
+        setErrorMessage("Unable to load secure payment checkout. Please check your internet connection.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 2. Initialize Order on the Server
+      const orderRes = await fetch("/api/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guestName: name.trim(),
+          phone: phoneCheck.cleanPhone,
+          email: email.trim().toLowerCase(),
+          roomCategory: activeRoom.code,
+          checkIn,
+          checkOut,
+          roomsRequested,
+          guests,
+          specialRequests: specialRequests.trim() || undefined,
+          agreedToPolicy: true,
+        }),
       });
 
-      if (!res.success) {
-        setErrorMessage(res.error || "Failed to confirm reservation request. Please try again.");
+      const orderData = await orderRes.json();
+      if (!orderData.success) {
+        setErrorMessage(orderData.error || "Failed to initiate payment. Please check availability and try again.");
         setIsSubmitting(false);
-        // Refresh availability in case inventory changed
         refreshAvailability(checkIn, checkOut);
         return;
       }
 
-      // Success confirmed by Supabase!
-      const finalRef = res.referenceCode || `FRM-${Math.floor(100000 + Math.random() * 900000)}`;
-      setBookingRef(finalRef);
-      setConfirmedTotal(res.estimatedTotal || total);
-      setIsSubmitted(true);
-      setIsSubmitting(false);
+      // 3. Launch Razorpay Standard Checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amountPaise,
+        currency: orderData.currency || "INR",
+        name: "Hotel Fremont",
+        description: `${activeRoom.name} (${nights} Night${nights > 1 ? "s" : ""})`,
+        image: "/icon.png",
+        order_id: orderData.orderId,
+        prefill: {
+          name: name.trim(),
+          email: email.trim(),
+          contact: phoneCheck.cleanPhone,
+        },
+        notes: {
+          bookingRef: orderData.bookingRef,
+          room: activeRoom.name,
+        },
+        theme: {
+          color: "#E02B1D",
+          backdrop_color: "#0E0E10",
+        },
+        modal: {
+          ondismiss: () => {
+            setIsSubmitting(false);
+            setErrorMessage("Payment was cancelled or interrupted. You can resume checkout anytime.");
+          },
+        },
+        handler: async (response: any) => {
+          try {
+            setIsSubmitting(true);
+            const verifyRes = await fetch("/api/razorpay/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                booking_ref: orderData.bookingRef,
+                access_token: orderData.accessToken,
+              }),
+            });
 
-      // Concierge WhatsApp Trigger
-      const message = `*Hotel Fremont - New Reservation Request*%0A%0A*Ref:* ${finalRef}%0A*Guest:* ${encodeURIComponent(
-        name.trim()
-      )}%0A*Phone:* +91 ${encodeURIComponent(phoneCheck.cleanPhone)}%0A*Suite:* ${encodeURIComponent(
-        activeRoom.name
-      )}%0A*Rooms:* ${roomsRequested}%0A*Check-In:* ${checkIn}%0A*Check-Out:* ${checkOut}%0A*Nights:* ${nights}%0A*Guests:* ${guests}%0A*Total (incl. 18% GST):* ₹${(
-        res.estimatedTotal || total
-      ).toLocaleString("en-IN")}`;
-      const waUrl = `https://wa.me/${HOTEL_CONFIG.whatsappNumber}?text=${message}`;
-      setTimeout(() => {
-        window.open(waUrl, "_blank");
-      }, 900);
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              // Direct navigation to verified booking confirmation page
+              window.location.href = `/booking-confirmation/${orderData.bookingRef}?t=${orderData.accessToken}`;
+            } else {
+              setErrorMessage(
+                verifyData.error ||
+                  "Payment received, but server verification took longer than usual. Please check your email for confirmation."
+              );
+              setIsSubmitting(false);
+            }
+          } catch {
+            // Even if client call errors, the webhook guarantees payment capture
+            window.location.href = `/booking-confirmation/${orderData.bookingRef}?t=${orderData.accessToken}`;
+          }
+        },
+      };
+
+      const rzpInstance = new (window as any).Razorpay(options);
+      rzpInstance.on("payment.failed", (failRes: any) => {
+        setIsSubmitting(false);
+        const reason =
+          failRes.error?.description ||
+          "Payment failed. Please choose another payment method or try again.";
+        setErrorMessage(reason);
+      });
+
+      rzpInstance.open();
     } catch (err: unknown) {
       const error = err as Error;
-      setErrorMessage(error.message || "Failed to connect to reservation database. Please check your network.");
+      setErrorMessage(error.message || "Failed to initialize payment gateway. Please check your connection.");
       setIsSubmitting(false);
     }
   };
@@ -611,14 +708,15 @@ export default function BookingModal({
 
                 <div>
                   <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
-                    Email Address (For Booking Voucher)
+                    Email Address (For Booking Voucher & Instant Receipt) *
                   </label>
                   <input
                     type="email"
                     name="email"
                     autoComplete="email"
+                    required
                     maxLength={100}
-                    placeholder="guest@domain.com (optional)"
+                    placeholder="guest@example.com"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -643,11 +741,11 @@ export default function BookingModal({
                 </div>
 
                 {/* Transparent Price Summary Box */}
-                <div className="p-4 rounded-xl bg-[#0E0E10] border border-[#C9A96E]/20 text-xs space-y-1.5">
+                <div className="p-4 rounded-xl bg-[#0E0E10] border border-[#C9A96E]/20 text-xs space-y-2">
                   <div className="flex justify-between text-[#A8A59E]">
                     <span>
-                      {activeRoom.name} &times; {nights} {nights > 1 ? "Nights" : "Night"}
-                      {roomsRequested > 1 ? ` (${roomsRequested} Rooms)` : ""}
+                      {activeRoom.name} ({formatINR(pricePerNight)}/night) &times; {nights} {nights > 1 ? "Nights" : "Night"}
+                      {roomsRequested > 1 ? ` &times; ${roomsRequested} Rooms` : ""}
                     </span>
                     <span className="text-[#F7F3EC] font-mono">{formatINR(subtotal)}</span>
                   </div>
@@ -655,34 +753,81 @@ export default function BookingModal({
                     <span>Luxury GST ({HOTEL_CONFIG.gstPercentageLabel})</span>
                     <span className="text-[#F7F3EC] font-mono">{formatINR(gst)}</span>
                   </div>
-                  <div className="flex justify-between text-sm font-bold text-[#F7F3EC] pt-2 border-t border-white/10">
-                    <span className="font-serif">Estimated Total</span>
+                  <div className="flex justify-between text-sm font-bold text-[#F7F3EC] pt-2 border-t border-white/10 items-baseline">
+                    <div>
+                      <span className="font-serif block">Total Payable Now</span>
+                      <span className="text-[10px] text-emerald-400 font-sans font-normal">100% Full Payment · No balance at hotel</span>
+                    </div>
                     <span className="font-serif text-[#E02B1D] font-mono text-base">
                       {formatINR(total)}
                     </span>
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting || isCurrentRoomSoldOut || isEntireHotelSoldOut}
-                  className="w-full py-4 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.22em] shadow-[0_4px_25px_rgba(224,43,29,0.5)] transition-all duration-300 btn-magnetic flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Confirming with Inventory Engine...</span>
-                    </>
-                  ) : isCurrentRoomSoldOut ? (
-                    <span>Suite Sold Out For Selected Dates</span>
-                  ) : (
-                    <>
-                      <Calendar className="w-4 h-4" />
-                      <span>Submit Reservation Request</span>
-                    </>
-                  )}
-                </button>
+                {/* Legal & Policy Agreement Checkbox */}
+                <div className="pt-1">
+                  <label className="flex items-start gap-2.5 text-xs text-[#A8A59E] cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={agreedToPolicy}
+                      onChange={(e) => {
+                        setAgreedToPolicy(e.target.checked);
+                        setErrorMessage(null);
+                      }}
+                      className="mt-0.5 w-4 h-4 rounded border-white/20 bg-[#0E0E10] text-[#E02B1D] focus:ring-[#E02B1D] accent-[#E02B1D] shrink-0 cursor-pointer"
+                    />
+                    <span className="leading-snug">
+                      I agree to the{" "}
+                      <a
+                        href="/terms-and-conditions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#C9A96E] hover:underline"
+                      >
+                        Terms and Conditions
+                      </a>{" "}
+                      and{" "}
+                      <a
+                        href="/cancellation-refund-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#C9A96E] hover:underline"
+                      >
+                        Cancellation & Refund Policy
+                      </a>
+                      .
+                    </span>
+                  </label>
+                </div>
+
+                {/* Submit & Razorpay Trigger */}
+                <div className="space-y-2 pt-1">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || isCurrentRoomSoldOut || isEntireHotelSoldOut}
+                    className="w-full py-4 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.16em] shadow-[0_4px_25px_rgba(224,43,29,0.5)] transition-all duration-300 btn-magnetic flex items-center justify-center space-x-2 cursor-pointer"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Opening Secure Payment Gateway...</span>
+                      </>
+                    ) : isCurrentRoomSoldOut ? (
+                      <span>Suite Sold Out For Selected Dates</span>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-4 h-4 text-white" />
+                        <span>Pay {formatINR(total)} Securely with Razorpay</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#A8A59E]/70 text-center">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#C9A96E] shrink-0" />
+                    <span>Secured by Razorpay · UPI, Cards, NetBanking</span>
+                  </div>
+                </div>
               </form>
             </div>
           ) : (

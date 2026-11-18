@@ -99,4 +99,6 @@ export function formatPolicyValue(val: string | number | null | undefined, suffi
   return `${val}${suffix}`;
 }
 
+export const SITE_CONFIG = siteConfig;
+
 export default siteConfig;

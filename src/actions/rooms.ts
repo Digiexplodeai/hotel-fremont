@@ -5,7 +5,17 @@ import { roomCategories as defaultRoomCategories } from "@/data/rooms";
 import { revalidatePath } from "next/cache";
 
 export type RoomStatus = "available" | "occupied" | "cleaning" | "maintenance" | "blocked";
-export type BookingStatus = "pending" | "confirmed" | "checked_in" | "checked_out" | "cancelled" | "no_show";
+export type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "checked_in"
+  | "checked_out"
+  | "cancelled"
+  | "no_show"
+  | "paid"
+  | "failed"
+  | "expired"
+  | "refunded";
 
 export interface PhysicalRoom {
   id: string;
@@ -37,10 +47,16 @@ export interface BookingRecord {
   guestsCount: number;
   totalAmount: number;
   advancePaid: number;
+  amountPaid?: number;
   status: BookingStatus;
   source: string;
   notes?: string;
   createdAt: string;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  paymentMethod?: string;
+  paidAt?: string;
+  roomsRequested?: number;
 }
 
 // In-memory persistent fallback state when Supabase database is offline or unmigrated
@@ -164,7 +180,7 @@ export async function updateRoomStatusAction(
 }
 
 /**
- * Fetch all reservations / bookings from public.reservations
+ * Fetch all reservations / bookings from public.bookings and public.reservations
  */
 export async function getBookingsAction(): Promise<{
   success: boolean;
@@ -177,36 +193,93 @@ export async function getBookingsAction(): Promise<{
       return { success: true, bookings: [], isDatabase: false };
     }
 
-    const { data, error } = await supabase
+    // 1. Fetch public.bookings (Razorpay transactions & online payments)
+    const { data: onlineBookings } = await supabase
+      .from("bookings")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    // 2. Fetch public.reservations
+    const { data: reservations } = await supabase
       .from("reservations")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !data) {
-      return { success: true, bookings: [], isDatabase: false };
+    const seenRefs = new Set<string>();
+    const list: BookingRecord[] = [];
+
+    const categoryMap: Record<string, string> = {
+      "deluxe-king": "Deluxe King Room",
+      "premier-executive": "Premier Executive Suite",
+      "royal-fremont": "The Royal Fremont Suite",
+      "presidential-penthouse": "Presidential Penthouse",
+    };
+
+    if (onlineBookings && onlineBookings.length > 0) {
+      for (const b of onlineBookings) {
+        seenRefs.add(b.booking_ref);
+        list.push({
+          id: b.id,
+          bookingCode: b.booking_ref,
+          guestName: b.guest_name,
+          guestPhone: b.phone,
+          guestEmail: b.email || undefined,
+          categorySlug: b.room_category?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "deluxe-king",
+          categoryName: categoryMap[b.room_category] || b.room_category,
+          roomNumber: undefined,
+          checkIn: b.check_in,
+          checkOut: b.check_out,
+          guestsCount: b.guests || 1,
+          totalAmount: Number(b.total_amount || 0),
+          advancePaid: Number(b.amount_paid || 0),
+          amountPaid: Number(b.amount_paid || 0),
+          status: b.status as BookingStatus,
+          source: "online_razorpay",
+          notes: b.special_requests || undefined,
+          createdAt: b.created_at,
+          razorpayPaymentId: b.razorpay_payment_id || undefined,
+          razorpayOrderId: b.razorpay_order_id || undefined,
+          paymentMethod: b.payment_method || undefined,
+          paidAt: b.paid_at || undefined,
+          roomsRequested: b.rooms_requested || 1,
+        });
+      }
     }
 
-    const bookings: BookingRecord[] = data.map((b) => ({
-      id: b.id,
-      bookingCode: `HF-${b.id.slice(0, 8).toUpperCase()}`,
-      guestName: b.full_name,
-      guestPhone: b.phone,
-      guestEmail: b.email || undefined,
-      categorySlug: b.room_type?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "suite",
-      categoryName: b.room_type || "Luxury Suite",
-      roomNumber: undefined,
-      checkIn: b.check_in,
-      checkOut: b.check_out,
-      guestsCount: b.guests || 2,
-      totalAmount: Number(b.estimated_total || 0),
-      advancePaid: 0,
-      status: (b.status === "confirmed" ? "confirmed" : b.status === "cancelled" ? "cancelled" : "pending") as BookingStatus,
-      source: "website",
-      notes: b.special_request || undefined,
-      createdAt: b.created_at,
-    }));
+    if (reservations && reservations.length > 0) {
+      for (const r of reservations) {
+        const ref = r.reference_code || `HF-${r.id.slice(0, 8).toUpperCase()}`;
+        if (!seenRefs.has(ref)) {
+          seenRefs.add(ref);
+          list.push({
+            id: r.id,
+            bookingCode: ref,
+            guestName: r.full_name,
+            guestPhone: r.phone,
+            guestEmail: r.email || undefined,
+            categorySlug: r.room_type?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "deluxe-king",
+            categoryName: r.room_type || "Luxury Suite",
+            roomNumber: undefined,
+            checkIn: r.check_in,
+            checkOut: r.check_out,
+            guestsCount: r.guests || 2,
+            totalAmount: Number(r.estimated_total || 0),
+            advancePaid: 0,
+            amountPaid: 0,
+            status: (r.status === "confirmed" ? "confirmed" : r.status === "cancelled" ? "cancelled" : "pending") as BookingStatus,
+            source: r.channel || "website",
+            notes: r.special_request || undefined,
+            createdAt: r.created_at,
+            roomsRequested: r.rooms_requested || 1,
+          });
+        }
+      }
+    }
 
-    return { success: true, bookings, isDatabase: true };
+    // Sort by createdAt descending
+    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return { success: true, bookings: list, isDatabase: true };
   } catch {
     return { success: true, bookings: [], isDatabase: false };
   }
@@ -322,7 +395,7 @@ export async function createBookingAction(input: CreateBookingInput): Promise<{
 }
 
 /**
- * Update booking status
+ * Update booking status across bookings and reservations
  */
 export async function updateBookingStatusAction(
   bookingId: string,
@@ -331,21 +404,32 @@ export async function updateBookingStatusAction(
   try {
     const supabase = await createServerSupabaseClient();
     if (supabase) {
-      const dbStatus =
-        status === "confirmed" || status === "checked_in"
+      // 1. Update public.bookings
+      await supabase
+        .from("bookings")
+        .update({
+          status: status,
+          updated_at: new Date().toISOString(),
+        })
+        .or(`id.eq.${bookingId},booking_ref.eq.${bookingId}`);
+
+      // 2. Map status for public.reservations
+      const resStatus =
+        status === "confirmed" || status === "paid" || status === "checked_in"
           ? "confirmed"
-          : status === "cancelled" || status === "no_show"
+          : status === "cancelled" || status === "refunded" || status === "no_show"
           ? "cancelled"
           : "contacted";
 
       await supabase
         .from("reservations")
-        .update({ status: dbStatus })
-        .eq("id", bookingId);
+        .update({ status: resStatus })
+        .or(`id.eq.${bookingId},reference_code.eq.${bookingId}`);
     }
 
     revalidatePath("/admin");
     revalidatePath("/admin/rooms");
+    revalidatePath("/admin/enquiries");
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to update booking";

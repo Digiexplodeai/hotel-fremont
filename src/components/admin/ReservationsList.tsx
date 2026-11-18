@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import {
   ReservationRecord,
   ReservationStatus,
@@ -16,13 +16,12 @@ import {
   Calendar,
   Users,
   CheckCircle2,
-  Clock,
-  Sparkles,
-  MessageSquare,
   AlertCircle,
   Loader2,
-  ChevronRight,
   User,
+  CreditCard,
+  ShieldCheck,
+  Search,
 } from "lucide-react";
 
 interface ReservationsListProps {
@@ -40,12 +39,12 @@ const statusConfig: Record<
     border: "border-emerald-500/30",
     dot: "bg-emerald-400 animate-pulse",
   },
-  contacted: {
-    label: "Contacted",
-    bg: "bg-blue-500/10",
-    text: "text-blue-400",
-    border: "border-blue-500/30",
-    dot: "bg-blue-400",
+  paid: {
+    label: "Paid Online",
+    bg: "bg-emerald-500/15",
+    text: "text-emerald-300",
+    border: "border-emerald-500/40",
+    dot: "bg-emerald-400",
   },
   confirmed: {
     label: "Confirmed",
@@ -53,6 +52,20 @@ const statusConfig: Record<
     text: "text-purple-400",
     border: "border-purple-500/30",
     dot: "bg-purple-400",
+  },
+  pending: {
+    label: "Pending Payment",
+    bg: "bg-amber-500/10",
+    text: "text-amber-400",
+    border: "border-amber-500/30",
+    dot: "bg-amber-400",
+  },
+  contacted: {
+    label: "Contacted",
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    border: "border-blue-500/30",
+    dot: "bg-blue-400",
   },
   converted: {
     label: "Converted",
@@ -75,6 +88,27 @@ const statusConfig: Record<
     border: "border-rose-500/30",
     dot: "bg-rose-400",
   },
+  refunded: {
+    label: "Refunded",
+    bg: "bg-purple-500/15",
+    text: "text-purple-300",
+    border: "border-purple-500/40",
+    dot: "bg-purple-400",
+  },
+  failed: {
+    label: "Payment Failed",
+    bg: "bg-rose-500/15",
+    text: "text-rose-400",
+    border: "border-rose-500/30",
+    dot: "bg-rose-400",
+  },
+  expired: {
+    label: "Expired",
+    bg: "bg-zinc-500/10",
+    text: "text-zinc-400",
+    border: "border-zinc-500/30",
+    dot: "bg-zinc-400",
+  },
   closed: {
     label: "Closed",
     bg: "bg-slate-500/10",
@@ -89,6 +123,8 @@ export default function ReservationsList({
 }: ReservationsListProps) {
   const [reservations, setReservations] = useState<ReservationRecord[]>(initialReservations);
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterDate, setFilterDate] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -116,7 +152,7 @@ export default function ReservationsList({
     }
   };
 
-  // Status change handler
+  // Status change handler (including Cancelled & Refunded)
   const handleStatusChange = async (id: string, newStatus: ReservationStatus) => {
     setUpdatingId(id);
     setErrorNotice(null);
@@ -126,7 +162,7 @@ export default function ReservationsList({
         setReservations((prev) =>
           prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
         );
-        setSuccessNotice(`Reservation updated to '${newStatus}'.`);
+        setSuccessNotice(`Reservation status updated to '${newStatus}'.`);
         setTimeout(() => setSuccessNotice(null), 3000);
       } else {
         setErrorNotice(res.error || "Failed to update reservation status.");
@@ -164,58 +200,68 @@ export default function ReservationsList({
     }
   };
 
-  // Filtered list
+  // Filtered list by status, date and search query
   const filtered = reservations.filter((r) => {
-    if (filterStatus === "all") return true;
-    return r.status === filterStatus;
+    // Status filter
+    if (filterStatus !== "all") {
+      if (filterStatus === "paid" && r.status !== "paid") return false;
+      if (filterStatus === "pending" && r.status !== "pending") return false;
+      if (filterStatus === "confirmed" && r.status !== "confirmed" && r.status !== "paid") return false;
+      if (filterStatus === "cancelled" && r.status !== "cancelled") return false;
+      if (filterStatus === "refunded" && r.status !== "refunded") return false;
+      if (filterStatus === "failed" && r.status !== "failed") return false;
+    }
+
+    // Date filter (matches check_in or check_out)
+    if (filterDate) {
+      if (r.check_in !== filterDate && r.check_out !== filterDate) {
+        return false;
+      }
+    }
+
+    // Search query filter (matches name, phone, ref, or payment id)
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      const matchName = r.full_name?.toLowerCase().includes(q);
+      const matchPhone = r.phone?.includes(q);
+      const matchRef = r.reference_code?.toLowerCase().includes(q);
+      const matchPayId = r.razorpay_payment_id?.toLowerCase().includes(q);
+      if (!matchName && !matchPhone && !matchRef && !matchPayId) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
-  const newCount = reservations.filter((r) => r.status === "new").length;
+  const paidCount = reservations.filter((r) => r.status === "paid").length;
 
   return (
     <div className="bg-[#151518] border border-white/10 rounded-2xl overflow-hidden shadow-xl">
       {/* Header Bar */}
       <div className="p-5 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-black/40 via-transparent to-black/20">
         <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <h3 className="text-base sm:text-lg font-serif font-bold text-[#F7F3EC]">
-              Online Guest Reservations
+              Bookings &amp; Online Payments
             </h3>
             <span className="px-2.5 py-0.5 rounded-full bg-[#E02B1D]/15 text-[#E02B1D] border border-[#E02B1D]/30 text-[11px] font-bold font-mono">
               {reservations.length} Total
             </span>
-            {newCount > 0 && (
+            {paidCount > 0 && (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                {newCount} New
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                {paidCount} Paid Online
               </span>
             )}
           </div>
           <p className="text-xs text-[#A8A59E]">
-            Directly synced with <code className="text-[#C9A96E] font-mono">public.reservations</code> in Supabase PostgreSQL
+            Real-time Razorpay checkout transactions and confirmed stays from <code className="text-[#C9A96E] font-mono">public.bookings</code> &amp; <code className="text-[#C9A96E] font-mono">public.reservations</code>
           </p>
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Status Filter */}
-          <div className="flex items-center gap-1 bg-black/40 border border-white/10 rounded-xl p-1 text-xs">
-            {["all", "new", "contacted", "confirmed", "cancelled"].map((st) => (
-              <button
-                key={st}
-                onClick={() => setFilterStatus(st)}
-                className={`px-3 py-1.5 rounded-lg font-medium capitalize transition cursor-pointer ${
-                  filterStatus === st
-                    ? "bg-[#E02B1D] text-white font-semibold"
-                    : "text-[#A8A59E] hover:text-white"
-                }`}
-              >
-                {st}
-              </button>
-            ))}
-          </div>
-
-          {/* Refresh Button */}
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -225,6 +271,78 @@ export default function ReservationsList({
             <RefreshCw className={`w-3.5 h-3.5 text-[#C9A96E] ${isRefreshing ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
+        </div>
+      </div>
+
+      {/* Filter Toolbar */}
+      <div className="p-4 bg-black/30 border-b border-white/5 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between text-xs">
+        {/* Status Pills */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0">
+          {[
+            { id: "all", label: "All" },
+            { id: "paid", label: "Paid" },
+            { id: "confirmed", label: "Confirmed" },
+            { id: "pending", label: "Pending" },
+            { id: "cancelled", label: "Cancelled" },
+            { id: "refunded", label: "Refunded" },
+            { id: "failed", label: "Failed" },
+          ].map((st) => (
+            <button
+              key={st.id}
+              onClick={() => setFilterStatus(st.id)}
+              className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition cursor-pointer ${
+                filterStatus === st.id
+                  ? "bg-[#E02B1D] text-white font-semibold shadow"
+                  : "text-[#A8A59E] hover:text-white bg-black/40 border border-white/5"
+              }`}
+            >
+              {st.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Date & Search Inputs */}
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          {/* Date Picker Filter */}
+          <div className="flex items-center gap-1.5 bg-black/40 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-[#F7F3EC]">
+            <Calendar className="w-3.5 h-3.5 text-[#C9A96E]" />
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="bg-transparent text-xs text-[#F7F3EC] focus:outline-none [color-scheme:dark]"
+              title="Filter by stay date"
+            />
+            {filterDate && (
+              <button
+                onClick={() => setFilterDate("")}
+                className="text-white/40 hover:text-white text-xs ml-1"
+                title="Clear date filter"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Search box */}
+          <div className="flex items-center gap-1.5 bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-[#F7F3EC] w-full sm:w-48">
+            <Search className="w-3.5 h-3.5 text-[#A8A59E]" />
+            <input
+              type="text"
+              placeholder="Search ref, guest, phone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent w-full text-xs text-[#F7F3EC] focus:outline-none placeholder-[#A8A59E]/50"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-white/40 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -247,7 +365,7 @@ export default function ReservationsList({
       {isRefreshing && reservations.length === 0 ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 text-[#E02B1D] animate-spin mx-auto" />
-          <p className="text-xs text-[#A8A59E]">Fetching reservations from Supabase...</p>
+          <p className="text-xs text-[#A8A59E]">Fetching records from Supabase...</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-16 text-center space-y-3 px-4">
@@ -255,10 +373,12 @@ export default function ReservationsList({
             <Calendar className="w-6 h-6" />
           </div>
           <h4 className="text-sm font-serif font-bold text-[#F7F3EC]">
-            {filterStatus === "all" ? "No reservation requests yet" : `No reservations marked '${filterStatus}'`}
+            {filterStatus === "all" && !filterDate && !searchQuery
+              ? "No reservations found"
+              : "No matching reservations for selected filters"}
           </h4>
           <p className="text-xs text-[#A8A59E] max-w-sm mx-auto">
-            When guests submit reservation requests from the website, they will appear here in real time.
+            Bookings made through Razorpay or front desk reservations will be displayed here in real time.
           </p>
         </div>
       ) : (
@@ -266,29 +386,40 @@ export default function ReservationsList({
           <table className="w-full text-left text-xs">
             <thead className="bg-black/50 text-[#A8A59E] font-mono border-b border-white/10 uppercase text-[10px] tracking-wider">
               <tr>
-                <th className="py-3 px-4">Guest Details</th>
-                <th className="py-3 px-4">Suite &amp; Guests</th>
-                <th className="py-3 px-4">Stay Dates</th>
-                <th className="py-3 px-4">Est. Total</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Booking Ref &amp; Guest</th>
+                <th className="py-3 px-4">Suite &amp; Stay Dates</th>
+                <th className="py-3 px-4">Payment Details</th>
+                <th className="py-3 px-4">Status &amp; Channel</th>
+                <th className="py-3 px-4">Update Status</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-[#F7F3EC]">
               {filtered.map((r) => {
                 const conf = statusConfig[r.status] || statusConfig.new;
-                const cleanPhone = r.phone.replace(/\D/g, "");
-                const waUrl = `https://wa.me/${cleanPhone}`;
+                const cleanPhone = r.phone?.replace(/\D/g, "") || "";
+                const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : "#";
 
-                // Calculate duration in days
                 const dIn = new Date(r.check_in);
                 const dOut = new Date(r.check_out);
                 const diffDays = Math.max(1, Math.round((dOut.getTime() - dIn.getTime()) / (1000 * 3600 * 24)));
 
+                const isPaidOnline = r.status === "paid" || (r.amount_paid && r.amount_paid > 0);
+
                 return (
                   <tr key={r.id} className="hover:bg-white/[0.02] transition">
-                    {/* Guest Details */}
+                    {/* Booking Ref & Guest */}
                     <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono font-bold text-[#E02B1D] text-xs">
+                          {r.reference_code || `FRM-${r.id.slice(0, 6).toUpperCase()}`}
+                        </span>
+                        {r.channel === "razorpay" && (
+                          <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] font-mono font-semibold">
+                            Razorpay
+                          </span>
+                        )}
+                      </div>
                       <div className="font-semibold text-white text-sm flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5 text-[#C9A96E]" />
                         <span>{r.full_name}</span>
@@ -301,16 +432,17 @@ export default function ReservationsList({
                           <Phone className="w-3 h-3 text-[#E02B1D]" />
                           <span>{r.phone}</span>
                         </a>
-                        <a
-                          href={waUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#25D366] hover:underline flex items-center gap-1"
-                          title="Chat on WhatsApp"
-                        >
-                          <MessageSquare className="w-3 h-3" />
-                          <span>WhatsApp</span>
-                        </a>
+                        {cleanPhone && (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#25D366] hover:underline flex items-center gap-1"
+                            title="Chat on WhatsApp"
+                          >
+                            <span>WhatsApp</span>
+                          </a>
+                        )}
                       </div>
                       {r.email && (
                         <div className="flex items-center gap-1 text-[11px] text-[#A8A59E] mt-0.5">
@@ -321,68 +453,93 @@ export default function ReservationsList({
                       {r.special_request && (
                         <div className="mt-1.5 p-1.5 rounded-lg bg-black/40 border border-white/5 text-[11px] text-[#C9A96E] max-w-xs">
                           <span className="font-semibold uppercase text-[9px] block text-[#A8A59E]">
-                            Note:
+                            Request:
                           </span>
                           {r.special_request}
                         </div>
                       )}
                     </td>
 
-                    {/* Suite & Guests */}
+                    {/* Suite & Stay Dates */}
                     <td className="py-3.5 px-4">
                       <div className="font-medium text-white">{r.room_type}</div>
                       <div className="text-[11px] text-[#A8A59E] flex items-center gap-1 mt-0.5 font-mono">
                         <Users className="w-3 h-3 text-[#C9A96E]" />
                         <span>
-                          {r.guests} {r.guests === 1 ? "Guest" : "Guests"}
+                          {r.rooms_requested || 1} Room(s) · {r.guests} Guest(s)
                         </span>
                       </div>
-                      <div className="text-[10px] text-[#A8A59E]/60 font-mono mt-1">
-                        Received: {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      <div className="mt-2 font-mono text-[11px]">
+                        <div className="text-white">In: {r.check_in}</div>
+                        <div className="text-[#A8A59E]">Out: {r.check_out} ({diffDays}N)</div>
                       </div>
                     </td>
 
-                    {/* Stay Dates */}
-                    <td className="py-3.5 px-4 font-mono text-[11px]">
-                      <div className="text-white">In: {r.check_in}</div>
-                      <div className="text-[#A8A59E]">Out: {r.check_out}</div>
-                      <div className="text-[#C9A96E] text-[10px] font-semibold mt-0.5">
-                        {diffDays} {diffDays === 1 ? "Night" : "Nights"}
-                      </div>
-                    </td>
-
-                    {/* Estimated Total */}
+                    {/* Payment Details */}
                     <td className="py-3.5 px-4">
-                      <div className="font-mono font-bold text-white text-sm">
-                        ₹{Number(r.estimated_total).toLocaleString("en-IN")}
-                      </div>
-                      <span className="text-[10px] text-[#A8A59E] font-mono">Incl. Taxes & GST</span>
-                    </td>
-
-                    {/* Status with Live Changer */}
-                    <td className="py-3.5 px-4">
-                      <div className="space-y-1.5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${conf.bg} ${conf.text} border ${conf.border}`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
-                          {conf.label}
-                        </span>
-
-                        <div>
-                          <select
-                            disabled={updatingId === r.id}
-                            value={r.status}
-                            onChange={(e) => handleStatusChange(r.id, e.target.value as ReservationStatus)}
-                            className="bg-black/60 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none cursor-pointer"
-                          >
-                            <option value="new">Mark as: New</option>
-                            <option value="contacted">Mark as: Contacted</option>
-                            <option value="confirmed">Mark as: Confirmed</option>
-                            <option value="cancelled">Mark as: Cancelled</option>
-                          </select>
+                      <div className="space-y-1">
+                        <div className="font-mono font-bold text-white text-sm">
+                          ₹{Number(r.estimated_total).toLocaleString("en-IN")}
                         </div>
+
+                        {isPaidOnline ? (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Paid in Full</span>
+                          </div>
+                        ) : r.status === "refunded" ? (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[10px] font-semibold">
+                            <span>Refund Processed</span>
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-amber-400 font-mono">
+                            Pending Payment
+                          </div>
+                        )}
+
+                        {r.razorpay_payment_id && (
+                          <div className="text-[10px] font-mono text-white/50 pt-1" title={r.razorpay_payment_id}>
+                            Pay ID: <span className="text-white/80">{r.razorpay_payment_id.slice(-8)}</span>
+                          </div>
+                        )}
+                        {r.payment_method && (
+                          <div className="text-[10px] uppercase font-mono text-white/40">
+                            Method: {r.payment_method}
+                          </div>
+                        )}
                       </div>
+                    </td>
+
+                    {/* Status Badge */}
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${conf.bg} ${conf.text} border ${conf.border}`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
+                        {conf.label}
+                      </span>
+                      <div className="text-[10px] text-[#A8A59E]/60 font-mono mt-1">
+                        {new Date(r.created_at).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </div>
+                    </td>
+
+                    {/* Update Status Dropdown (Cancelled, Refunded, etc.) */}
+                    <td className="py-3.5 px-4">
+                      <select
+                        disabled={updatingId === r.id}
+                        value={r.status}
+                        onChange={(e) => handleStatusChange(r.id, e.target.value as ReservationStatus)}
+                        className="bg-black/60 border border-white/10 rounded-lg px-2.5 py-1.5 text-[11px] text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none cursor-pointer"
+                      >
+                        <option value="paid">Mark as: Paid</option>
+                        <option value="confirmed">Mark as: Confirmed</option>
+                        <option value="cancelled">Mark as: Cancelled</option>
+                        <option value="refunded">Mark as: Refunded</option>
+                        <option value="contacted">Mark as: Contacted</option>
+                      </select>
                     </td>
 
                     {/* Delete Action */}
@@ -410,4 +567,3 @@ export default function ReservationsList({
     </div>
   );
 }
-

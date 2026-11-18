@@ -120,6 +120,48 @@ http://localhost:3000/admin/login
 
 ---
 
+## 💳 Razorpay Online Payment & Booking Engine
+
+The site supports full online room booking payments via Razorpay (Credit/Debit Cards, UPI, NetBanking).
+
+### Payment Model: FULL PAYMENT (100% Online)
+- The guest pays 100% of the booking tariff + 18% Luxury GST online at checkout.
+- No advance and no balance payable at the hotel.
+- Unpaid orders expire after 20 minutes (`HOLD_MINUTES = 20`), freeing inventory.
+- Real-time inventory check prevents overbooking across all 12 boutique keys.
+
+### Supabase Database Migration
+Before going live, execute the migration script in your Supabase SQL Editor:
+- **Migration file:** `supabase/migrations/20261118_razorpay_bookings.sql`
+- Creates `public.bookings` with RLS, indexes, and an automatic `updated_at` trigger.
+- Adds `reference_code` and `channel` support to `public.reservations` to synchronize live tape chart availability.
+
+### Required Environment Variables
+
+Add the following to your deployment environment (Vercel / Netlify / `.env.local`):
+
+| Variable | Scope | Purpose |
+| :--- | :--- | :--- |
+| `RAZORPAY_KEY_ID` | Server | Razorpay Key ID for server order generation |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Client & Server | Razorpay Key ID for client checkout popup |
+| `RAZORPAY_KEY_SECRET` | Server only | Razorpay Key Secret (never expose to client) |
+| `RAZORPAY_WEBHOOK_SECRET` | Server only | Secret used to verify webhook event signatures |
+| `HOTEL_NOTIFY_EMAIL` | Server | Notification inbox for paid bookings (default: `hotelfremont1@gmail.com`) |
+| `RESEND_API_KEY` | Server (optional) | Resend API key to deliver branded guest voucher emails |
+| `RESEND_FROM_EMAIL` | Server (optional) | From address (default: `Hotel Fremont <bookings@hotelfremont.in>`) |
+
+### Webhook Configuration in Razorpay Dashboard
+1. Go to **Razorpay Dashboard > Settings > Webhooks > Add New Webhook**.
+2. **Webhook URL:** `https://www.hotelfremont.in/api/razorpay/webhook`
+3. **Secret:** Set a strong random secret and copy it into `RAZORPAY_WEBHOOK_SECRET`.
+4. **Active Events:**
+   - `payment.captured`
+   - `order.paid`
+   - `payment.failed`
+5. Save Webhook.
+
+---
+
 ## 🚢 Deployment (Netlify)
 
 The project is pre-configured for seamless production deployment on **Netlify** via `netlify.toml` and `@netlify/plugin-nextjs`:
