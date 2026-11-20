@@ -27,44 +27,44 @@ export default function TermsAndConditionsPage() {
       subtitle="Please review these terms and conditions carefully before reserving accommodation or utilizing our hospitality services."
     >
       {/* Intro Box */}
-      <div className="bg-white border border-[#E5DFD7] rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm">
-        <h2 className="text-xl font-serif font-bold text-[#24272B] m-0 border-none pb-0">
+      <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 sm:p-8 space-y-4">
+        <h2 className="text-xl font-serif font-bold text-[#F7F3EC] m-0 border-none pb-0">
           Agreement to Terms
         </h2>
-        <p className="text-[#64615D] leading-relaxed text-sm sm:text-base m-0 font-normal">
+        <p className="text-[#A8A59E] leading-relaxed text-sm sm:text-base m-0">
           These Terms and Conditions constitute a legally binding agreement between you (the &quot;Guest&quot; or &quot;Customer&quot;) and <strong>{siteConfig.siteName}</strong> (Proprietor: <strong>{siteConfig.proprietorName}</strong>, situated at <em>{siteConfig.address}</em>). By initiating a reservation request, completing an advance deposit or full payment, or taking occupancy of a room or suite, you acknowledge that you have read, understood, and agreed to be bound by these terms.
         </p>
       </div>
 
       {/* 1. Booking & Confirmation */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <FileCheck className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <FileCheck className="w-5 h-5 text-[#C9A96E]" />
           <span>1. Booking, Confirmation &amp; Cancellation Rules</span>
         </h2>
-        <ul className="space-y-2 list-disc pl-6 text-[#64615D]">
+        <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
-            <strong className="text-[#24272B]">Inventory Allocation:</strong> Hotel Fremont operates 21 guest rooms across three categories: Deluxe Room, Super Deluxe Room, and Premium Room. All reservations are subject to real-time room availability.
+            <strong className="text-[#F7F3EC]">Inventory Allocation:</strong> Hotel Fremont operates 21 guest rooms across three categories: Deluxe Room, Super Deluxe Room, and Premium Room. All reservations are subject to real-time room availability.
           </li>
           <li>
-            <strong className="text-[#24272B]">Binding Confirmation:</strong> A reservation is considered confirmed only after the required advance payment or authorization has been successfully validated and an official booking confirmation voucher containing a unique reference code (e.g. <code>FRM-XXXXXX</code>) is issued via email or WhatsApp.
+            <strong className="text-[#F7F3EC]">Binding Confirmation:</strong> A reservation is considered confirmed only after the required advance payment or authorization has been successfully validated and an official booking confirmation voucher containing a unique reference code (e.g. <code>FRM-XXXXXX</code>) is issued via email or WhatsApp.
           </li>
           <li>
-            <strong className="text-[#24272B]">Cancellation &amp; Refund Rules:</strong> All cancellations, no-shows, and refunds are governed strictly by our <Link href="/cancellation-refund-policy" className="text-[#742B40] underline hover:text-[#24272B] font-semibold transition-colors">Cancellation &amp; Refund Policy</Link>. Notice provided at least {siteConfig.cancellation.freeCancellationHours} before check-in qualifies for a full refund. Cancellations made less than {siteConfig.cancellation.freeCancellationHours} prior to check-in, as well as no-shows, are non-refundable. Early departures are non-refundable for unused nights unless approved by management.
+            <strong className="text-[#F7F3EC]">Cancellation &amp; Refund Rules:</strong> All cancellations, no-shows, and refunds are governed strictly by our <Link href="/cancellation-refund-policy" className="text-[#C9A96E] underline hover:text-white transition-colors">Cancellation &amp; Refund Policy</Link>. Notice provided at least {siteConfig.cancellation.freeCancellationHours} before check-in qualifies for a full refund. Cancellations made less than {siteConfig.cancellation.freeCancellationHours} prior to check-in, as well as no-shows, are non-refundable. Early departures are non-refundable for unused nights unless approved by management.
           </li>
           <li>
-            <strong className="text-[#24272B]">Guest Occupancy Limits:</strong> Each room category maintains strict maximum guest occupancy limits (up to 2 guests per room). Exceeding designated room capacity without prior written management approval is strictly prohibited.
+            <strong className="text-[#F7F3EC]">Guest Occupancy Limits:</strong> Each room category maintains strict maximum guest occupancy limits (up to 2 guests per room). Exceeding designated room capacity without prior written management approval is strictly prohibited.
           </li>
         </ul>
       </section>
 
       {/* 2. Rates, Currency & Taxes */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <CreditCard className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <CreditCard className="w-5 h-5 text-[#C9A96E]" />
           <span>2. Tariff, Currency &amp; Goods and Services Tax (GST)</span>
         </h2>
-        <ul className="space-y-2 list-disc pl-6 text-[#64615D]">
+        <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
             All room tariffs, dining menus, and event venue packages are published and billed in <strong>Indian Rupees (INR ₹)</strong>.
           </li>
@@ -79,31 +79,31 @@ export default function TermsAndConditionsPage() {
 
       {/* 3. Check-In & Check-Out Times */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <Clock className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <Clock className="w-5 h-5 text-[#C9A96E]" />
           <span>3. Check-In &amp; Check-Out Schedule</span>
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-[#F8F6F2] border border-[#E5DFD7] rounded-xl p-5 space-y-2">
-            <span className="text-[10px] font-sans uppercase tracking-wider text-[#742B40] font-bold block">
+          <div className="bg-[#151518] border border-white/10 rounded-xl p-5 space-y-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E] block">
               Standard Check-In
             </span>
-            <div className="text-lg font-serif font-bold text-[#24272B]">
+            <div className="text-lg font-serif font-bold text-[#F7F3EC]">
               {siteConfig.checkInTime}
             </div>
-            <p className="text-xs text-[#64615D]">
+            <p className="text-xs text-[#A8A59E]">
               Early arrival is subject to availability upon request. Guaranteed early check-in before standard hours may incur a supplemental day tariff.
             </p>
           </div>
 
-          <div className="bg-[#F8F6F2] border border-[#E5DFD7] rounded-xl p-5 space-y-2">
-            <span className="text-[10px] font-sans uppercase tracking-wider text-[#742B40] font-bold block">
+          <div className="bg-[#151518] border border-white/10 rounded-xl p-5 space-y-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E] block">
               Standard Check-Out
             </span>
-            <div className="text-lg font-serif font-bold text-[#24272B]">
+            <div className="text-lg font-serif font-bold text-[#F7F3EC]">
               {siteConfig.checkOutTime}
             </div>
-            <p className="text-xs text-[#64615D]">
+            <p className="text-xs text-[#A8A59E]">
               Late check-out requires prior management clearance. Unauthorized late departures will incur additional half-day or full-day charges.
             </p>
           </div>
@@ -112,23 +112,23 @@ export default function TermsAndConditionsPage() {
 
       {/* 4. Mandatory Identification Requirements */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <ShieldAlert className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <ShieldAlert className="w-5 h-5 text-[#C9A96E]" />
           <span>4. Mandatory Government Identification</span>
         </h2>
-        <div className="bg-[#F8F6F2] border border-[#E5DFD7] rounded-2xl p-6 space-y-3">
-          <p className="text-sm text-[#24272B] font-medium leading-relaxed">
+        <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 space-y-3">
+          <p className="text-sm text-[#F7F3EC] font-medium leading-relaxed">
             In compliance with Indian statutory guidelines and local police directives:
           </p>
-          <ul className="space-y-2 list-disc pl-6 text-xs sm:text-sm text-[#64615D]">
+          <ul className="space-y-2 list-disc pl-6 text-xs sm:text-sm text-[#A8A59E]">
             <li>
               Every adult occupant (18 years and above) must present an <strong>original, valid government-issued photo identity document</strong> bearing a clear photograph and residential address upon check-in.
             </li>
             <li>
-              <strong className="text-[#24272B]">Accepted Indian IDs:</strong> Aadhaar Card, Passport, Driving License, or Voter ID Card. <em>PAN Cards are legally not accepted as proof of residence for hotel registration.</em>
+              <strong className="text-[#F7F3EC]">Accepted Indian IDs:</strong> Aadhaar Card, Passport, Driving License, or Voter ID Card. <em>PAN Cards are legally not accepted as proof of residence for hotel registration.</em>
             </li>
             <li>
-              <strong className="text-[#24272B]">Foreign Nationals:</strong> Must present an original valid Passport, valid Indian Visa, and where applicable, Overseas Citizen of India (OCI) registration. Form C registration is mandatorily submitted to immigration authorities.
+              <strong className="text-[#F7F3EC]">Foreign Nationals:</strong> Must present an original valid Passport, valid Indian Visa, and where applicable, Overseas Citizen of India (OCI) registration. Form C registration is mandatorily submitted to immigration authorities.
             </li>
             <li>
               Hotel Fremont reserves the right to deny check-in without refund if valid identification is not produced upon arrival.
@@ -139,44 +139,44 @@ export default function TermsAndConditionsPage() {
 
       {/* 5. Guest Conduct & Property Damage */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <AlertTriangle className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <AlertTriangle className="w-5 h-5 text-[#C9A96E]" />
           <span>5. Guest Conduct, Decorum &amp; Property Damages</span>
         </h2>
-        <ul className="space-y-2 list-disc pl-6 text-[#64615D]">
+        <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
-            <strong className="text-[#24272B]">Guest Decorum:</strong> Guests are expected to maintain courteous conduct and respect the tranquility of other patrons. Loud music, disruptive behaviour, or unlawful activities are grounds for immediate eviction without refund.
+            <strong className="text-[#F7F3EC]">Guest Decorum:</strong> Guests are expected to maintain courteous conduct and respect the tranquility of other patrons. Loud music, disruptive behaviour, or unlawful activities are grounds for immediate eviction without refund.
           </li>
           <li>
-            <strong className="text-[#24272B]">Damage Liability:</strong> The primary guest named on the booking is financially responsible for any breakage, staining, structural damage, or missing fixtures within the allocated room or public areas caused by themselves or their invited visitors. Full replacement or restoration costs will be charged directly prior to departure.
+            <strong className="text-[#F7F3EC]">Damage Liability:</strong> The primary guest named on the booking is financially responsible for any breakage, staining, structural damage, or missing fixtures within the allocated room or public areas caused by themselves or their invited visitors. Full replacement or restoration costs will be charged directly prior to departure.
           </li>
           <li>
-            <strong className="text-[#24272B]">Non-Smoking Policy:</strong> All guest rooms and indoor suites are strictly non-smoking. A specialized cleaning recovery fee of ₹5,000 will be levied if evidence of indoor smoking is detected. Designated outdoor smoking zones are provided.
+            <strong className="text-[#F7F3EC]">Non-Smoking Policy:</strong> All guest rooms and indoor suites are strictly non-smoking. A specialized cleaning recovery fee of ₹5,000 will be levied if evidence of indoor smoking is detected. Designated outdoor smoking zones are provided.
           </li>
         </ul>
       </section>
 
       {/* 6. Force Majeure */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <Building className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <Building className="w-5 h-5 text-[#C9A96E]" />
           <span>6. Force Majeure</span>
         </h2>
-        <p className="text-[#64615D]">
+        <p>
           Hotel Fremont shall not be held in breach of contract, nor liable for any delay or failure in performance of our hospitality services, arising from events beyond our reasonable control. Such &quot;Force Majeure&quot; events include acts of God, flood, earthquake, extreme weather disasters, civil unrest, war, governmental curfew or state travel lockdowns, utility grid collapse, or telecommunication outages. In such circumstances, our liability is limited strictly to rescheduling the reservation or issuing a future credit note at management discretion.
         </p>
       </section>
 
       {/* 7. Limitation of Liability */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <Scale className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <Scale className="w-5 h-5 text-[#C9A96E]" />
           <span>7. Limitation of Liability</span>
         </h2>
-        <p className="text-[#64615D]">
+        <p>
           To the maximum extent permitted by Indian law:
         </p>
-        <ul className="space-y-2 list-disc pl-6 text-[#64615D]">
+        <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
             Hotel Fremont’s maximum aggregate liability for any direct claims, losses, or damages arising out of your booking or stay shall strictly not exceed the total room tariff amount actually paid by you for the specific reservation.
           </li>
@@ -188,13 +188,13 @@ export default function TermsAndConditionsPage() {
 
       {/* 8. Governing Law & Jurisdiction */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <Scale className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <Scale className="w-5 h-5 text-[#C9A96E]" />
           <span>8. Governing Law &amp; Exclusive Jurisdiction</span>
         </h2>
-        <div className="bg-white border border-[#E5DFD7] rounded-2xl p-6 text-sm text-[#64615D] leading-relaxed shadow-sm">
+        <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 text-sm text-[#A8A59E] leading-relaxed">
           These Terms and Conditions, all reservations, and any dispute or controversy arising out of or related to your relationship with Hotel Fremont shall be governed by, interpreted, and construed strictly in accordance with the substantive <strong>laws of the Republic of India</strong>.
-          <p className="mt-3 text-[#24272B] font-semibold">
+          <p className="mt-3 text-[#F7F3EC] font-semibold">
             Any legal dispute, action, or proceeding shall be subject to the exclusive jurisdiction of the competent courts situated at <strong>SAS Nagar (Mohali), Punjab, India</strong>.
           </p>
         </div>
@@ -202,17 +202,17 @@ export default function TermsAndConditionsPage() {
 
       {/* 9. Contact Details */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#24272B] pb-2 border-b border-[#E5DFD7] flex items-center gap-2.5">
-          <Building className="w-5 h-5 text-[#742B40]" />
+        <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
+          <Building className="w-5 h-5 text-[#C9A96E]" />
           <span>9. Official Contact Information</span>
         </h2>
-        <p className="text-[#64615D]">For any queries regarding these Terms &amp; Conditions, please contact:</p>
-        <div className="bg-white border border-[#E5DFD7] rounded-xl p-5 text-xs sm:text-sm space-y-1.5 text-[#64615D] shadow-sm">
-          <p className="text-[#24272B] font-semibold">{siteConfig.siteName}</p>
+        <p>For any queries regarding these Terms &amp; Conditions, please contact:</p>
+        <div className="bg-[#151518] border border-white/10 rounded-xl p-5 text-xs sm:text-sm space-y-1.5 text-[#A8A59E]">
+          <p className="text-[#F7F3EC] font-semibold">{siteConfig.siteName}</p>
           <p>Proprietor: {siteConfig.proprietorName}</p>
           <p>{siteConfig.address}</p>
-          <p>Phone: <a href={siteConfig.phoneTel} className="text-[#742B40] font-semibold hover:underline">{siteConfig.phone}</a></p>
-          <p>Email: <a href={`mailto:${siteConfig.email}`} className="text-[#742B40] font-semibold hover:underline">{siteConfig.email}</a></p>
+          <p>Phone: <a href={siteConfig.phoneTel} className="text-[#C9A96E] hover:underline">{siteConfig.phone}</a></p>
+          <p>Email: <a href={`mailto:${siteConfig.email}`} className="text-[#C9A96E] hover:underline">{siteConfig.email}</a></p>
         </div>
       </section>
     </PolicyLayout>

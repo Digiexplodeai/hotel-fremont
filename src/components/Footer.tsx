@@ -78,9 +78,9 @@ export default function Footer() {
   };
 
   return (
-    <footer id="contact" className="relative bg-[#24272B] text-[#F8F6F2] border-t border-white/10 pt-20 pb-28 sm:pb-16 overflow-hidden scroll-mt-20 lg:scroll-mt-24">
-      {/* Background Subtle Accent */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#B69A68]/10 rounded-full blur-3xl pointer-events-none" />
+    <footer id="contact" className="relative bg-[#09090B] text-[#F7F3EC] border-t border-white/10 pt-20 pb-28 sm:pb-16 overflow-hidden scroll-mt-20 lg:scroll-mt-24">
+      {/* Background Accent */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#C9A96E]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-white/10">
@@ -97,11 +97,11 @@ export default function Footer() {
               />
             </Link>
 
-            <p className="text-xs sm:text-sm text-gray-300 font-normal leading-relaxed max-w-sm">
+            <p className="text-xs sm:text-sm text-[#A8A59E] font-light leading-relaxed max-w-sm">
               {footer.about}
             </p>
 
-            {/* Social Icons */}
+            {/* Social Icons - only if configured */}
             {footer.socials && footer.socials.length > 0 && (
               <div className="flex items-center space-x-3 pt-2">
                 {(footer.socials as any[]).map((social) => {
@@ -112,7 +112,7 @@ export default function Footer() {
                       href={social.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#742B40] text-gray-300 hover:text-white border border-white/10 flex items-center justify-center transition-all duration-300 cursor-pointer"
+                      className="w-9 h-9 rounded-full bg-[#151518] hover:bg-[#E02B1D] text-[#A8A59E] hover:text-white border border-white/10 flex items-center justify-center transition-all duration-300"
                       aria-label={social.name}
                     >
                       <IconComp className="w-4 h-4" />
@@ -125,7 +125,7 @@ export default function Footer() {
 
           {/* Quick Links Column */}
           <div className="lg:col-span-3 space-y-4">
-            <span className="text-xs font-sans tracking-[0.25em] text-[#DFC28A] uppercase font-bold block">
+            <span className="text-xs font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-bold block">
               Quick Navigation
             </span>
             <ul className="space-y-2.5">
@@ -134,7 +134,7 @@ export default function Footer() {
                   <Link
                     href={link.href}
                     onClick={(e) => handleQuickLink(e, link.href)}
-                    className="text-xs text-gray-300 hover:text-[#DFC28A] transition-colors link-underline inline-block font-sans"
+                    className="text-xs text-[#A8A59E] hover:text-[#E02B1D] transition-colors link-underline inline-block font-sans"
                   >
                     {link.label}
                   </Link>
@@ -145,25 +145,25 @@ export default function Footer() {
 
           {/* Contact Details Column */}
           <div className="lg:col-span-5 space-y-4">
-            <span className="text-xs font-sans tracking-[0.25em] text-[#DFC28A] uppercase font-bold block">
+            <span className="text-xs font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-bold block">
               Hotel Fremont Front Desk &amp; Reception
             </span>
 
-            <div className="space-y-3.5 text-xs text-gray-300 font-normal">
+            <div className="space-y-3.5 text-xs text-[#A8A59E] font-light">
               <div className="flex items-start space-x-3">
-                <MapPin className="w-4 h-4 text-[#DFC28A] shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-[#E02B1D] shrink-0 mt-0.5" />
                 <span>{contact.address}</span>
               </div>
 
               <div className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 text-[#DFC28A] shrink-0" />
+                <Phone className="w-4 h-4 text-[#E02B1D] shrink-0" />
                 <a href={contact.phoneTel} className="hover:text-white transition-colors">
                   {contact.phone}
                 </a>
               </div>
 
               <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-[#DFC28A] shrink-0" />
+                <Mail className="w-4 h-4 text-[#E02B1D] shrink-0" />
                 <a href={`mailto:${contact.bookingEmail}`} className="hover:text-white transition-colors">
                   {contact.bookingEmail}
                 </a>
@@ -173,7 +173,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar: Copyright, Legal & Back to Top */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-4">
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-[#A8A59E]/70 gap-4">
           <div>{footer.copyright}</div>
 
           <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-6 gap-y-2">
@@ -185,7 +185,7 @@ export default function Footer() {
 
             <button
               onClick={scrollToTop}
-              className="p-2 rounded-full bg-white/10 hover:bg-[#742B40] text-white border border-white/10 transition-colors ml-2 cursor-pointer"
+              className="p-2 rounded-full bg-[#151518] hover:bg-[#E02B1D] text-white border border-white/10 transition-colors ml-2"
               aria-label="Scroll to top"
               title="Back to top"
             >

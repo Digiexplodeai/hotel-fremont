@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BedDouble, Maximize2, Users, Eye, Calendar, Sparkles } from "lucide-react";
+import { BedDouble, Maximize2, Users, ArrowRight, Eye, Calendar, Sparkles } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { useSiteSlots } from "@/context/SiteSlotsContext";
 import RoomDetailModal, { RoomType } from "./RoomDetailModal";
@@ -20,6 +20,7 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
 
   const rooms = (siteConfig.rooms as RoomType[]).map((room) => {
     const slug = room.slug || room.id;
+    // Map specific slots
     let mainSlotUrl = "";
     let mainAlt = room.name || room.title;
 
@@ -45,10 +46,10 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
   });
 
   return (
-    <section id="rooms" className="relative py-20 lg:py-28 bg-[#EEE8DF] text-[#24272B] overflow-hidden scroll-mt-20 lg:scroll-mt-24">
-      {/* Decorative Subtle Accent Lighting */}
-      <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-[#B69A68]/15 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 left-0 w-[400px] h-[400px] bg-[#742B40]/10 rounded-full blur-[120px] pointer-events-none" />
+    <section id="rooms" className="relative py-20 lg:py-28 bg-[#0E0E10] text-[#F7F3EC] overflow-hidden scroll-mt-20 lg:scroll-mt-24">
+      {/* Decorative Subtle Lighting */}
+      <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-[#C9A96E]/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-10 left-0 w-[400px] h-[400px] bg-[#E02B1D]/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
@@ -60,11 +61,11 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
             transition={{ duration: 0.8 }}
             className="max-w-2xl"
           >
-            <div className="inline-flex items-center space-x-2 text-[11px] font-sans tracking-[0.3em] text-[#742B40] uppercase font-bold mb-3">
-              <span className="w-6 h-[2px] bg-[#742B40]" />
+            <div className="inline-flex items-center space-x-2 text-[11px] font-sans tracking-[0.3em] text-[#C9A96E] uppercase font-semibold mb-3">
+              <span className="w-6 h-[1.5px] bg-[#E02B1D]" />
               <span>ROOMS &amp; STAYS</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#24272B] leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#F7F3EC] leading-tight">
               Thoughtfully Appointed Rooms
             </h2>
           </motion.div>
@@ -74,7 +75,7 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xs sm:text-sm text-[#64615D] font-normal max-w-sm mt-4 md:mt-0"
+            className="text-xs sm:text-sm text-[#A8A59E] font-light max-w-sm mt-4 md:mt-0"
           >
             21 guest rooms across 3 categories. All rooms include plush king-size beds, air-conditioning, Smart TV, tea/coffee maker, and complimentary Wi-Fi.
           </motion.p>
@@ -92,10 +93,10 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: index * 0.12 }}
-                className="group relative rounded-2xl bg-white border border-[#E5DFD7] hover:border-[#B69A68] transition-all duration-300 overflow-hidden shadow-md hover:shadow-xl flex flex-col justify-between"
+                className="group relative rounded-2xl bg-[#151518] border border-white/10 hover:border-[#C9A96E]/40 transition-all duration-300 overflow-hidden shadow-xl flex flex-col justify-between"
               >
                 {/* Image Container with Safe Ratio */}
-                <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#F8F6F2]">
+                <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#0E0E10]">
                   {hasRealPhoto ? (
                     <Image
                       src={room.image}
@@ -113,18 +114,18 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
                     />
                   )}
 
-                  {/* Gradient Overlay for photo contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#151518] via-transparent to-transparent pointer-events-none" />
 
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                     {room.tag && (
-                      <span className="px-3 py-1 rounded-full bg-[#742B40] text-white text-[10px] font-sans font-bold tracking-widest uppercase shadow">
+                      <span className="px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] font-sans font-bold tracking-widest uppercase shadow">
                         {room.tag}
                       </span>
                     )}
                     {room.inventoryLabel && (
-                      <span className="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md border border-[#E5DFD7] text-[#24272B] text-[10px] font-sans font-semibold">
+                      <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-[#F7F3EC] text-[10px] font-sans font-medium">
                         {room.inventoryLabel}
                       </span>
                     )}
@@ -135,40 +136,40 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
                 <div className="p-6 flex flex-col flex-1 justify-between">
                   <div>
                     <div className="flex items-baseline justify-between mb-2">
-                      <h3 className="text-xl font-serif font-bold text-[#24272B] group-hover:text-[#742B40] transition-colors">
+                      <h3 className="text-xl font-serif font-bold text-[#F7F3EC] group-hover:text-[#C9A96E] transition-colors">
                         {room.title}
                       </h3>
                     </div>
 
                     <div className="mb-4">
-                      <span className="text-lg font-serif font-bold text-[#742B40]">
+                      <span className="text-lg font-serif font-bold text-[#E02B1D]">
                         {room.startingPriceLabel || `From ${room.priceLabel} + taxes`}
                       </span>
-                      <span className="text-[11px] text-[#64615D] block">
+                      <span className="text-[11px] text-[#A8A59E] block">
                         Base tariff · 4 rate plans available
                       </span>
                     </div>
 
-                    <p className="text-xs text-[#64615D] font-normal leading-relaxed mb-5 line-clamp-3">
+                    <p className="text-xs text-[#A8A59E] font-light leading-relaxed mb-5 line-clamp-3">
                       {room.shortDescription || room.description}
                     </p>
 
                     {/* Room Specs */}
-                    <div className="grid grid-cols-2 gap-2 text-[11px] text-[#24272B]/85 mb-6 pb-5 border-b border-[#E5DFD7] font-sans">
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-[#F7F3EC]/80 mb-6 pb-5 border-b border-white/5 font-sans">
                       <div className="flex items-center space-x-1.5">
-                        <Maximize2 className="w-3.5 h-3.5 text-[#B69A68]" />
+                        <Maximize2 className="w-3.5 h-3.5 text-[#C9A96E]" />
                         <span>{room.size}</span>
                       </div>
                       <div className="flex items-center space-x-1.5">
-                        <BedDouble className="w-3.5 h-3.5 text-[#B69A68]" />
+                        <BedDouble className="w-3.5 h-3.5 text-[#C9A96E]" />
                         <span>{room.bed}</span>
                       </div>
                       <div className="flex items-center space-x-1.5">
-                        <Users className="w-3.5 h-3.5 text-[#B69A68]" />
+                        <Users className="w-3.5 h-3.5 text-[#C9A96E]" />
                         <span>{room.occupancy}</span>
                       </div>
-                      <div className="flex items-center space-x-1.5 text-emerald-700 font-medium">
-                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <div className="flex items-center space-x-1.5 text-emerald-400">
+                        <Sparkles className="w-3.5 h-3.5" />
                         <span>Free Wi-Fi</span>
                       </div>
                     </div>
@@ -178,7 +179,7 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setSelectedRoom(room)}
-                      className="w-full py-2.5 px-3 rounded-xl border border-[#B69A68] hover:border-[#742B40] text-[#742B40] hover:text-white hover:bg-[#742B40] text-xs font-sans uppercase tracking-[0.14em] font-semibold transition-all duration-300 flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
+                      className="w-full py-2.5 px-3 rounded-xl border border-[#C9A96E]/30 hover:border-[#C9A96E] text-[#C9A96E] hover:text-white hover:bg-white/5 text-xs font-sans uppercase tracking-[0.14em] font-medium transition-all duration-300 flex items-center justify-center space-x-1.5 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>View Room</span>
@@ -186,7 +187,7 @@ export default function RoomsSection({ onBookRoom }: RoomsSectionProps) {
 
                     <button
                       onClick={() => onBookRoom(room.id)}
-                      className="w-full py-2.5 px-3 rounded-xl bg-[#742B40] hover:bg-[#5C2033] text-white text-xs font-sans uppercase tracking-[0.14em] font-semibold transition-all duration-300 shadow-[0_4px_15px_rgba(116,43,64,0.3)] hover:shadow-[0_4px_20px_rgba(116,43,64,0.5)] flex items-center justify-center space-x-1.5 cursor-pointer"
+                      className="w-full py-2.5 px-3 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] text-white text-xs font-sans uppercase tracking-[0.14em] font-semibold transition-all duration-300 shadow-[0_4px_15px_rgba(224,43,29,0.35)] flex items-center justify-center space-x-1.5 cursor-pointer"
                     >
                       <Calendar className="w-3.5 h-3.5" />
                       <span>Book Now</span>

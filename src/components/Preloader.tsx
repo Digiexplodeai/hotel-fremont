@@ -11,7 +11,7 @@ export default function Preloader() {
   const [progress, setProgress] = useState(0);
   const hasTriggeredExitRef = useRef(false);
 
-  // Manual skip handler
+  // Manual skip handler (only manual user interaction, never stored or auto-triggered)
   const handleManualSkip = useCallback(() => {
     if (hasTriggeredExitRef.current) return;
     hasTriggeredExitRef.current = true;
@@ -19,7 +19,7 @@ export default function Preloader() {
     completeIntro();
   }, [completeIntro]);
 
-  // Lock body scroll while intro/curtain is visible
+  // Lock body scroll while intro/curtain is visible to avoid scrolling underneath
   useEffect(() => {
     if (showCurtain) {
       document.body.style.overflow = "hidden";
@@ -54,7 +54,9 @@ export default function Preloader() {
       } else {
         if (hasTriggeredExitRef.current) return;
         hasTriggeredExitRef.current = true;
+        // Progress filled, trigger curtain exit
         setShowCurtain(false);
+        // As curtain lifts away (1.0s), mark intro done so hero & navbar reveal
         completeTimerId = setTimeout(() => {
           completeIntro();
         }, 900);
@@ -76,32 +78,32 @@ export default function Preloader() {
       {showCurtain && (
         <motion.div
           key="fremont-preloader-curtain"
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#24272B] text-center overflow-hidden text-white"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0E0E10] text-center overflow-hidden"
           initial={{ y: "0%" }}
           exit={{
             y: "-100%",
             transition: {
               duration: 1.0,
-              ease: [0.76, 0, 0.24, 1], // Luxury curtain lift
+              ease: [0.76, 0, 0.24, 1], // Exact cubic-bezier(0.76, 0, 0.24, 1) luxury curtain lift
             },
           }}
         >
-          {/* Skip Button */}
+          {/* Subtle Manual Skip Button */}
           <button
             type="button"
             onClick={handleManualSkip}
-            className="absolute top-6 right-6 z-20 text-[11px] font-sans tracking-[0.2em] text-white/50 hover:text-[#DFC28A] uppercase transition-colors px-3 py-1.5 rounded cursor-pointer border border-transparent hover:border-white/20"
+            className="absolute top-6 right-6 z-20 text-[11px] font-sans tracking-[0.2em] text-[#F7F3EC]/40 hover:text-[#C9A96E] uppercase transition-colors px-3 py-1.5 rounded cursor-pointer border border-transparent hover:border-[#C9A96E]/30"
             aria-label="Skip Intro"
           >
             Skip
           </button>
 
-          {/* Ambient Burgundy Glow */}
-          <div className="absolute w-[600px] h-[600px] rounded-full bg-[#742B40]/25 blur-[140px] pointer-events-none" />
+          {/* Ambient Deep Red Core Glow */}
+          <div className="absolute w-[600px] h-[600px] rounded-full bg-[#E02B1D]/15 blur-[140px] pointer-events-none" />
 
           {/* Centered Content Container */}
           <div className="relative z-10 flex flex-col items-center px-6 max-w-lg w-full">
-            {/* Logo */}
+            {/* Logo fades in + slides up slightly (0.8s, ease power3.out) */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -115,25 +117,25 @@ export default function Preloader() {
                 height={26}
                 priority
                 style={{ height: "auto" }}
-                className="w-[280px] sm:w-[320px] md:w-[340px] max-w-[70vw] object-contain drop-shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
+                className="w-[280px] sm:w-[320px] md:w-[340px] max-w-[70vw] object-contain drop-shadow-[0_4px_30px_rgba(224,43,29,0.45)]"
               />
             </motion.div>
 
-            {/* Burgundy progress line */}
+            {/* Thin red progress line under it fills from 0 to 100% over ~1.6s */}
             <div className="w-56 sm:w-64 h-[2px] bg-white/10 overflow-hidden rounded-full mb-4">
               <motion.div
-                className="h-full bg-[#742B40] shadow-[0_0_14px_#742B40]"
+                className="h-full bg-[#E02B1D] shadow-[0_0_14px_#E02B1D]"
                 style={{ width: `${progress}%` }}
                 transition={{ ease: "easeOut" }}
               />
             </div>
 
-            {/* Mohali Subtitle */}
+            {/* Subtle Mohali Subtitle */}
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
-              className="text-[10px] sm:text-[11px] font-sans tracking-[0.3em] text-[#DFC28A] uppercase font-semibold"
+              className="text-[10px] sm:text-[11px] font-sans tracking-[0.3em] text-[#C9A96E] uppercase font-medium"
             >
               Mohali &bull; Airport Road
             </motion.span>

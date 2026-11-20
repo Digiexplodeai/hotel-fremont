@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { ArrowDown, Sparkles, MapPin } from "lucide-react";
 import { siteConfig } from "@/data/content";
@@ -45,26 +46,26 @@ export default function Hero({ onCheckAvailability, onExploreSuites, onExploreRo
         style={{ y: shouldReduceMotion ? 0 : yParallax }}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
       >
-        <div className="absolute inset-0 w-full h-full bg-[#24272B]">
+        <div className="absolute inset-0 w-full h-full bg-[#0E0E10]">
           {exteriorPhoto ? (
             <Image
               src={exteriorPhoto}
               alt="Hotel Fremont - Exterior on Airport Road, Mohali"
               fill
               priority
-              quality={88}
+              quality={85}
               sizes="100vw"
               className="object-cover object-center"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#2D2A26] via-[#24272B] to-[#1C1E21]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a20] via-[#101014] to-[#0A0A0C]" />
           )}
         </div>
 
-        {/* Ambient Softer Gradients for Clear Building Visibility & Perfect Text Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-black/15 to-black/70" />
-        <div className="absolute inset-0 bg-grain opacity-20" />
+        {/* Ambient Gradients for Text Contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10] via-black/40 to-black/60" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-black/20 to-black/80" />
+        <div className="absolute inset-0 bg-grain opacity-25" />
       </motion.div>
 
       {/* Hero Central Content */}
@@ -77,25 +78,25 @@ export default function Hero({ onCheckAvailability, onExploreSuites, onExploreRo
           initial={{ opacity: 0, y: -20 }}
           animate={isIntroDone ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-white/20 bg-black/45 backdrop-blur-md mb-6 shadow-lg"
+          className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-[#C9A96E]/40 bg-[#0E0E10]/70 backdrop-blur-md mb-6 shadow-lg"
         >
-          <Sparkles className="w-3.5 h-3.5 text-[#DFC28A]" />
-          <span className="text-[10px] sm:text-[11px] font-sans tracking-[0.25em] text-[#DFC28A] uppercase font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-[#E02B1D]" />
+          <span className="text-[10px] sm:text-[11px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold">
             {siteConfig.brand.badge || "3-Star Hotel"}
           </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#B69A68]" />
-          <span className="text-[10px] tracking-[0.18em] text-white/90 uppercase font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E02B1D]" />
+          <span className="text-[10px] tracking-[0.18em] text-[#F7F3EC]/85 uppercase">
             {siteConfig.brand.subline || "A convenient address on Airport Road"}
           </span>
         </motion.div>
 
         {/* Headline */}
-        <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] font-serif font-bold text-white tracking-tight leading-[1.12] mb-6 [text-shadow:_0_2px_22px_rgba(0,0,0,0.85)]">
+        <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] font-serif font-bold text-[#F7F3EC] tracking-tight leading-[1.12] mb-6 [text-shadow:_0_2px_20px_rgba(0,0,0,0.85)]">
           {words.map((word, i) => (
             <span key={i} className="inline-block overflow-hidden mr-2.5 sm:mr-3.5 align-top">
               <motion.span
                 className={`inline-block ${
-                  word === "Mohali." ? "text-[#DFC28A] italic font-normal" : "text-white"
+                  word === "Mohali." ? "text-[#C9A96E] italic font-normal" : "text-[#F7F3EC]"
                 }`}
                 initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
                 animate={
@@ -120,7 +121,7 @@ export default function Hero({ onCheckAvailability, onExploreSuites, onExploreRo
           initial={{ opacity: 0, y: 25 }}
           animate={isIntroDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 25 }}
           transition={{ duration: 0.8, delay: isIntroDone ? 0.55 : 0, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-white/95 font-light leading-relaxed mb-6 [text-shadow:_0_1px_12px_rgba(0,0,0,0.8)]"
+          className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-white/90 font-light leading-relaxed mb-6 [text-shadow:_0_1px_10px_rgba(0,0,0,0.8)]"
         >
           {siteConfig.brand.tagline}
         </motion.p>
@@ -130,11 +131,11 @@ export default function Hero({ onCheckAvailability, onExploreSuites, onExploreRo
           initial={{ opacity: 0 }}
           animate={isIntroDone ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.8, delay: isIntroDone ? 0.75 : 0 }}
-          className="flex items-center justify-center text-xs font-sans text-[#DFC28A] mb-6"
+          className="flex items-center justify-center text-xs font-sans text-[#C9A96E] mb-6"
         >
-          <div className="flex items-center space-x-1.5 bg-black/45 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
-            <MapPin className="w-3.5 h-3.5 text-[#742B40]" />
-            <span className="tracking-widest uppercase text-[11px] text-white/95 font-medium">
+          <div className="flex items-center space-x-1.5 bg-black/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10">
+            <MapPin className="w-3.5 h-3.5 text-[#E02B1D]" />
+            <span className="tracking-widest uppercase text-[11px] text-[#F7F3EC]/90">
               Sector 80, Airport Road, Mohali · 21 Rooms
             </span>
           </div>
@@ -169,7 +170,7 @@ export default function Hero({ onCheckAvailability, onExploreSuites, onExploreRo
               e.preventDefault();
               handleExplore();
             }}
-            className="flex items-center space-x-2 text-white/80 hover:text-[#DFC28A] transition-colors group cursor-pointer text-[10px] uppercase tracking-[0.25em]"
+            className="flex items-center space-x-2 text-[#F7F3EC]/70 hover:text-[#C9A96E] transition-colors group cursor-pointer text-[10px] uppercase tracking-[0.25em]"
             aria-label="Scroll to discover rooms"
           >
             <span>Scroll To Discover</span>
@@ -177,7 +178,7 @@ export default function Hero({ onCheckAvailability, onExploreSuites, onExploreRo
               animate={{ y: [0, 4, 0] }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
             >
-              <ArrowDown className="w-3.5 h-3.5 text-[#DFC28A]" />
+              <ArrowDown className="w-3.5 h-3.5 text-[#E02B1D]" />
             </motion.div>
           </a>
         </motion.div>

@@ -80,12 +80,12 @@ export default function HomeClient() {
         <CustomCursor />
         <HashScrollHandler />
 
-        {/* Main Page Layout - Warm Ivory Light Theme */}
-        <div className="relative min-h-screen bg-[#F8F6F2] text-[#24272B] flex flex-col selection:bg-[#742B40] selection:text-white">
-          {/* Elegant Navigation */}
+        {/* Main Page Layout */}
+        <div className="relative min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col selection:bg-[#E02B1D] selection:text-white">
+          {/* Transparent & Frosted Glass Navigation */}
           <Navbar onOpenBooking={() => handleOpenBooking()} />
 
-          {/* Hero Section with Exterior Building Photo & Booking Bar */}
+          {/* Hero Section with Cinematic Background & Floating Booking Bar */}
           <main className="flex-1">
             <Hero
               onCheckAvailability={(data) => handleOpenBooking(data)}
@@ -94,32 +94,32 @@ export default function HomeClient() {
               }}
             />
 
-            {/* About / Heritage Story — Warm Ivory #F8F6F2 */}
+            {/* About / Heritage Story & Overlapping Parallax Visuals */}
             <AboutIntro />
 
-            {/* Rooms & Suites Showcase — Soft Sand #EEE8DF */}
+            {/* Rooms & Suites Showcase with Modal Gallery */}
             <RoomsSection onBookRoom={handleBookRoom} />
 
-            {/* Hotel Facilities — Warm Ivory #F8F6F2 */}
+            {/* 8-Icon Luxury Amenities Grid */}
             <AmenitiesSection />
 
-            {/* In-House Restaurant & Dining — Soft Sand #EEE8DF */}
+            {/* In-House Restaurant & Dining */}
             <DiningSection />
 
-            {/* Banquets & Events — Warm Ivory #F8F6F2 */}
+            {/* Grand Banquets & Corporate Event Venues */}
             <EventsSection />
 
-            {/* Property Gallery — Soft Sand #EEE8DF */}
+            {/* Visual Gallery Masonry Grid & Fullscreen Lightbox */}
             <GallerySection />
 
-            {/* Location & Directions — Soft Sand #EEE8DF */}
+            {/* Interactive Google Map & Location Details */}
             <LocationSection />
 
-            {/* Final Call to Action — Warm Ivory #F8F6F2 */}
+            {/* Grand Final CTA Band */}
             <FinalCta onOpenBooking={() => handleOpenBooking()} />
           </main>
 
-          {/* Grounded Charcoal Luxury Footer #24272B */}
+          {/* Luxury Brand Footer & Direct Contacts */}
           <Footer />
 
           {/* Persistent Floating Bottom Bar for Mobile Only */}

@@ -20,7 +20,7 @@ const manrope = Manrope({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#F8F6F2",
+  themeColor: "#0E0E10",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -140,7 +140,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${manrope.variable} scroll-smooth`}
+      className={`${playfair.variable} ${manrope.variable} dark scroll-smooth`}
       suppressHydrationWarning
     >
       <head>
@@ -150,7 +150,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="min-h-screen bg-[#F8F6F2] text-[#24272B] antialiased selection:bg-[#742B40] selection:text-white"
+        className="min-h-screen bg-[#0E0E10] text-[#F7F3EC] antialiased selection:bg-[#E02B1D] selection:text-white"
         suppressHydrationWarning
       >
         {children}

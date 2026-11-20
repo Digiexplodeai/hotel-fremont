@@ -4,17 +4,22 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
+  Calendar,
+  BedDouble,
+  Users,
+  ShieldCheck,
   AlertCircle,
   Loader2,
   Phone,
   DoorClosed,
-  ShieldCheck,
+  Coffee,
+  CheckCircle2,
   Sparkles,
 } from "lucide-react";
 import { HOTEL_CONFIG, RoomTypeConfig, DEFAULT_ROOM_TYPES, validateIndianPhone, formatINR } from "@/config/hotel";
 import { getRoomTypesAction, getRoomAvailabilityAction, RoomAvailabilityResult } from "@/actions/roomTypes";
 import { lockScroll, unlockScroll } from "@/lib/scroll";
-import { calculateServerBookingPrice } from "@/lib/payment-config";
+import { calculateServerBookingPrice, PAYMENT_CONFIG } from "@/lib/payment-config";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -145,8 +150,6 @@ export default function BookingModal({
         });
         setAvailability(map);
       }
-    } catch {
-      // Fallback
     } finally {
       setIsLoadingAvailability(false);
     }
@@ -158,7 +161,7 @@ export default function BookingModal({
     }
   }, [isOpen, checkIn, checkOut, refreshAvailability]);
 
-  // Handle ESC key and scroll lock
+  // Handle ESC key and scroll locking
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -176,37 +179,42 @@ export default function BookingModal({
     };
   }, [isOpen, onClose]);
 
-  // Active Room Config
+  // Active Room
   const activeRoom = useMemo(() => {
     return roomTypes.find((r) => r.code === selectedCode) || roomTypes[0] || DEFAULT_ROOM_TYPES[0];
   }, [roomTypes, selectedCode]);
 
-  // Nights calculation
-  const nights = useMemo(() => {
-    if (!checkIn || !checkOut) return 1;
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
-    const diffTime = end.getTime() - start.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 1;
-  }, [checkIn, checkOut]);
-
-  // Live Inventory Metrics for active room
+  // Availability
   const currentRoomAvail = availability[activeRoom.code];
-  const roomsLeft = currentRoomAvail !== undefined ? currentRoomAvail.rooms_left : (activeRoom.roomsTotal || activeRoom.totalRooms || 1);
-  const isCurrentRoomSoldOut = roomsLeft <= 0;
-  const isEntireHotelSoldOut = Object.values(availability).length > 0 && Object.values(availability).every((a) => a.rooms_left <= 0);
+  const categoryTotal = activeRoom.roomsTotal || activeRoom.totalRooms || 21;
+  const roomsLeft = currentRoomAvail ? currentRoomAvail.rooms_left : categoryTotal;
+  const isCurrentRoomSoldOut = currentRoomAvail ? roomsLeft <= 0 : false;
 
-  const categoryTotal = activeRoom.roomsTotal || activeRoom.totalRooms || 1;
-  const maxRoomsAllowed = Math.min(roomsLeft > 0 ? roomsLeft : 1, categoryTotal);
+  const isEntireHotelSoldOut = useMemo(() => {
+    if (Object.keys(availability).length === 0) return false;
+    return roomTypes.every((rt) => {
+      const av = availability[rt.code];
+      return av ? av.rooms_left <= 0 : false;
+    });
+  }, [availability, roomTypes]);
+
+  const maxRoomsAllowed = Math.max(0, roomsLeft);
 
   useEffect(() => {
-    if (roomsRequested > maxRoomsAllowed && maxRoomsAllowed > 0) {
-      setRoomsRequested(maxRoomsAllowed);
+    if (roomsLeft > 0 && roomsRequested > roomsLeft) {
+      setRoomsRequested(roomsLeft);
+    } else if (roomsLeft <= 0 && roomsRequested !== 1) {
+      setRoomsRequested(1);
     }
-  }, [roomsLeft, roomsRequested, maxRoomsAllowed]);
+  }, [roomsLeft, roomsRequested]);
 
-  // Pricing calculation
+  // Stay calculation
+  const d1 = new Date(checkIn);
+  const d2 = new Date(checkOut);
+  const timeDiff = Math.max(1, Math.round((d2.getTime() - d1.getTime()) / (1000 * 3600 * 24)));
+  const nights = isNaN(timeDiff) || timeDiff < 1 ? 1 : timeDiff;
+
+  // Rate lookup based on selected meal plan and occupancy
   const priceBreakdown = useMemo(() => {
     return calculateServerBookingPrice(
       activeRoom.code,
@@ -219,17 +227,25 @@ export default function BookingModal({
     );
   }, [activeRoom.code, checkIn, checkOut, roomsRequested, mealPlan, occupancy, roomTypes]);
 
-  const totalGuests = roomsRequested * (occupancy === "single" ? 1 : 2);
+  const totalGuests = (occupancy === "single" ? 1 : 2) * roomsRequested;
 
-  // Submit Handler -> Razorpay standard checkout
+  if (!isOpen) return null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (honeypot) return;
-
     if (isClientRateLimited()) {
-      setErrorMessage("Too many booking attempts. Please wait a few minutes or call reception directly.");
+      setErrorMessage("Too many submission attempts. Please wait a moment before trying again.");
+      return;
+    }
+
+    if (!name.trim() || name.trim().length < 2) {
+      setErrorMessage("Please enter your full name (minimum 2 characters).");
+      return;
+    }
+    if (name.trim().length > 100) {
+      setErrorMessage("Full name must not exceed 100 characters.");
       return;
     }
 
@@ -239,18 +255,28 @@ export default function BookingModal({
       return;
     }
 
-    if (!email || !email.includes("@") || !email.includes(".")) {
-      setErrorMessage("Please enter a valid email address to receive your confirmation voucher.");
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMessage("Please enter a valid email address for your booking confirmation voucher.");
       return;
     }
 
     if (!agreedToPolicy) {
-      setErrorMessage("Please accept the terms, conditions, and 24-hour cancellation policy to proceed.");
+      setErrorMessage("Please accept the Terms and Conditions and 24-Hour Cancellation & Refund Policy to proceed.");
+      return;
+    }
+
+    if (!checkIn || !checkOut) {
+      setErrorMessage("Please select check-in and check-out dates.");
+      return;
+    }
+
+    if (checkIn < todayStr) {
+      setErrorMessage("Check-in date cannot be in the past.");
       return;
     }
 
     if (checkOut <= checkIn) {
-      setErrorMessage("Check-out date must be after check-in date.");
+      setErrorMessage("Check-out date must be after the check-in date.");
       return;
     }
 
@@ -321,8 +347,8 @@ export default function BookingModal({
           occupancy,
         },
         theme: {
-          color: "#742B40",
-          backdrop_color: "#F8F6F2",
+          color: "#E02B1D",
+          backdrop_color: "#0E0E10",
         },
         modal: {
           ondismiss: () => {
@@ -386,7 +412,7 @@ export default function BookingModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 bg-[#0E0E10]/90 backdrop-blur-md"
         />
 
         <motion.div
@@ -394,43 +420,43 @@ export default function BookingModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="relative w-full max-w-2xl bg-white border border-[#E5DFD7] rounded-2xl shadow-[0_25px_80px_rgba(36,39,43,0.2)] p-6 sm:p-8 z-10 my-auto text-[#24272B]"
+          className="relative w-full max-w-2xl bg-[#151518] border border-white/10 rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.85)] p-6 sm:p-8 z-10 my-auto text-[#F7F3EC]"
         >
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-[#F8F6F2] text-[#24272B] hover:text-[#742B40] hover:bg-[#EEE8DF] border border-[#E5DFD7] transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 rounded-full bg-[#0E0E10] text-[#F7F3EC] hover:text-[#E02B1D] border border-white/10 transition-colors cursor-pointer"
             aria-label="Close booking modal"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div>
-            <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#742B40] uppercase font-bold mb-2">
-              <Sparkles className="w-3 h-3 text-[#742B40]" />
+            <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold mb-2">
+              <Sparkles className="w-3 h-3 text-[#E02B1D]" />
               <span>HOTEL FREMONT · AIRPORT ROAD, MOHALI</span>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#24272B] mb-2">
+            <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC] mb-2">
               Book Your Stay
             </h3>
 
-            <p className="text-xs text-[#64615D] mb-5 font-normal">
+            <p className="text-xs text-[#A8A59E] mb-5 font-light">
               Direct booking with transparent rates, 24-hour reception assistance, and instant booking confirmation.
             </p>
 
             {isEntireHotelSoldOut && (
-              <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs space-y-2">
-                <div className="flex items-center gap-2 font-bold text-red-900">
-                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <div className="mb-5 p-4 rounded-xl bg-red-950/70 border border-red-500/50 text-red-200 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-red-300">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
                   <span>All Rooms Sold Out for Selected Dates</span>
                 </div>
-                <p className="text-[11px] text-red-700 leading-relaxed">
+                <p className="text-[11px] text-red-200/90 leading-relaxed">
                   Hotel Fremont is fully booked for these dates. For queries or future bookings, please contact our front desk:
                 </p>
                 <div className="flex flex-wrap gap-3 pt-1">
                   <a
                     href={`tel:${HOTEL_CONFIG.phone}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-900 font-mono text-[11px]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[11px]"
                   >
                     <Phone className="w-3 h-3" />
                     <span>{HOTEL_CONFIG.phone}</span>
@@ -440,8 +466,8 @@ export default function BookingModal({
             )}
 
             {errorMessage && (
-              <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <div className="mb-5 p-3.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-center gap-2.5">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -461,7 +487,7 @@ export default function BookingModal({
               {/* Dates Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Check-In Date * (1:00 PM)
                   </label>
                   <input
@@ -479,12 +505,12 @@ export default function BookingModal({
                         setCheckOut(nextD.toISOString().slice(0, 10));
                       }
                     }}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none [color-scheme:light]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none [color-scheme:dark]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Check-Out Date * (11:00 AM)
                   </label>
                   <input
@@ -496,7 +522,7 @@ export default function BookingModal({
                       setCheckOut(e.target.value);
                       setErrorMessage(null);
                     }}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none [color-scheme:light]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -504,11 +530,11 @@ export default function BookingModal({
               {/* Room Category Selection */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] font-semibold">
                     Room Category *
                   </label>
                   {isLoadingAvailability && (
-                    <span className="text-[10px] text-[#64615D] flex items-center gap-1">
+                    <span className="text-[10px] text-[#A8A59E] flex items-center gap-1">
                       <Loader2 className="w-2.5 h-2.5 animate-spin" />
                       <span>Checking availability...</span>
                     </span>
@@ -521,7 +547,7 @@ export default function BookingModal({
                     setSelectedCode(e.target.value);
                     setErrorMessage(null);
                   }}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none cursor-pointer"
                 >
                   {roomTypes.map((rt) => {
                     const av = availability[rt.code];
@@ -540,20 +566,20 @@ export default function BookingModal({
 
                 <div className="mt-1.5 flex items-center justify-between text-[11px]">
                   <div className="flex items-center gap-1.5">
-                    <DoorClosed className="w-3.5 h-3.5 text-[#742B40]" />
+                    <DoorClosed className="w-3.5 h-3.5 text-[#C9A96E]" />
                     {currentRoomAvail ? (
                       roomsLeft > 0 ? (
-                        <span className={roomsLeft <= 2 ? "text-amber-700 font-medium" : "text-emerald-700 font-medium"}>
+                        <span className={roomsLeft <= 2 ? "text-amber-400 font-medium" : "text-emerald-400 font-medium"}>
                           {roomsLeft} of {categoryTotal} rooms available for selected dates
                         </span>
                       ) : (
-                        <span className="text-[#742B40] font-bold">Sold out for these dates</span>
+                        <span className="text-[#E02B1D] font-bold">Sold out for these dates</span>
                       )
                     ) : (
-                      <span className="text-[#64615D]">{categoryTotal} total rooms in this category</span>
+                      <span className="text-[#A8A59E]">{categoryTotal} total rooms in this category</span>
                     )}
                   </div>
-                  <span className="text-[#64615D] text-[10px]">
+                  <span className="text-[#A8A59E] text-[10px]">
                     {activeRoom.sizeSqft ? `${activeRoom.sizeSqft} sq ft · ` : ""}Max 2 guests/room
                   </span>
                 </div>
@@ -562,13 +588,13 @@ export default function BookingModal({
               {/* Meal Plan & Occupancy Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Meal Plan *
                   </label>
                   <select
                     value={mealPlan}
                     onChange={(e) => setMealPlan(e.target.value as any)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none cursor-pointer"
                   >
                     <option value="without_breakfast">Without Breakfast (Room Only)</option>
                     <option value="with_breakfast">With Breakfast (Buffet Included)</option>
@@ -576,13 +602,13 @@ export default function BookingModal({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Occupancy *
                   </label>
                   <select
                     value={occupancy}
                     onChange={(e) => setOccupancy(e.target.value as any)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none cursor-pointer"
                   >
                     <option value="double">Double Occupancy (2 Guests / room)</option>
                     <option value="single">Single Occupancy (1 Guest / room)</option>
@@ -592,14 +618,14 @@ export default function BookingModal({
 
               {/* Number of Rooms */}
               <div>
-                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                   Number of Rooms *
                 </label>
                 <select
                   value={roomsRequested}
                   disabled={isCurrentRoomSoldOut || maxRoomsAllowed <= 0}
                   onChange={(e) => setRoomsRequested(Number(e.target.value))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none disabled:opacity-50 cursor-pointer"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none disabled:opacity-50 cursor-pointer"
                 >
                   {maxRoomsAllowed > 0 ? (
                     Array.from({ length: maxRoomsAllowed }, (_, i) => i + 1).map((n) => (
@@ -618,7 +644,7 @@ export default function BookingModal({
               {/* Guest Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Full Name *
                   </label>
                   <input
@@ -631,12 +657,12 @@ export default function BookingModal({
                       setName(e.target.value);
                       setErrorMessage(null);
                     }}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     10-Digit Mobile / WhatsApp *
                   </label>
                   <input
@@ -649,13 +675,13 @@ export default function BookingModal({
                       setPhone(e.target.value);
                       setErrorMessage(null);
                     }}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                   Email Address (For Instant Booking Voucher) *
                 </label>
                 <input
@@ -668,12 +694,12 @@ export default function BookingModal({
                     setEmail(e.target.value);
                     setErrorMessage(null);
                   }}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
+                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                   Special Requests (Optional)
                 </label>
                 <input
@@ -682,36 +708,36 @@ export default function BookingModal({
                   placeholder="e.g. Quiet room, approximate arrival time"
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                 />
               </div>
 
               {/* Transparent Price Summary Box */}
-              <div className="p-4 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs space-y-2">
-                <div className="flex justify-between text-[#64615D]">
+              <div className="p-4 rounded-xl bg-[#0E0E10] border border-white/10 text-xs space-y-2">
+                <div className="flex justify-between text-[#A8A59E]">
                   <span>
                     {activeRoom.name} ({formatINR(priceBreakdown.ratePerNight)}/night) &times; {nights} {nights > 1 ? "Nights" : "Night"}
                     {roomsRequested > 1 ? ` &times; ${roomsRequested} Rooms` : ""}
                   </span>
-                  <span className="text-[#24272B] font-mono font-semibold">{formatINR(priceBreakdown.baseAmount)}</span>
+                  <span className="text-[#F7F3EC] font-mono">{formatINR(priceBreakdown.baseAmount)}</span>
                 </div>
-                <div className="flex justify-between text-[#64615D]">
+                <div className="flex justify-between text-[#A8A59E]">
                   <span>
                     GST ({priceBreakdown.gstPercent}%)
-                    <span className="text-[10px] text-[#64615D]/80 block">
+                    <span className="text-[10px] text-[#A8A59E]/70 block">
                       {priceBreakdown.ratePerNight <= 7500 ? "5% GST (Tariff up to ₹7,500/night)" : "18% GST (Tariff above ₹7,500/night)"}
                     </span>
                   </span>
-                  <span className="text-[#24272B] font-mono font-semibold">{formatINR(priceBreakdown.gstAmount)}</span>
+                  <span className="text-[#F7F3EC] font-mono">{formatINR(priceBreakdown.gstAmount)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold text-[#24272B] pt-2 border-t border-[#E5DFD7] items-baseline">
+                <div className="flex justify-between text-sm font-bold text-[#F7F3EC] pt-2 border-t border-white/10 items-baseline">
                   <div>
                     <span className="font-serif block">Total Payable Now</span>
-                    <span className="text-[10px] text-emerald-700 font-sans font-normal">
+                    <span className="text-[10px] text-emerald-400 font-sans font-normal">
                       100% Full Payment via Razorpay · No balance at hotel
                     </span>
                   </div>
-                  <span className="font-serif text-[#742B40] font-mono text-base font-bold">
+                  <span className="font-serif text-[#E02B1D] font-mono text-base">
                     {formatINR(priceBreakdown.totalAmount)}
                   </span>
                 </div>
@@ -719,7 +745,7 @@ export default function BookingModal({
 
               {/* Policy Agreement */}
               <div className="pt-1">
-                <label className="flex items-start gap-2.5 text-xs text-[#64615D] cursor-pointer select-none">
+                <label className="flex items-start gap-2.5 text-xs text-[#A8A59E] cursor-pointer select-none">
                   <input
                     type="checkbox"
                     required
@@ -728,15 +754,15 @@ export default function BookingModal({
                       setAgreedToPolicy(e.target.checked);
                       setErrorMessage(null);
                     }}
-                    className="mt-0.5 w-4 h-4 rounded border-[#E5DFD7] bg-[#F8F6F2] text-[#742B40] focus:ring-[#742B40] accent-[#742B40] shrink-0 cursor-pointer"
+                    className="mt-0.5 w-4 h-4 rounded border-white/20 bg-[#0E0E10] text-[#E02B1D] focus:ring-[#E02B1D] accent-[#E02B1D] shrink-0 cursor-pointer"
                   />
                   <span className="leading-snug">
                     I agree to the{" "}
-                    <a href="/terms-and-conditions" target="_blank" className="text-[#742B40] font-semibold hover:underline">
+                    <a href="/terms-and-conditions" target="_blank" className="text-[#C9A96E] hover:underline">
                       Terms & Conditions
                     </a>{" "}
                     and{" "}
-                    <a href="/cancellation-refund-policy" target="_blank" className="text-[#742B40] font-semibold hover:underline">
+                    <a href="/cancellation-refund-policy" target="_blank" className="text-[#C9A96E] hover:underline">
                       24-Hour Cancellation Policy
                     </a>
                     . (Full refund if cancelled 24+ hours before check-in; valid photo ID required at arrival).
@@ -749,7 +775,7 @@ export default function BookingModal({
                 <button
                   type="submit"
                   disabled={isSubmitting || isCurrentRoomSoldOut || isEntireHotelSoldOut}
-                  className="w-full py-4 rounded-xl bg-[#742B40] hover:bg-[#5C2033] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.16em] shadow-[0_4px_25px_rgba(116,43,64,0.35)] transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer"
+                  className="w-full py-4 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.16em] shadow-[0_4px_25px_rgba(224,43,29,0.5)] transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -766,7 +792,7 @@ export default function BookingModal({
                   )}
                 </button>
 
-                <p className="text-[11px] text-center text-[#64615D] pt-1">
+                <p className="text-[11px] text-center text-[#A8A59E] pt-1">
                   Check-in: 1:00 PM · Check-out: 11:00 AM · 24-hour reception assistance
                 </p>
               </div>
