@@ -49,6 +49,7 @@ import { SlotData } from "@/lib/data/siteData";
 import {
   requestPresignedUploadUrl,
   confirmUploadAction,
+  uploadSlotDirectAction,
   updateSlotMetaAction,
   restoreSlotDefaultAction,
   getOrphanObjectsAction,
@@ -460,86 +461,121 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
     setErrorBanner(null);
     setUploadProgress(10);
-    setStatusMessage("Requesting presigned upload URL from Cloudflare R2...");
+    setStatusMessage("Pre-processing & optimizing image for Cloudflare R2...");
     setIsProcessing(true);
     let uploadSucceeded = false;
 
     try {
       const processed = await processImageBeforeUpload(selectedFile);
 
-      const presignRes = await requestPresignedUploadUrl({
-        slotKey: replacingSlot.key,
-        section: replacingSlot.section,
-        fileName: selectedFile.name,
-        mimeType: processed.mimeType,
-        sizeBytes: processed.sizeBytes,
-      });
+      setUploadProgress(25);
+      setStatusMessage("Preparing secure Cloudflare R2 upload...");
 
-      if (!presignRes.success || !presignRes.uploadUrl || !presignRes.key) {
-        throw new Error(presignRes.error || "Failed to obtain upload authorization.");
+      // Prepare FormData for direct server upload (fail-safe against browser CORS restrictions)
+      const formData = new FormData();
+      formData.append("file", processed.blob, `${replacingSlot.key}.webp`);
+      formData.append("slotKey", replacingSlot.key);
+      formData.append("section", replacingSlot.section);
+      formData.append("altText", replacingSlot.altText);
+      formData.append("focalPoint", replacingSlot.focalPoint);
+
+      let uploadSuccess = false;
+      let finalPublicUrl = "";
+
+      // Strategy 1: Attempt direct presigned browser-to-R2 upload (fine-grained progress)
+      try {
+        const presignRes = await requestPresignedUploadUrl({
+          slotKey: replacingSlot.key,
+          section: replacingSlot.section,
+          fileName: selectedFile.name,
+          mimeType: processed.mimeType,
+          sizeBytes: processed.sizeBytes,
+        });
+
+        if (presignRes.success && presignRes.uploadUrl && presignRes.key) {
+          setUploadProgress(40);
+          setStatusMessage("Transferring directly to Cloudflare R2 vault...");
+
+          await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("PUT", presignRes.uploadUrl!, true);
+            xhr.setRequestHeader("Content-Type", processed.mimeType);
+
+            xhr.upload.onprogress = (evt) => {
+              if (evt.lengthComputable) {
+                const percent = 40 + Math.round((evt.loaded / evt.total) * 45);
+                setUploadProgress(percent);
+              }
+            };
+
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+              } else {
+                reject(new Error(`Storage returned HTTP ${xhr.status} ${xhr.statusText}`));
+              }
+            };
+
+            xhr.onerror = () => {
+              reject(new Error("CORS_PREFLIGHT_BLOCKED"));
+            };
+
+            xhr.send(processed.blob);
+          });
+
+          setUploadProgress(88);
+          setStatusMessage("Confirming asset and updating database slot pointer...");
+
+          const confirmRes = await confirmUploadAction({
+            key: presignRes.key,
+            slotKey: replacingSlot.key,
+            section: replacingSlot.section,
+            fileName: selectedFile.name,
+            mimeType: processed.mimeType,
+            width: processed.width,
+            height: processed.height,
+            blurDataUrl: processed.blurDataUrl,
+            altText: replacingSlot.altText,
+            focalPoint: replacingSlot.focalPoint,
+          });
+
+          if (!confirmRes.success) {
+            throw new Error(confirmRes.error || "Failed to finalize asset in database.");
+          }
+
+          finalPublicUrl = confirmRes.publicUrl || presignRes.publicUrl!;
+          uploadSuccess = true;
+        }
+      } catch (presignErr: unknown) {
+        const pErr = presignErr as Error;
+        console.warn(
+          "[ImageManager] Browser direct upload encountered restriction (" +
+            pErr.message +
+            "), engaging server-direct storage pipeline..."
+        );
       }
 
-      setUploadProgress(35);
-      setStatusMessage("Uploading directly to Cloudflare R2 bucket...");
+      // Strategy 2: If browser preflight/CORS blocked, fallback to server-direct R2 upload
+      if (!uploadSuccess) {
+        setUploadProgress(60);
+        setStatusMessage("Uploading directly to Cloudflare R2 via secure server pipeline...");
 
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", presignRes.uploadUrl!, true);
-        xhr.setRequestHeader("Content-Type", processed.mimeType);
-
-        xhr.upload.onprogress = (evt) => {
-          if (evt.lengthComputable) {
-            const percent = 35 + Math.round((evt.loaded / evt.total) * 50);
-            setUploadProgress(percent);
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error(`Upload to Cloudflare R2 failed (HTTP ${xhr.status}).`));
-          }
-        };
-
-        xhr.onerror = () => {
-          reject(
-            new Error(
-              "Storage rejected the upload (likely 403 or signature mismatch). Check R2 API token permissions."
-            )
+        const directRes = await uploadSlotDirectAction(formData);
+        if (!directRes.success || !directRes.publicUrl) {
+          throw new Error(
+            directRes.error || "Failed to upload image directly to Cloudflare R2."
           );
-        };
+        }
 
-        xhr.send(processed.blob);
-      });
-
-      setUploadProgress(88);
-      setStatusMessage("Updating database slot pointer & triggering revalidation...");
-
-      const confirmRes = await confirmUploadAction({
-        key: presignRes.key,
-        slotKey: replacingSlot.key,
-        section: replacingSlot.section,
-        fileName: selectedFile.name,
-        mimeType: processed.mimeType,
-        width: processed.width,
-        height: processed.height,
-        blurDataUrl: processed.blurDataUrl,
-        altText: replacingSlot.altText,
-        focalPoint: replacingSlot.focalPoint,
-      });
-
-      if (!confirmRes.success) {
-        throw new Error(confirmRes.error || "Failed to finalize asset in database.");
+        finalPublicUrl = directRes.publicUrl;
+        uploadSuccess = true;
       }
 
       setUploadProgress(100);
       setStatusMessage("Image successfully published to Hotel Fremont live site!");
       uploadSucceeded = true;
 
-      const confirmedUrl = confirmRes.publicUrl
-        ? `${confirmRes.publicUrl}?v=${Date.now()}`
-        : presignRes.publicUrl!;
+      const confirmedUrl = `${finalPublicUrl}?v=${Date.now()}`;
 
       setSlots((prev) =>
         prev.map((s) =>
@@ -558,7 +594,11 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
       }, 1000);
     } catch (err: unknown) {
       const error = err as Error;
-      setErrorBanner(error.message);
+      console.error("[ImageManager] Upload failure:", error);
+      setErrorBanner(
+        error.message ||
+          "Upload failed. Ensure Cloudflare R2 and Supabase storage services are reachable."
+      );
     } finally {
       setIsProcessing(false);
       if (!uploadSucceeded) {

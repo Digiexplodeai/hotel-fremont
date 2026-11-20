@@ -556,3 +556,152 @@ export async function getOrphanObjectsAction() {
   }
 }
 
+/**
+ * Direct server-side upload action to Cloudflare R2:
+ * Bypasses browser CORS restrictions completely while maintaining
+ * authentication, validation, verification, and Supabase database updates.
+ */
+export async function uploadSlotDirectAction(formData: FormData): Promise<{
+  success: boolean;
+  publicUrl?: string;
+  key?: string;
+  error?: string;
+}> {
+  try {
+    const user = await getCurrentUser();
+    if (!user || (user.role !== "owner" && user.role !== "manager")) {
+      return { success: false, error: "Unauthorized: Owner or Manager session required." };
+    }
+
+    const file = formData.get("file") as File | null;
+    const slotKey = formData.get("slotKey") as string | null;
+    const section = (formData.get("section") as string) || "general";
+    const altText = (formData.get("altText") as string) || "";
+    const focalPoint = (formData.get("focalPoint") as string) || "50% 50%";
+
+    if (!file) {
+      return { success: false, error: "No image file provided in upload request." };
+    }
+
+    const mimeType = file.type || "image/webp";
+    if (mimeType !== "image/svg+xml" && !ALLOWED_MIME_TYPES.includes(mimeType as AllowedMimeType)) {
+      return {
+        success: false,
+        error: `Unsupported file type '${mimeType}'. Allowed formats: WebP, JPEG, PNG, AVIF.`,
+      };
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return {
+        success: false,
+        error: `File size exceeds 10MB limit (${(file.size / (1024 * 1024)).toFixed(2)} MB).`,
+      };
+    }
+
+    const cleanExt = file.name.includes(".")
+      ? file.name.split(".").pop()!.toLowerCase().replace(/[^a-z0-9]/g, "")
+      : "webp";
+    const rawBase = file.name.substring(
+      0,
+      file.name.lastIndexOf(".") !== -1 ? file.name.lastIndexOf(".") : file.name.length
+    );
+    const cleanBase =
+      rawBase
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 30) || "media";
+
+    const uniqueId = randomUUID().substring(0, 8);
+    const objectKey = `site/${section}/${cleanBase}-${Date.now()}-${uniqueId}.${cleanExt}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const s3 = getR2Client();
+    const bucketName = process.env.R2_BUCKET_NAME || process.env.R2_BUCKET || "hotel-fremont-media";
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: objectKey,
+        Body: buffer,
+        ContentType: mimeType,
+      })
+    );
+
+    // Verify object exists in R2 before writing to database
+    const head = await verifyObjectExists(objectKey);
+    if (!head.exists) {
+      return {
+        success: false,
+        error: "Verification failed: Uploaded file was not found in Cloudflare R2 storage.",
+      };
+    }
+
+    const publicUrl = getPublicMediaUrl(objectKey);
+
+    // Update Supabase image_slots table
+    if (slotKey) {
+      let focal_x = "50%";
+      let focal_y = "50%";
+      if (focalPoint) {
+        const parts = focalPoint.trim().split(/\s+/);
+        if (parts.length >= 2) {
+          focal_x = parts[0];
+          focal_y = parts[1];
+        }
+      }
+
+      const supabase = (await createServerSupabaseClient()) || createAdminSupabaseClient();
+      if (!supabase) {
+        return { success: false, error: "Database client is unconfigured." };
+      }
+
+      const slotPayload = {
+        slot_key: slotKey,
+        url: publicUrl,
+        alt_text: altText || null,
+        focal_x,
+        focal_y,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data: savedRows, error: upsertErr } = await supabase
+        .from("image_slots")
+        .upsert(slotPayload, { onConflict: "slot_key" })
+        .select();
+
+      if (upsertErr) {
+        return {
+          success: false,
+          error: `Database write failed for slot '${slotKey}': ${upsertErr.message}`,
+        };
+      }
+    }
+
+    // Revalidate paths
+    try {
+      revalidatePath("/", "layout");
+      revalidatePath("/admin", "layout");
+      revalidatePath("/admin/images", "layout");
+    } catch (revErr) {
+      console.warn("[R2 Direct Action] revalidatePath warning:", revErr);
+    }
+
+    return {
+      success: true,
+      key: objectKey,
+      publicUrl,
+    };
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error("[R2 Direct Action] Error:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to upload file directly to storage.",
+    };
+  }
+}
+
+
