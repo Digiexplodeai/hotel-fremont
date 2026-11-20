@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Clock, Users, CheckCircle2, Phone, Sparkles } from "lucide-react";
+import { X, Calendar, CheckCircle2, Sparkles } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { submitPublicEnquiryAction } from "@/actions/enquiries";
 import { lockScroll, unlockScroll } from "@/lib/scroll";
@@ -107,7 +107,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#0E0E10]/90 backdrop-blur-md"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md"
         />
 
         <motion.div
@@ -115,11 +115,11 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="relative w-full max-w-lg bg-[#151518] border border-white/10 rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.85)] p-6 sm:p-8 z-10 my-auto text-[#F7F3EC]"
+          className="relative w-full max-w-lg bg-white border border-[#E5DFD7] rounded-2xl shadow-[0_25px_80px_rgba(36,39,43,0.2)] p-6 sm:p-8 z-10 my-auto text-[#24272B]"
         >
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-[#0E0E10] text-[#F7F3EC] hover:text-[#E02B1D] border border-white/10 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 rounded-full bg-[#F8F6F2] text-[#24272B] hover:text-[#742B40] hover:bg-[#EEE8DF] border border-[#E5DFD7] transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -127,21 +127,21 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
 
           {!isSubmitted ? (
             <div>
-              <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold mb-2">
-                <Sparkles className="w-3 h-3 text-[#E02B1D]" />
+              <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#742B40] uppercase font-bold mb-2">
+                <Sparkles className="w-3 h-3 text-[#742B40]" />
                 <span>HOTEL FREMONT RESTAURANT</span>
               </div>
 
-              <h3 className="text-2xl font-serif font-bold text-[#F7F3EC] mb-2">
+              <h3 className="text-2xl font-serif font-bold text-[#24272B] mb-2">
                 Table Enquiry
               </h3>
 
-              <p className="text-xs text-[#A8A59E] mb-6 font-light">
+              <p className="text-xs text-[#64615D] mb-6 font-normal">
                 Ground floor dining with 50 covers. Kitchen operational daily until 10:30 PM.
               </p>
 
               {errorMessage && (
-                <div className="mb-4 p-3 rounded-xl bg-red-950/50 border border-red-500/30 text-red-200 text-xs">
+                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
                   {errorMessage}
                 </div>
               )}
@@ -156,7 +156,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                     Guest Name *
                   </label>
                   <input
@@ -165,12 +165,12 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                     placeholder="e.g. Amanjot Kaur"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                     Phone / WhatsApp Number *
                   </label>
                   <input
@@ -179,13 +179,13 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                     placeholder="e.g. 79734 50281"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Date *
                     </label>
                     <input
@@ -193,12 +193,12 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                       required
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none [color-scheme:dark]"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none [color-scheme:light]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Preferred Time *
                     </label>
                     <input
@@ -206,19 +206,19 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                       required
                       value={formData.time}
                       onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none [color-scheme:dark]"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none [color-scheme:light]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                     Party Size *
                   </label>
                   <select
                     value={formData.guests}
                     onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none cursor-pointer"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
                   >
                     {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20].map((num) => (
                       <option key={num} value={num}>
@@ -229,7 +229,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                     Special Requests (Optional)
                   </label>
                   <input
@@ -237,14 +237,14 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                     placeholder="e.g. Window table, birthday setup"
                     value={formData.specialRequest}
                     onChange={(e) => setFormData({ ...formData, specialRequest: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] text-white text-xs font-sans uppercase tracking-[0.18em] font-semibold transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center space-x-2"
+                  className="w-full py-3.5 rounded-xl bg-[#742B40] hover:bg-[#5C2033] text-white text-xs font-sans uppercase tracking-[0.18em] font-semibold transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center space-x-2"
                 >
                   {isSubmitting ? (
                     <span>Submitting Enquiry...</span>
@@ -259,18 +259,18 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
             </div>
           ) : (
             <div className="text-center py-6">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4 text-emerald-400">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto mb-4 text-emerald-600">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h4 className="text-2xl font-serif font-bold text-[#F7F3EC] mb-2">
+              <h4 className="text-2xl font-serif font-bold text-[#24272B] mb-2">
                 Enquiry Sent
               </h4>
-              <p className="text-xs text-[#A8A59E] mb-6 leading-relaxed max-w-sm mx-auto">
+              <p className="text-xs text-[#64615D] mb-6 leading-relaxed max-w-sm mx-auto">
                 Thank you! Our restaurant desk will confirm your table shortly. We also opened WhatsApp to connect directly.
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-sans uppercase tracking-wider text-white transition"
+                className="px-6 py-2.5 rounded-xl bg-[#F8F6F2] hover:bg-[#EEE8DF] text-xs font-sans uppercase tracking-wider text-[#24272B] border border-[#E5DFD7] transition font-semibold"
               >
                 Close
               </button>

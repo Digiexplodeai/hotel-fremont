@@ -56,36 +56,36 @@ export default function GalleryLightbox({
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-        {/* Dark Backdrop */}
+        {/* Dark Backdrop for photography focus */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#0E0E10]/95 backdrop-blur-xl"
+          className="fixed inset-0 bg-black/95 backdrop-blur-xl"
         />
 
         {/* Modal Content */}
         <div className="relative z-10 w-full max-w-5xl flex flex-col items-center">
           {/* Top Bar: Title & Close */}
-          <div className="w-full flex items-center justify-between py-3 mb-2 text-[#F7F3EC]">
+          <div className="w-full flex items-center justify-between py-3 mb-2 text-white">
             <div>
-              <span className="text-[10px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold">
+              <span className="text-[10px] font-sans tracking-[0.25em] text-[#DFC28A] uppercase font-semibold">
                 {currentItem.category}
               </span>
-              <h4 className="text-lg font-serif font-bold text-[#F7F3EC]">
+              <h4 className="text-lg font-serif font-bold text-white">
                 {currentItem.title}
               </h4>
             </div>
 
             <div className="flex items-center space-x-4">
-              <span className="text-xs text-[#A8A59E] font-sans">
+              <span className="text-xs text-white/70 font-sans">
                 {currentIndex + 1} / {items.length}
               </span>
 
               <button
                 onClick={onClose}
-                className="p-2 rounded-full bg-white/10 hover:bg-[#E02B1D] text-white transition-colors"
+                className="p-2 rounded-full bg-white/10 hover:bg-[#742B40] text-white transition-colors cursor-pointer"
                 aria-label="Close lightbox"
               >
                 <X className="w-5 h-5" />
@@ -116,7 +116,7 @@ export default function GalleryLightbox({
             {/* Left Nav Button */}
             <button
               onClick={onPrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-[#0E0E10]/70 hover:bg-[#E02B1D] text-white border border-white/10 transition-colors shadow-lg"
+              className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 hover:bg-[#742B40] text-white border border-white/20 transition-colors shadow-lg cursor-pointer"
               aria-label="Previous image"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -125,7 +125,7 @@ export default function GalleryLightbox({
             {/* Right Nav Button */}
             <button
               onClick={onNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-[#0E0E10]/70 hover:bg-[#E02B1D] text-white border border-white/10 transition-colors shadow-lg"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 hover:bg-[#742B40] text-white border border-white/20 transition-colors shadow-lg cursor-pointer"
               aria-label="Next image"
             >
               <ChevronRight className="w-5 h-5" />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Crown, Users, Sparkles, CheckCircle2, Phone, Mail } from "lucide-react";
+import { X, Crown, CheckCircle2 } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { submitPublicEnquiryAction } from "@/actions/enquiries";
 import { lockScroll, unlockScroll } from "@/lib/scroll";
@@ -62,13 +62,12 @@ export default function EventEnquiryModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.botField) return; // Silent discard for bot spam
+    if (formData.botField) return;
 
     setIsSubmitting(true);
     setErrorMessage(null);
 
     try {
-      // Record event inquiry to Supabase pipeline
       const res = await submitPublicEnquiryAction({
         type: "event_banquet",
         name: formData.name,
@@ -125,7 +124,7 @@ export default function EventEnquiryModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#0E0E10]/90 backdrop-blur-md"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md"
         />
 
         <motion.div
@@ -133,11 +132,11 @@ export default function EventEnquiryModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full max-w-lg bg-[#151518] border border-[#C9A96E]/30 rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.85)] p-6 sm:p-8 z-10 my-auto text-[#F7F3EC]"
+          className="relative w-full max-w-lg bg-white border border-[#E5DFD7] rounded-2xl shadow-[0_25px_80px_rgba(36,39,43,0.2)] p-6 sm:p-8 z-10 my-auto text-[#24272B]"
         >
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-[#0E0E10] text-[#F7F3EC] hover:text-[#E02B1D] border border-white/10 transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-[#F8F6F2] text-[#24272B] hover:text-[#742B40] hover:bg-[#EEE8DF] border border-[#E5DFD7] transition-colors cursor-pointer"
             aria-label="Close event enquiry modal"
           >
             <X className="w-5 h-5" />
@@ -145,25 +144,24 @@ export default function EventEnquiryModal({
 
           {!isSubmitted ? (
             <div>
-              <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold mb-2">
-                <Crown className="w-3 h-3 text-[#E02B1D]" />
+              <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#742B40] uppercase font-bold mb-2">
+                <Crown className="w-3 h-3 text-[#742B40]" />
                 <span>HOTEL FREMONT BANQUETS</span>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC] mb-2">
+              <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#24272B] mb-2">
                 Plan Your Event
               </h3>
-              <p className="text-xs text-[#A8A59E] mb-6 font-light">
+              <p className="text-xs text-[#64615D] mb-6 font-normal">
                 Dedicated venues for private celebrations, corporate meetings, and social gatherings on Airport Road, Mohali.
               </p>
 
               {errorMessage && (
-                <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs">
+                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
                   {errorMessage}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Honeypot field */}
                 <input
                   type="text"
                   name="user_verification_notes"
@@ -175,7 +173,7 @@ export default function EventEnquiryModal({
                 />
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                     Host / Organizer Name *
                   </label>
                   <input
@@ -184,13 +182,13 @@ export default function EventEnquiryModal({
                     placeholder="e.g. Jasleen Kaur / Sandhu Logistics"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-sm text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-sm text-[#24272B] focus:border-[#742B40] focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Phone / WhatsApp *
                     </label>
                     <input
@@ -199,12 +197,12 @@ export default function EventEnquiryModal({
                       placeholder="+91 79734 50281"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-sm text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-sm text-[#24272B] focus:border-[#742B40] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Email Address
                     </label>
                     <input
@@ -212,20 +210,20 @@ export default function EventEnquiryModal({
                       placeholder="host@company.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-sm text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-sm text-[#24272B] focus:border-[#742B40] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Event Occasion
                     </label>
                     <select
                       value={formData.eventType}
                       onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
                     >
                       <option value="Celebration / Special Occasion">Celebration / Special Occasion</option>
                       <option value="Corporate Meeting / Seminar">Corporate Meeting / Seminar</option>
@@ -236,13 +234,13 @@ export default function EventEnquiryModal({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Venue Selection
                     </label>
                     <select
                       value={formData.venue}
                       onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
                     >
                       <option value="Cloud Six Banquet">Cloud Six Banquet (Up to 150 guests)</option>
                       <option value="Conference Hall">Conference Hall (40 to 50 guests)</option>
@@ -252,13 +250,13 @@ export default function EventEnquiryModal({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Estimated Guests
                     </label>
                     <select
                       value={formData.guests}
                       onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
                     >
                       <option value="Up to 50 Guests">Up to 50 Guests</option>
                       <option value="50-100 Guests">50 - 100 Guests</option>
@@ -267,7 +265,7 @@ export default function EventEnquiryModal({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                       Target Date *
                     </label>
                     <input
@@ -276,13 +274,13 @@ export default function EventEnquiryModal({
                       min={new Date().toISOString().split("T")[0]}
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none [color-scheme:dark]"
+                      className="w-full px-3 py-2 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none [color-scheme:light]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#64615D] mb-1 font-semibold">
                     Custom Requests & Setup Notes
                   </label>
                   <textarea
@@ -290,14 +288,14 @@ export default function EventEnquiryModal({
                     placeholder="e.g. Stage setup, multi-cuisine catering, audio-visual requirements"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                    className="w-full px-4 py-2 rounded-xl bg-[#F8F6F2] border border-[#E5DFD7] text-xs text-[#24272B] focus:border-[#742B40] focus:outline-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs uppercase tracking-[0.2em] shadow-lg transition-all duration-300 btn-magnetic flex items-center justify-center space-x-2"
+                  className="w-full py-3.5 rounded-xl bg-[#742B40] hover:bg-[#5C2033] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs uppercase tracking-[0.2em] shadow-md transition-all duration-300 btn-magnetic flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -312,21 +310,21 @@ export default function EventEnquiryModal({
             </div>
           ) : (
             <div className="py-8 text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-[#E02B1D]/20 border border-[#E02B1D] mx-auto flex items-center justify-center text-[#E02B1D]">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 mx-auto flex items-center justify-center text-emerald-600">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
 
-              <h4 className="text-2xl font-serif font-bold text-[#F7F3EC]">
+              <h4 className="text-2xl font-serif font-bold text-[#24272B]">
                 Enquiry Sent to Banquet Desk!
               </h4>
 
-              <p className="text-xs text-[#A8A59E] max-w-sm mx-auto font-light leading-relaxed">
-                Thank you, <strong className="text-white">{formData.name}</strong>. Our senior event curator has received your details for {formData.eventType} on {formData.date} and will contact you directly with bespoke pricing and floor plans.
+              <p className="text-xs text-[#64615D] max-w-sm mx-auto font-normal leading-relaxed">
+                Thank you, <strong className="text-[#24272B]">{formData.name}</strong>. Our senior event curator has received your details for {formData.eventType} on {formData.date} and will contact you directly with bespoke pricing and floor plans.
               </p>
 
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-xs uppercase tracking-widest text-[#F7F3EC] transition-colors"
+                className="px-6 py-2.5 rounded-xl bg-[#F8F6F2] hover:bg-[#EEE8DF] text-xs uppercase tracking-widest text-[#24272B] border border-[#E5DFD7] transition-colors font-semibold"
               >
                 Close Window
               </button>

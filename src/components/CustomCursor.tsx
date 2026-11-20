@@ -67,7 +67,7 @@ export default function CustomCursor() {
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden hidden md:block">
       {/* Outer Follower Ring */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full border border-[#C9A96E]/60 pointer-events-none -translate-x-1/2 -translate-y-1/2"
+        className="fixed top-0 left-0 rounded-full border border-[#742B40]/40 pointer-events-none -translate-x-1/2 -translate-y-1/2"
         style={{
           x: smoothX,
           y: smoothY,
@@ -75,16 +75,16 @@ export default function CustomCursor() {
         animate={{
           width: isHovered ? 48 : 32,
           height: isHovered ? 48 : 32,
-          borderColor: isHovered ? "#E02B1D" : "rgba(201, 169, 110, 0.6)",
-          backgroundColor: isHovered ? "rgba(224, 43, 29, 0.12)" : "transparent",
+          borderColor: isHovered ? "#742B40" : "rgba(116, 43, 64, 0.4)",
+          backgroundColor: isHovered ? "rgba(116, 43, 64, 0.08)" : "transparent",
           scale: isClicked ? 0.85 : 1,
         }}
         transition={{ duration: 0.15, ease: "easeOut" }}
       />
 
-      {/* Center Signature Red Dot */}
+      {/* Center Burgundy Dot */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full bg-[#E02B1D] pointer-events-none shadow-[0_0_8px_rgba(224,43,29,0.8)] -translate-x-1/2 -translate-y-1/2"
+        className="fixed top-0 left-0 rounded-full bg-[#742B40] pointer-events-none shadow-[0_0_8px_rgba(116,43,64,0.6)] -translate-x-1/2 -translate-y-1/2"
         style={{
           x: cursorX,
           y: cursorY,

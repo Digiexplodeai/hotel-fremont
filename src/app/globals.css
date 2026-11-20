@@ -2,17 +2,27 @@
 
 @layer base {
   :root {
-    --bg-dark: #0E0E10;
-    --bg-card: #151518;
-    --bg-card-hover: #1c1c21;
-    --text-ivory: #F7F3EC;
-    --text-muted: #A8A59E;
-    --gold-champagne: #C9A96E;
+    --bg-page: #F8F6F2;
+    --bg-alt: #EEE8DF;
+    --bg-card: #FFFFFF;
+    --text-primary: #24272B;
+    --text-secondary: #64615D;
+    --border-color: #E5DFD7;
+    --primary-burgundy: #742B40;
+    --primary-hover: #5C2033;
+    --gold-accent: #B69A68;
     --gold-light: #DFC28A;
-    --accent-red: #E02B1D;
-    --accent-red-hover: #c42215;
-    --border-gold: rgba(201, 169, 110, 0.18);
-    --border-subtle: rgba(255, 255, 255, 0.08);
+    --footer-bg: #24272B;
+
+    /* Backward compatibility aliases */
+    --bg-dark: #24272B;
+    --text-ivory: #F8F6F2;
+    --text-muted: #64615D;
+    --gold-champagne: #B69A68;
+    --accent-red: #742B40;
+    --accent-red-hover: #5C2033;
+    --border-gold: rgba(182, 154, 104, 0.25);
+    --border-subtle: #E5DFD7;
   }
 
   *, *::before, *::after {
@@ -24,8 +34,8 @@
   html {
     /* Lenis provides smooth scrolling - native smooth scroll MUST be auto to avoid conflict */
     scroll-behavior: auto !important;
-    background-color: #0E0E10;
-    color: #F7F3EC;
+    background-color: #F8F6F2;
+    color: #24272B;
     overflow-x: hidden;
     width: 100%;
     max-width: 100%;
@@ -33,8 +43,8 @@
   }
 
   body {
-    background-color: #0E0E10;
-    color: #F7F3EC;
+    background-color: #F8F6F2;
+    color: #24272B;
     overflow-x: hidden;
     position: relative;
     width: 100%;
@@ -60,7 +70,7 @@
 
   /* Custom selection */
   ::selection {
-    background-color: #E02B1D;
+    background-color: #742B40;
     color: #FFFFFF;
   }
 
@@ -70,17 +80,17 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #0E0E10;
+    background: #F8F6F2;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #2A2A30;
+    background: #D9D2C7;
     border-radius: 4px;
-    border: 1px solid rgba(201, 169, 110, 0.2);
+    border: 1px solid #E5DFD7;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #E02B1D;
+    background: #742B40;
   }
 }
 
@@ -97,52 +107,60 @@ html.lenis, html.lenis-smooth {
   overflow: hidden;
 }
 
-/* Glassmorphism utilities */
+/* Glassmorphism utilities - light luxury theme */
 .glass-panel {
-  background: rgba(18, 18, 22, 0.82);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(201, 169, 110, 0.2);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid #E5DFD7;
+  box-shadow: 0 10px 30px rgba(36, 39, 43, 0.08);
 }
 
 .glass-card {
-  background: rgba(22, 22, 26, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #FFFFFF;
+  border: 1px solid #E5DFD7;
+  box-shadow: 0 4px 20px rgba(36, 39, 43, 0.05);
 }
 
 .glass-card:hover {
-  border-color: rgba(201, 169, 110, 0.35);
+  border-color: #B69A68;
+  box-shadow: 0 8px 30px rgba(36, 39, 43, 0.1);
 }
 
-.glass-red {
-  background: rgba(224, 43, 29, 0.08);
-  border: 1px solid rgba(224, 43, 29, 0.25);
+.glass-burgundy {
+  background: rgba(116, 43, 64, 0.06);
+  border: 1px solid rgba(116, 43, 64, 0.2);
 }
 
-/* Gold Gradient Text - robust against line clipping */
+/* Gold Gradient Text */
 .gold-gradient-text {
-  background: linear-gradient(135deg, #FFF1D6 0%, #C9A96E 60%, #9F7E46 100%);
+  background: linear-gradient(135deg, #742B40 0%, #B69A68 50%, #8C6F3B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: inline-block;
 }
 
-/* Red Glow Shadow */
-.shadow-red-glow {
-  box-shadow: 0 0 25px rgba(224, 43, 29, 0.35);
+/* Shadows */
+.shadow-burgundy-glow {
+  box-shadow: 0 4px 25px rgba(116, 43, 64, 0.35);
 }
 
 .shadow-gold-glow {
-  box-shadow: 0 0 25px rgba(201, 169, 110, 0.22);
+  box-shadow: 0 4px 25px rgba(182, 154, 104, 0.25);
+}
+
+.shadow-card {
+  box-shadow: 0 4px 20px rgba(36, 39, 43, 0.06);
+}
+
+.shadow-card-hover {
+  box-shadow: 0 12px 35px rgba(36, 39, 43, 0.12);
 }
 
 /* Subtle luxury grain overlay */
 .bg-grain {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-image: radial-gradient(rgba(36, 39, 43, 0.03) 1px, transparent 0);
   background-size: 24px 24px;
 }
 
@@ -166,7 +184,7 @@ html.lenis, html.lenis-smooth {
   left: 0;
   width: 0%;
   height: 1.5px;
-  background-color: #E02B1D;
+  background-color: #742B40;
   transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 

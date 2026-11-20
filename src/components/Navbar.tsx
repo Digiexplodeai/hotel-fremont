@@ -126,28 +126,32 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
 
   return (
     <>
-      {/* Permanent subtle top gradient behind the header for contrast on bright photos */}
-      <div className="fixed inset-x-0 top-0 h-32 bg-gradient-to-b from-black/70 via-black/30 to-transparent pointer-events-none z-40" />
+      {/* Permanent subtle top gradient behind the header for contrast on bright photos when at top */}
+      <div
+        className={`fixed inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-black/25 to-transparent pointer-events-none z-40 transition-opacity duration-300 ${
+          isScrolled ? "opacity-0" : "opacity-100"
+        }`}
+      />
 
       {/* Main Fixed Header with Hide/Reveal & Fade/Slide Entry */}
       <header
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-400 ease-out ${
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ease-out ${
           isScrolled
-            ? "bg-[#0E0E10]/75 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+            ? "bg-white/95 backdrop-blur-xl border-b border-[#E5DFD7] shadow-[0_4px_25px_rgba(36,39,43,0.06)]"
             : "bg-transparent border-b border-transparent"
         }`}
         style={{
           transform: isVisible ? "translateY(0%)" : "translateY(-100%)",
           opacity: isIntroDone ? 1 : 0,
-          transition: "transform 350ms cubic-bezier(0.22, 1, 0.36, 1), opacity 800ms ease, background-color 400ms ease, height 400ms ease",
+          transition: "transform 350ms cubic-bezier(0.22, 1, 0.36, 1), opacity 800ms ease, background-color 300ms ease, height 300ms ease",
         }}
       >
         <div
-          className={`max-w-[1440px] mx-auto px-6 lg:px-10 grid grid-cols-[auto_1fr_auto] items-center transition-all duration-400 ease-out ${
+          className={`max-w-[1440px] mx-auto px-6 lg:px-10 grid grid-cols-[auto_1fr_auto] items-center transition-all duration-300 ease-out ${
             isScrolled ? "h-16" : "h-20"
           }`}
         >
-          {/* Column 1: Left Logo Wrapper with reserved width */}
+          {/* Column 1: Left Logo Wrapper */}
           <div className="w-[170px] lg:w-[190px] xl:w-[200px] 2xl:w-[220px] shrink-0 flex items-center justify-start">
             <Link
               href="/"
@@ -161,14 +165,14 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
                 height={32}
                 priority
                 style={{ width: "auto" }}
-                className={`transition-all duration-400 object-contain object-left block max-w-full ${
+                className={`transition-all duration-300 object-contain object-left block max-w-full ${
                   isScrolled ? "h-7 sm:h-8 md:h-9" : "h-8 sm:h-9 md:h-11"
                 }`}
               />
             </Link>
           </div>
 
-          {/* Column 2: Centre Nav Links - Always centered with generous breathing room */}
+          {/* Column 2: Centre Nav Links */}
           <nav className="hidden lg:flex items-center justify-center gap-4 xl:gap-5.5 2xl:gap-8 whitespace-nowrap text-[11px] xl:text-[12px] tracking-[0.16em] xl:tracking-[0.18em] uppercase font-medium px-2">
             {navLinks.map((item) => {
               const targetId = extractTargetId(item.href);
@@ -179,17 +183,23 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
                   key={item.label}
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
-                  className={`relative py-1.5 transition-colors duration-200 group [text-shadow:_0_1px_8px_rgba(0,0,0,0.85)] ${
-                    isActive ? "text-[#E02B1D]" : "text-[#F7F3EC] hover:text-[#E02B1D]"
+                  className={`relative py-1.5 transition-colors duration-200 group ${
+                    isScrolled
+                      ? isActive
+                        ? "text-[#742B40] font-semibold"
+                        : "text-[#24272B] hover:text-[#742B40]"
+                      : isActive
+                      ? "text-[#DFC28A] font-semibold [text-shadow:_0_1px_8px_rgba(0,0,0,0.85)]"
+                      : "text-white/95 hover:text-white [text-shadow:_0_1px_8px_rgba(0,0,0,0.85)]"
                   }`}
                 >
                   <span>{item.label}</span>
 
-                  {/* Underline on hover or active (draws left to right) */}
+                  {/* Underline on hover or active */}
                   <span
-                    className={`absolute bottom-0 left-0 w-full h-[2px] bg-[#E02B1D] origin-left transition-transform duration-300 ease-out pointer-events-none ${
-                      isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                    }`}
+                    className={`absolute bottom-0 left-0 w-full h-[2px] origin-left transition-transform duration-300 ease-out pointer-events-none ${
+                      isScrolled ? "bg-[#742B40]" : "bg-[#DFC28A]"
+                    } ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`}
                   />
                 </a>
               );
@@ -198,45 +208,51 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
 
           {/* Column 3: Right Action Area (Phone + Book Now + Mobile Hamburger) */}
           <div className="shrink-0 flex items-center justify-end space-x-5">
-            {/* Phone Number - Visible only from 1360px+ to ensure center nav never cramps */}
+            {/* Phone Number */}
             <a
               href={siteConfig.contact.phoneTel}
-              className="hidden min-[1360px]:flex items-center space-x-2 text-xs uppercase tracking-[0.18em] text-[#C9A96E] hover:text-[#F7F3EC] transition-colors [text-shadow:_0_1px_8px_rgba(0,0,0,0.85)]"
+              className={`hidden min-[1360px]:flex items-center space-x-2 text-xs uppercase tracking-[0.18em] transition-colors ${
+                isScrolled
+                  ? "text-[#742B40] hover:text-[#24272B]"
+                  : "text-[#DFC28A] hover:text-white [text-shadow:_0_1px_8px_rgba(0,0,0,0.85)]"
+              }`}
               title="Call Hotel Fremont Reception"
             >
-              <Phone className="w-3.5 h-3.5 text-[#E02B1D]" />
+              <Phone className="w-3.5 h-3.5 text-[#742B40]" />
               <span className="font-semibold">{siteConfig.contact.phoneDisplay}</span>
             </a>
 
             {/* Desktop Book Now Button */}
             <button
               onClick={onOpenBooking}
-              className="hidden sm:flex items-center space-x-2 px-5 py-2.5 rounded-full bg-[#E02B1D] text-white text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-300 shadow-[0_4px_20px_rgba(224,43,29,0.35)] hover:shadow-[0_4px_25px_rgba(224,43,29,0.6)] hover:bg-[#c82215] btn-magnetic cursor-pointer"
+              className="hidden sm:flex items-center space-x-2 px-5 py-2.5 rounded-full bg-[#742B40] hover:bg-[#5C2033] text-white text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-300 shadow-[0_4px_15px_rgba(116,43,64,0.3)] hover:shadow-[0_4px_22px_rgba(116,43,64,0.5)] btn-magnetic cursor-pointer"
             >
               <Calendar className="w-3.5 h-3.5" />
               <span>Book Now</span>
             </button>
 
-            {/* Mobile / Tablet Quick Book + Animated Hamburger (Visible below 1024px) */}
+            {/* Mobile / Tablet Quick Book + Hamburger */}
             <div className="flex lg:hidden items-center space-x-3">
               <button
                 onClick={onOpenBooking}
-                className="sm:hidden px-3.5 py-1.5 rounded-full bg-[#E02B1D] text-white text-[11px] uppercase tracking-[0.16em] font-semibold shadow-md flex items-center space-x-1.5 cursor-pointer"
+                className="sm:hidden px-3.5 py-1.5 rounded-full bg-[#742B40] hover:bg-[#5C2033] text-white text-[11px] uppercase tracking-[0.16em] font-semibold shadow-md flex items-center space-x-1.5 cursor-pointer"
               >
                 <Calendar className="w-3 h-3" />
                 <span>Book</span>
               </button>
 
-              {/* Animated Hamburger Icon */}
+              {/* Hamburger Icon */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="w-11 h-11 flex flex-col items-center justify-center space-y-1.5 text-[#F7F3EC] focus:outline-none cursor-pointer"
+                className={`w-11 h-11 flex flex-col items-center justify-center space-y-1.5 focus:outline-none cursor-pointer ${
+                  isScrolled ? "text-[#24272B]" : "text-white"
+                }`}
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileMenuOpen}
               >
                 <span
                   className={`w-6 h-[2px] bg-current transform transition-all duration-300 ${
-                    mobileMenuOpen ? "rotate-45 translate-y-2 bg-[#E02B1D]" : ""
+                    mobileMenuOpen ? "rotate-45 translate-y-2 bg-[#742B40]" : ""
                   }`}
                 />
                 <span
@@ -246,7 +262,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
                 />
                 <span
                   className={`w-6 h-[2px] bg-current transform transition-all duration-300 ${
-                    mobileMenuOpen ? "-rotate-45 -translate-y-2 bg-[#E02B1D]" : ""
+                    mobileMenuOpen ? "-rotate-45 -translate-y-2 bg-[#742B40]" : ""
                   }`}
                 />
               </button>
@@ -255,7 +271,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
         </div>
       </header>
 
-      {/* Fullscreen Mobile Navigation Overlay (z-[70]) */}
+      {/* Fullscreen Mobile Navigation Overlay (Warm Ivory Light Theme) */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -264,10 +280,10 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[70] bg-[#0E0E10]/98 backdrop-blur-2xl flex flex-col justify-between pt-6 pb-8 px-6 lg:hidden overflow-y-auto"
+            className="fixed inset-0 z-[70] bg-[#F8F6F2]/98 backdrop-blur-2xl flex flex-col justify-between pt-6 pb-8 px-6 lg:hidden overflow-y-auto text-[#24272B]"
           >
-            {/* Top Bar with Logo & Prominent Touch-Friendly Close (X) Button */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
+            {/* Top Bar with Logo & Close (X) Button */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#E5DFD7] shrink-0">
               <Link
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}
@@ -284,21 +300,21 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
                 />
               </Link>
 
-              {/* Large, High-Contrast 48x48px Tap Target Close Button */}
+              {/* Tap Target Close Button */}
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#151518] hover:bg-[#E02B1D] text-[#F7F3EC] border border-white/20 hover:border-[#E02B1D] transition-all duration-200 flex items-center justify-center cursor-pointer shadow-lg active:scale-95 shrink-0 focus:outline-none focus:ring-2 focus:ring-[#E02B1D]"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white hover:bg-[#742B40] text-[#24272B] hover:text-white border border-[#E5DFD7] hover:border-[#742B40] transition-all duration-200 flex items-center justify-center cursor-pointer shadow-md active:scale-95 shrink-0 focus:outline-none focus:ring-2 focus:ring-[#742B40]"
                 aria-label="Close navigation menu"
                 title="Close navigation menu"
               >
-                <X className="w-5 h-5 sm:w-6 sm:h-6 text-[#F7F3EC]" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
             {/* Navigation Links */}
             <div className="flex flex-col space-y-3 my-auto py-6">
-              <span className="text-[11px] font-sans tracking-[0.3em] text-[#C9A96E] uppercase font-semibold">
+              <span className="text-[11px] font-sans tracking-[0.3em] text-[#742B40] uppercase font-bold">
                 Hotel Fremont Navigation
               </span>
 
@@ -316,12 +332,12 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
                     <a
                       href={item.href}
                       onClick={(e) => handleNavClick(e, item.href)}
-                      className={`flex items-center justify-between text-2xl sm:text-3xl font-serif tracking-wider py-3 border-b border-white/5 transition-colors cursor-pointer ${
-                        isActive ? "text-[#E02B1D]" : "text-[#F7F3EC] hover:text-[#E02B1D]"
+                      className={`flex items-center justify-between text-2xl sm:text-3xl font-serif tracking-wider py-3 border-b border-[#E5DFD7] transition-colors cursor-pointer ${
+                        isActive ? "text-[#742B40] font-semibold" : "text-[#24272B] hover:text-[#742B40]"
                       }`}
                     >
                       <span>{item.label}</span>
-                      <ArrowRight className={`w-5 h-5 transition-transform ${isActive ? "text-[#E02B1D] translate-x-1" : "text-[#C9A96E] opacity-60"}`} />
+                      <ArrowRight className={`w-5 h-5 transition-transform ${isActive ? "text-[#742B40] translate-x-1" : "text-[#B69A68] opacity-70"}`} />
                     </a>
                   </motion.div>
                 );
@@ -329,18 +345,18 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             </div>
 
             {/* Mobile Footer CTAs */}
-            <div className="pt-4 border-t border-white/10 space-y-4 shrink-0">
-              <div className="flex items-center space-x-2 text-xs text-[#C9A96E]">
-                <MapPin className="w-3.5 h-3.5 text-[#E02B1D] shrink-0" />
-                <span>{siteConfig.contact.address}</span>
+            <div className="pt-4 border-t border-[#E5DFD7] space-y-4 shrink-0">
+              <div className="flex items-center space-x-2 text-xs text-[#64615D]">
+                <MapPin className="w-3.5 h-3.5 text-[#742B40] shrink-0" />
+                <span className="truncate">{siteConfig.contact.address}</span>
               </div>
 
               <div className="flex items-center justify-between pt-2">
                 <a
                   href={siteConfig.contact.phoneTel}
-                  className="text-xs uppercase tracking-widest text-[#F7F3EC] flex items-center space-x-1.5"
+                  className="text-xs uppercase tracking-widest text-[#24272B] flex items-center space-x-1.5 font-semibold"
                 >
-                  <Phone className="w-3.5 h-3.5 text-[#E02B1D]" />
+                  <Phone className="w-3.5 h-3.5 text-[#742B40]" />
                   <span>{siteConfig.contact.phoneDisplay}</span>
                 </a>
 
@@ -349,7 +365,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
                     setMobileMenuOpen(false);
                     onOpenBooking();
                   }}
-                  className="px-6 py-3 rounded-full bg-[#E02B1D] text-white text-xs uppercase tracking-[0.2em] font-semibold shadow-lg cursor-pointer"
+                  className="px-6 py-3 rounded-full bg-[#742B40] hover:bg-[#5C2033] text-white text-xs uppercase tracking-[0.2em] font-semibold shadow-md cursor-pointer"
                 >
                   Book Your Stay
                 </button>
