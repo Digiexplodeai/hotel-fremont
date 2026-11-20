@@ -57,35 +57,49 @@ export interface BookingRecord {
   paymentMethod?: string;
   paidAt?: string;
   roomsRequested?: number;
+  mealPlan?: string;
+  occupancy?: string;
+  ratePerNight?: number;
+  baseAmount?: number;
+  gstPercent?: number;
+  gstAmount?: number;
 }
 
-// In-memory persistent fallback state when Supabase database is offline or unmigrated
+// Exactly 21 Physical Rooms Inventory across 3 categories
 const defaultPhysicalRooms: PhysicalRoom[] = [
-  // 6 Deluxe King Rooms (Floor 1)
-  { id: "room-101", roomNumber: "101", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
-  { id: "room-102", roomNumber: "102", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
-  { id: "room-103", roomNumber: "103", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
-  { id: "room-104", roomNumber: "104", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
-  { id: "room-105", roomNumber: "105", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
-  { id: "room-106", roomNumber: "106", categorySlug: "deluxe-king", categoryName: "Deluxe King Room", floor: 1, status: "available" },
+  // 9 Deluxe Rooms (Floor 1: 101 - 109)
+  { id: "room-101", roomNumber: "101", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-102", roomNumber: "102", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-103", roomNumber: "103", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-104", roomNumber: "104", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-105", roomNumber: "105", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-106", roomNumber: "106", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-107", roomNumber: "107", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-108", roomNumber: "108", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
+  { id: "room-109", roomNumber: "109", categorySlug: "deluxe-room", categoryName: "Deluxe Room", floor: 1, status: "available" },
 
-  // 3 Premier Executive Suites (Floor 2)
-  { id: "room-201", roomNumber: "201", categorySlug: "premier-executive", categoryName: "Premier Executive Suite", floor: 2, status: "available" },
-  { id: "room-202", roomNumber: "202", categorySlug: "premier-executive", categoryName: "Premier Executive Suite", floor: 2, status: "available" },
-  { id: "room-203", roomNumber: "203", categorySlug: "premier-executive", categoryName: "Premier Executive Suite", floor: 2, status: "available" },
+  // 10 Super Deluxe Rooms (Floor 2: 201 - 210)
+  { id: "room-201", roomNumber: "201", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-202", roomNumber: "202", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-203", roomNumber: "203", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-204", roomNumber: "204", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-205", roomNumber: "205", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-206", roomNumber: "206", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-207", roomNumber: "207", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-208", roomNumber: "208", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-209", roomNumber: "209", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
+  { id: "room-210", roomNumber: "210", categorySlug: "super-deluxe-room", categoryName: "Super Deluxe Room", floor: 2, status: "available" },
 
-  // 2 The Royal Fremont Suites (Floor 3)
-  { id: "room-301", roomNumber: "301", categorySlug: "royal-fremont", categoryName: "The Royal Fremont Suite", floor: 3, status: "available" },
-  { id: "room-302", roomNumber: "302", categorySlug: "royal-fremont", categoryName: "The Royal Fremont Suite", floor: 3, status: "available" },
-
-  // 1 Presidential Penthouse (Floor 4)
-  { id: "room-401", roomNumber: "401", categorySlug: "presidential-penthouse", categoryName: "Presidential Penthouse", floor: 4, status: "available" },
+  // 2 Premium Rooms (Floor 3: 301, 302)
+  { id: "room-301", roomNumber: "301", categorySlug: "premium-room", categoryName: "Premium Room", floor: 3, status: "available" },
+  { id: "room-302", roomNumber: "302", categorySlug: "premium-room", categoryName: "Premium Room", floor: 3, status: "available" },
 ];
 
 let memoryRooms: PhysicalRoom[] = [...defaultPhysicalRooms];
+let memoryBookings: BookingRecord[] = [];
 
 /**
- * Fetch all 12 physical rooms with current status
+ * Fetch all 21 physical rooms with current status
  */
 export async function getRoomsWithStatusAction(): Promise<{
   success: boolean;
@@ -107,12 +121,13 @@ export async function getRoomsWithStatusAction(): Promise<{
       return { success: true, rooms: memoryRooms, isDatabase: false };
     }
 
-    // Map to PhysicalRoom interface with category names
     const categoryMap: Record<string, string> = {
-      "deluxe-king": "Deluxe King Room",
-      "premier-executive": "Premier Executive Suite",
-      "royal-fremont": "The Royal Fremont Suite",
-      "presidential-penthouse": "Presidential Penthouse",
+      "deluxe-room": "Deluxe Room",
+      "super-deluxe-room": "Super Deluxe Room",
+      "premium-room": "Premium Room",
+      "deluxe-king": "Deluxe Room",
+      "premier-executive": "Super Deluxe Room",
+      "royal-fremont": "Premium Room",
     };
 
     const mapped: PhysicalRoom[] = dbRooms.map((r) => {
@@ -145,15 +160,9 @@ export async function updateRoomStatusAction(
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Update memory state
     memoryRooms = memoryRooms.map((r) => {
       if (r.roomNumber === roomNumber) {
-        return {
-          ...r,
-          status,
-          notes: notes !== undefined ? notes : r.notes,
-          currentBooking: status === "available" ? null : r.currentBooking,
-        };
+        return { ...r, status, notes: notes !== undefined ? notes : r.notes };
       }
       return r;
     });
@@ -162,25 +171,21 @@ export async function updateRoomStatusAction(
     if (supabase) {
       await supabase
         .from("rooms")
-        .update({
-          status,
-          notes: notes !== undefined ? notes : undefined,
-          updated_at: new Date().toISOString(),
-        })
+        .update({ status, notes, updated_at: new Date().toISOString() })
         .eq("room_number", roomNumber);
     }
 
-    revalidatePath("/admin");
     revalidatePath("/admin/rooms");
+    revalidatePath("/admin");
     return { success: true };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to update room status";
+    const message = err instanceof Error ? err.message : "Failed to update room";
     return { success: false, error: message };
   }
 }
 
 /**
- * Fetch all reservations / bookings from public.bookings and public.reservations
+ * Fetch all bookings (from public.bookings table or memory)
  */
 export async function getBookingsAction(): Promise<{
   success: boolean;
@@ -190,102 +195,106 @@ export async function getBookingsAction(): Promise<{
   try {
     const supabase = await createServerSupabaseClient();
     if (!supabase) {
-      return { success: true, bookings: [], isDatabase: false };
+      return { success: true, bookings: memoryBookings, isDatabase: false };
     }
 
-    // 1. Fetch public.bookings (Razorpay transactions & online payments)
-    const { data: onlineBookings } = await supabase
+    const { data: dbBookings, error } = await supabase
       .from("bookings")
       .select("*")
       .order("created_at", { ascending: false });
 
-    // 2. Fetch public.reservations
-    const { data: reservations } = await supabase
-      .from("reservations")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    const seenRefs = new Set<string>();
-    const list: BookingRecord[] = [];
+    if (error || !dbBookings) {
+      return { success: true, bookings: memoryBookings, isDatabase: false };
+    }
 
     const categoryMap: Record<string, string> = {
-      "deluxe-king": "Deluxe King Room",
-      "premier-executive": "Premier Executive Suite",
-      "royal-fremont": "The Royal Fremont Suite",
-      "presidential-penthouse": "Presidential Penthouse",
+      "deluxe-room": "Deluxe Room",
+      "super-deluxe-room": "Super Deluxe Room",
+      "premium-room": "Premium Room",
+      "deluxe-king": "Deluxe Room",
+      "premier-executive": "Super Deluxe Room",
+      "royal-fremont": "Premium Room",
     };
 
-    if (onlineBookings && onlineBookings.length > 0) {
-      for (const b of onlineBookings) {
-        seenRefs.add(b.booking_ref);
-        list.push({
-          id: b.id,
-          bookingCode: b.booking_ref,
-          guestName: b.guest_name,
-          guestPhone: b.phone,
-          guestEmail: b.email || undefined,
-          categorySlug: b.room_category?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "deluxe-king",
-          categoryName: categoryMap[b.room_category] || b.room_category,
-          roomNumber: undefined,
-          checkIn: b.check_in,
-          checkOut: b.check_out,
-          guestsCount: b.guests || 1,
-          totalAmount: Number(b.total_amount || 0),
-          advancePaid: Number(b.amount_paid || 0),
-          amountPaid: Number(b.amount_paid || 0),
-          status: b.status as BookingStatus,
-          source: "online_razorpay",
-          notes: b.special_requests || undefined,
-          createdAt: b.created_at,
-          razorpayPaymentId: b.razorpay_payment_id || undefined,
-          razorpayOrderId: b.razorpay_order_id || undefined,
-          paymentMethod: b.payment_method || undefined,
-          paidAt: b.paid_at || undefined,
-          roomsRequested: b.rooms_requested || 1,
-        });
-      }
-    }
+    const mapped: BookingRecord[] = dbBookings.map((b) => ({
+      id: b.id,
+      bookingCode: b.booking_ref || `FRM-${b.id.slice(0, 6).toUpperCase()}`,
+      guestName: b.guest_name,
+      guestPhone: b.phone,
+      guestEmail: b.email,
+      categorySlug: b.room_category,
+      categoryName: categoryMap[b.room_category] || b.room_category,
+      roomNumber: b.room_number || undefined,
+      checkIn: b.check_in,
+      checkOut: b.check_out,
+      guestsCount: b.guests || 1,
+      totalAmount: Number(b.total_amount) || 0,
+      advancePaid: Number(b.amount_paid) || 0,
+      amountPaid: Number(b.amount_paid) || 0,
+      status: b.status as BookingStatus,
+      source: "website",
+      notes: b.special_requests || "",
+      createdAt: b.created_at,
+      razorpayPaymentId: b.razorpay_payment_id || undefined,
+      razorpayOrderId: b.razorpay_order_id || undefined,
+      paymentMethod: b.payment_method || undefined,
+      paidAt: b.paid_at || undefined,
+      roomsRequested: b.rooms_requested || b.rooms_count || 1,
+      mealPlan: b.meal_plan || "without_breakfast",
+      occupancy: b.occupancy || "double",
+      ratePerNight: b.rate_per_night ? Number(b.rate_per_night) : undefined,
+      baseAmount: b.base_amount ? Number(b.base_amount) : undefined,
+      gstPercent: b.gst_percent ? Number(b.gst_percent) : undefined,
+      gstAmount: b.gst_amount ? Number(b.gst_amount) : undefined,
+    }));
 
-    if (reservations && reservations.length > 0) {
-      for (const r of reservations) {
-        const ref = r.reference_code || `HF-${r.id.slice(0, 8).toUpperCase()}`;
-        if (!seenRefs.has(ref)) {
-          seenRefs.add(ref);
-          list.push({
-            id: r.id,
-            bookingCode: ref,
-            guestName: r.full_name,
-            guestPhone: r.phone,
-            guestEmail: r.email || undefined,
-            categorySlug: r.room_type?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "deluxe-king",
-            categoryName: r.room_type || "Luxury Suite",
-            roomNumber: undefined,
-            checkIn: r.check_in,
-            checkOut: r.check_out,
-            guestsCount: r.guests || 2,
-            totalAmount: Number(r.estimated_total || 0),
-            advancePaid: 0,
-            amountPaid: 0,
-            status: (r.status === "confirmed" ? "confirmed" : r.status === "cancelled" ? "cancelled" : "pending") as BookingStatus,
-            source: r.channel || "website",
-            notes: r.special_request || undefined,
-            createdAt: r.created_at,
-            roomsRequested: r.rooms_requested || 1,
-          });
-        }
-      }
-    }
-
-    // Sort by createdAt descending
-    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    return { success: true, bookings: list, isDatabase: true };
+    return { success: true, bookings: mapped, isDatabase: true };
   } catch {
-    return { success: true, bookings: [], isDatabase: false };
+    return { success: true, bookings: memoryBookings, isDatabase: false };
   }
 }
 
-export interface CreateBookingInput {
+/**
+ * Update a booking status
+ */
+export async function updateBookingStatusAction(
+  bookingId: string,
+  newStatus: BookingStatus,
+  roomNumber?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    memoryBookings = memoryBookings.map((b) => {
+      if (b.id === bookingId) {
+        return { ...b, status: newStatus, roomNumber: roomNumber || b.roomNumber };
+      }
+      return b;
+    });
+
+    const supabase = await createServerSupabaseClient();
+    if (supabase) {
+      const updateData: Record<string, any> = {
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      };
+      if (roomNumber) {
+        updateData.room_number = roomNumber;
+      }
+      await supabase.from("bookings").update(updateData).eq("id", bookingId);
+    }
+
+    revalidatePath("/admin/rooms");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to update booking";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Create a booking manually from the admin panel
+ */
+export async function createBookingAction(data: {
   guestName: string;
   guestPhone: string;
   guestEmail?: string;
@@ -294,146 +303,64 @@ export interface CreateBookingInput {
   checkIn: string;
   checkOut: string;
   guestsCount: number;
+  totalAmount?: number;
   advancePaid?: number;
-  source?: "website" | "phone" | "walk_in" | "whatsapp";
+  source?: string;
   notes?: string;
-}
-
-/**
- * Create a new booking with double-booking prevention check
- */
-export async function createBookingAction(input: CreateBookingInput): Promise<{
-  success: boolean;
-  bookingCode?: string;
-  error?: string;
-}> {
+}): Promise<{ success: boolean; bookingCode?: string; error?: string }> {
   try {
-    // 1. Basic validation
-    if (!input.guestName?.trim() || !input.guestPhone?.trim()) {
-      return { success: false, error: "Guest name and phone number are required" };
-    }
-    if (!input.checkIn || !input.checkOut) {
-      return { success: false, error: "Check-in and check-out dates are required" };
-    }
+    const bookingCode = `FRM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-    const checkInDate = new Date(input.checkIn);
-    const checkOutDate = new Date(input.checkOut);
+    const newBooking: BookingRecord = {
+      id: `booking-${Date.now()}`,
+      bookingCode,
+      guestName: data.guestName,
+      guestPhone: data.guestPhone,
+      guestEmail: data.guestEmail,
+      categorySlug: data.categorySlug,
+      categoryName: data.categorySlug,
+      roomNumber: data.roomNumber,
+      checkIn: data.checkIn,
+      checkOut: data.checkOut,
+      guestsCount: data.guestsCount,
+      totalAmount: data.totalAmount || 0,
+      advancePaid: data.advancePaid || 0,
+      amountPaid: data.advancePaid || 0,
+      status: "confirmed",
+      source: data.source || "front_desk",
+      notes: data.notes,
+      createdAt: new Date().toISOString(),
+    };
 
-    if (checkOutDate <= checkInDate) {
-      return { success: false, error: "Check-out date must be strictly after check-in date" };
-    }
+    memoryBookings.unshift(newBooking);
 
-    // 2. Validate category & capacity
-    const category = defaultRoomCategories.find((c) => c.slug === input.categorySlug);
-    if (!category) {
-      return { success: false, error: `Invalid room category: ${input.categorySlug}` };
-    }
-
-    if (input.guestsCount > category.maxGuests) {
-      return {
-        success: false,
-        error: `${category.name} can accommodate up to ${category.maxGuests} guests only.`,
-      };
-    }
-
-    const assignedRoomNumber = input.roomNumber || category.roomNumbers[0];
-
-    // 3. Calculate total amount
-    const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)));
-    const baseTotal = nights * category.price;
-    const gst = Math.round(baseTotal * 0.18);
-    const totalAmount = baseTotal + gst;
-
-    // 4. Generate collision-resistant booking code
-    const dateStamp = checkInDate.toISOString().slice(0, 10).replace(/-/g, "");
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const bookingCode = `HF-${dateStamp}-${randomSuffix}`;
-
-    // Mark room as occupied in memory if checkIn is today
-    const todayStr = new Date().toISOString().slice(0, 10);
-    if (input.checkIn <= todayStr && input.checkOut > todayStr) {
-      memoryRooms = memoryRooms.map((r) =>
-        r.roomNumber === assignedRoomNumber
-          ? {
-              ...r,
-              status: "occupied",
-              currentBooking: {
-                bookingCode,
-                guestName: input.guestName.trim(),
-                checkIn: input.checkIn,
-                checkOut: input.checkOut,
-              },
-            }
-          : r
-      );
-    }
-
-    // Save directly to Supabase public.reservations
     const supabase = await createServerSupabaseClient();
     if (supabase) {
-      await supabase.from("reservations").insert({
-        check_in: input.checkIn,
-        check_out: input.checkOut,
-        room_type: category.name,
-        guests: input.guestsCount,
-        full_name: input.guestName.trim(),
-        phone: input.guestPhone.trim(),
-        email: input.guestEmail?.trim() || null,
-        special_request: input.notes?.trim() || null,
-        estimated_total: totalAmount,
+      await supabase.from("bookings").insert({
+        booking_ref: bookingCode,
+        access_token: Math.random().toString(36).substring(2),
+        guest_name: data.guestName,
+        phone: data.guestPhone,
+        email: data.guestEmail || "walkin@hotelfremont.in",
+        room_category: data.categorySlug,
+        rooms_requested: 1,
+        check_in: data.checkIn,
+        check_out: data.checkOut,
+        nights: Math.max(1, Math.round((new Date(data.checkOut).getTime() - new Date(data.checkIn).getTime()) / (1000 * 3600 * 24))),
+        guests: data.guestsCount,
+        total_amount: data.totalAmount || 0,
+        amount_paid: data.advancePaid || 0,
         status: "confirmed",
+        expires_at: new Date(Date.now() + 86400000 * 30).toISOString(),
+        special_requests: data.notes,
       });
     }
 
-    revalidatePath("/admin");
     revalidatePath("/admin/rooms");
+    revalidatePath("/admin");
     return { success: true, bookingCode };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to create booking";
     return { success: false, error: message };
   }
 }
-
-/**
- * Update booking status across bookings and reservations
- */
-export async function updateBookingStatusAction(
-  bookingId: string,
-  status: BookingStatus
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const supabase = await createServerSupabaseClient();
-    if (supabase) {
-      // 1. Update public.bookings
-      await supabase
-        .from("bookings")
-        .update({
-          status: status,
-          updated_at: new Date().toISOString(),
-        })
-        .or(`id.eq.${bookingId},booking_ref.eq.${bookingId}`);
-
-      // 2. Map status for public.reservations
-      const resStatus =
-        status === "confirmed" || status === "paid" || status === "checked_in"
-          ? "confirmed"
-          : status === "cancelled" || status === "refunded" || status === "no_show"
-          ? "cancelled"
-          : "contacted";
-
-      await supabase
-        .from("reservations")
-        .update({ status: resStatus })
-        .or(`id.eq.${bookingId},reference_code.eq.${bookingId}`);
-    }
-
-    revalidatePath("/admin");
-    revalidatePath("/admin/rooms");
-    revalidatePath("/admin/enquiries");
-    return { success: true };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to update booking";
-    return { success: false, error: message };
-  }
-}
-

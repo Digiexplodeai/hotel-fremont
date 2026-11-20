@@ -16,15 +16,15 @@ interface EventEnquiryModalProps {
 export default function EventEnquiryModal({
   isOpen,
   onClose,
-  preSelectedVenue = "The Grand Fremont Ballroom",
+  preSelectedVenue = "Cloud Six Banquet",
 }: EventEnquiryModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
-    eventType: "Royal Wedding & Reception",
+    eventType: "Celebration / Special Occasion",
     venue: preSelectedVenue,
-    guests: "200-350 Guests",
+    guests: "50-100 Guests",
     date: new Date().toISOString().split("T")[0],
     notes: "",
     botField: "",
@@ -150,10 +150,10 @@ export default function EventEnquiryModal({
                 <span>HOTEL FREMONT BANQUETS</span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC] mb-2">
-                Plan Your Celebration
+                Plan Your Event
               </h3>
               <p className="text-xs text-[#A8A59E] mb-6 font-light">
-                From fairy-tale weddings to corporate conclaves, our banqueting team creates unforgettable occasions on Airport Road, Mohali.
+                Dedicated venues for private celebrations, corporate meetings, and social gatherings on Airport Road, Mohali.
               </p>
 
               {errorMessage && (
@@ -196,7 +196,7 @@ export default function EventEnquiryModal({
                     <input
                       type="tel"
                       required
-                      placeholder="+91 98727 68514"
+                      placeholder="+91 79734 50281"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl bg-[#0E0E10] border border-white/10 text-sm text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
@@ -227,11 +227,11 @@ export default function EventEnquiryModal({
                       onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     >
-                      <option value="Royal Wedding & Reception">Wedding & Reception</option>
-                      <option value="Sangeet & Cocktail Evening">Sangeet & Cocktail</option>
-                      <option value="Corporate Summit / Conference">Corporate Summit</option>
-                      <option value="Product Launch / Exhibition">Product Launch</option>
-                      <option value="Social Gala / Anniversary">Social Gala / Anniversary</option>
+                      <option value="Celebration / Special Occasion">Celebration / Special Occasion</option>
+                      <option value="Corporate Meeting / Seminar">Corporate Meeting / Seminar</option>
+                      <option value="Birthday / Anniversary">Birthday / Anniversary</option>
+                      <option value="Social Gathering / Dinner">Social Gathering / Dinner</option>
+                      <option value="Other Event">Other Event</option>
                     </select>
                   </div>
 
@@ -244,9 +244,8 @@ export default function EventEnquiryModal({
                       onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     >
-                      <option value="The Grand Fremont Ballroom">The Grand Ballroom (600 pax)</option>
-                      <option value="The Fremont Terrace Lawn">Terrace Lawn (350 pax)</option>
-                      <option value="The Executive Boardroom">Executive Boardroom (35 pax)</option>
+                      <option value="Cloud Six Banquet">Cloud Six Banquet (Up to 150 guests)</option>
+                      <option value="Conference Hall">Conference Hall (40 to 50 guests)</option>
                     </select>
                   </div>
                 </div>
@@ -261,10 +260,9 @@ export default function EventEnquiryModal({
                       onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     >
-                      <option value="30-75 Guests">30 - 75 Guests</option>
-                      <option value="75-150 Guests">75 - 150 Guests</option>
-                      <option value="150-300 Guests">150 - 300 Guests</option>
-                      <option value="300-600 Guests">300 - 600 Guests</option>
+                      <option value="Up to 50 Guests">Up to 50 Guests</option>
+                      <option value="50-100 Guests">50 - 100 Guests</option>
+                      <option value="100-150 Guests">100 - 150 Guests</option>
                     </select>
                   </div>
 

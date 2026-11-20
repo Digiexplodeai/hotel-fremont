@@ -16,95 +16,64 @@ interface HeroProps {
     roomType: string;
     guests: number;
   }) => void;
-  onExploreSuites: () => void;
+  onExploreSuites?: () => void;
+  onExploreRooms?: () => void;
 }
 
-const DEFAULT_HERO_SLIDES = [
-  { src: "/assets/hero/hero-suite.webp", label: "Classic Luxury Suite" },
-  { src: "/assets/hero/hero-room-1.webp", label: "Deluxe King Room" },
-  { src: "/assets/hero/hero-lobby.webp", label: "Panoramic Modern Suite" },
-  { src: "/assets/hero/hero-room-2.webp", label: "Executive Lounge Suite" },
-];
-
-export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps) {
+export default function Hero({ onCheckAvailability, onExploreSuites, onExploreRooms }: HeroProps) {
   const { isIntroDone } = useIntro();
   const { slots } = useSiteSlots();
 
-  const heroSlides = [
-    { src: slots["hero.slide_1"]?.url || DEFAULT_HERO_SLIDES[0].src, label: "Classic Luxury Suite" },
-    { src: slots["hero.slide_2"]?.url || DEFAULT_HERO_SLIDES[1].src, label: "Deluxe King Room" },
-    { src: slots["hero.slide_3"]?.url || DEFAULT_HERO_SLIDES[2].src, label: "Panoramic Modern Suite" },
-    { src: slots["hero.slide_4"]?.url || DEFAULT_HERO_SLIDES[3].src, label: "Executive Lounge Suite" },
-  ];
+  // Prefer the real exterior photo slot uploaded via admin Image Manager
+  const exteriorPhoto = slots["exterior"]?.url || slots["hero.slide_1"]?.url || "";
 
-  const [currentSlide, setCurrentSlide] = useState(0);
   const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
 
-  // Subtle parallax (max 8% movement)
   const yParallax = useTransform(scrollY, [0, 1000], [0, 60]);
 
-  // Start crossfade slider ONLY after intro is done
-  useEffect(() => {
-    if (!isIntroDone || shouldReduceMotion) return;
+  const words = ["A", "comfortable", "stay", "in", "Mohali."];
 
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [isIntroDone, shouldReduceMotion]);
-
-  const words = ["Stay", "Beyond", "Ordinary."];
+  const handleExplore = () => {
+    if (onExploreRooms) onExploreRooms();
+    else if (onExploreSuites) onExploreSuites();
+  };
 
   return (
     <section className="relative min-h-[100svh] w-full flex flex-col justify-between pt-28 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Media Container with Ken Burns & Parallax */}
+      {/* Background Media Container */}
       <motion.div
         style={{ y: shouldReduceMotion ? 0 : yParallax }}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
       >
-        <AnimatePresence initial={false}>
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              scale: shouldReduceMotion || !isIntroDone ? 1 : [1.0, 1.08],
-            }}
-            exit={{ opacity: 0 }}
-            transition={{
-              opacity: { duration: 1.2, ease: "easeInOut" },
-              scale: { duration: 18, ease: "linear", repeat: Infinity },
-            }}
-            className="absolute inset-0 w-full h-full"
-          >
+        <div className="absolute inset-0 w-full h-full bg-[#0E0E10]">
+          {exteriorPhoto ? (
             <Image
-              src={heroSlides[currentSlide].src}
-              alt={`Hotel Fremont ${heroSlides[currentSlide].label}`}
+              src={exteriorPhoto}
+              alt="Hotel Fremont - Exterior on Airport Road, Mohali"
               fill
-              priority={currentSlide === 0}
+              priority
               quality={85}
               sizes="100vw"
-              className="object-cover object-[center_60%]"
+              className="object-cover object-center"
             />
-          </motion.div>
-        </AnimatePresence>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a20] via-[#101014] to-[#0A0A0C]" />
+          )}
+        </div>
 
-        {/* Soft Luxury Gradients: from-black/55 via-black/25 to-black/70 */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/55" />
+        {/* Ambient Gradients for Text Contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10] via-black/40 to-black/60" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-black/20 to-black/80" />
-
-        {/* Subtle Film Grain / Vignette */}
         <div className="absolute inset-0 bg-grain opacity-25" />
       </motion.div>
 
-      {/* Hero Central Content - Starts with opacity: 0 via CSS until isIntroDone */}
+      {/* Hero Central Content */}
       <div
         className="relative z-10 max-w-5xl mx-auto w-full text-center my-auto pt-6 pb-6 transition-opacity duration-300"
         style={{ opacity: isIntroDone ? 1 : 0 }}
       >
-        {/* Eyebrow Badge (0.0s after intro) */}
+        {/* Eyebrow Badge */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={isIntroDone ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
@@ -113,21 +82,21 @@ export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps
         >
           <Sparkles className="w-3.5 h-3.5 text-[#E02B1D]" />
           <span className="text-[10px] sm:text-[11px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold">
-            {siteConfig.hero.eyebrow}
+            {siteConfig.brand.badge || "3-Star Hotel"}
           </span>
           <span className="w-1.5 h-1.5 rounded-full bg-[#E02B1D]" />
-          <span className="text-[10px] tracking-[0.18em] text-[#F7F3EC]/85 uppercase hidden sm:inline">
-            10 Mins From IXC Airport
+          <span className="text-[10px] tracking-[0.18em] text-[#F7F3EC]/85 uppercase">
+            {siteConfig.brand.subline || "A convenient address on Airport Road"}
           </span>
         </motion.div>
 
-        {/* Serif Headline with 0.12s Word-by-Word Stagger Reveal & Subtle Text Shadow */}
-        <h1 className="text-[clamp(2.5rem,6.5vw,5.5rem)] font-serif font-bold text-[#F7F3EC] tracking-tight leading-[1.12] mb-6 [text-shadow:_0_2px_20px_rgba(0,0,0,0.85)]">
+        {/* Headline */}
+        <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] font-serif font-bold text-[#F7F3EC] tracking-tight leading-[1.12] mb-6 [text-shadow:_0_2px_20px_rgba(0,0,0,0.85)]">
           {words.map((word, i) => (
-            <span key={i} className="inline-block overflow-hidden mr-2.5 sm:mr-4 align-top">
+            <span key={i} className="inline-block overflow-hidden mr-2.5 sm:mr-3.5 align-top">
               <motion.span
                 className={`inline-block ${
-                  word === "Ordinary." ? "text-[#C9A96E] italic font-normal" : "text-[#F7F3EC]"
+                  word === "Mohali." ? "text-[#C9A96E] italic font-normal" : "text-[#F7F3EC]"
                 }`}
                 initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
                 animate={
@@ -147,14 +116,14 @@ export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps
           ))}
         </h1>
 
-        {/* Cinematic Subtitle */}
+        {/* Tagline / Subtitle */}
         <motion.p
           initial={{ opacity: 0, y: 25 }}
           animate={isIntroDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 25 }}
           transition={{ duration: 0.8, delay: isIntroDone ? 0.55 : 0, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-white/85 font-light leading-relaxed mb-6 [text-shadow:_0_1px_10px_rgba(0,0,0,0.8)]"
+          className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-white/90 font-light leading-relaxed mb-6 [text-shadow:_0_1px_10px_rgba(0,0,0,0.8)]"
         >
-          {siteConfig.hero.description}
+          {siteConfig.brand.tagline}
         </motion.p>
 
         {/* Address Badge */}
@@ -164,16 +133,16 @@ export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps
           transition={{ duration: 0.8, delay: isIntroDone ? 0.75 : 0 }}
           className="flex items-center justify-center text-xs font-sans text-[#C9A96E] mb-6"
         >
-          <div className="flex items-center space-x-1.5 bg-black/40 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-white/10">
+          <div className="flex items-center space-x-1.5 bg-black/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10">
             <MapPin className="w-3.5 h-3.5 text-[#E02B1D]" />
             <span className="tracking-widest uppercase text-[11px] text-[#F7F3EC]/90">
-              Sector 80, Airport Road, Mohali
+              Sector 80, Airport Road, Mohali · 21 Rooms
             </span>
           </div>
         </motion.div>
       </div>
 
-      {/* Floating Glassmorphism Booking Bar (Slides up 0.9s duration) */}
+      {/* Floating Booking Bar */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={isIntroDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
@@ -184,32 +153,11 @@ export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps
         <BookingBar onCheckAvailability={onCheckAvailability} />
       </motion.div>
 
-      {/* Bottom Row: Slider Indicators (Left) & Animated Scroll Down (Right) */}
+      {/* Bottom Scroll Down CTA */}
       <div
-        className="relative z-10 flex items-center justify-between max-w-5xl mx-auto w-full px-2 transition-opacity duration-300"
+        className="relative z-10 flex items-center justify-end max-w-5xl mx-auto w-full px-2 transition-opacity duration-300"
         style={{ opacity: isIntroDone ? 1 : 0 }}
       >
-        {/* Slider Progress Indicators (Bottom-Left) */}
-        <div className="flex items-center space-x-2">
-          {heroSlides.map((slide, idx) => (
-            <button
-              key={slide.src}
-              onClick={() => setCurrentSlide(idx)}
-              className="group py-2 focus:outline-none cursor-pointer"
-              aria-label={`Go to slide ${idx + 1}: ${slide.label}`}
-            >
-              <div
-                className={`h-1 rounded-full transition-all duration-500 ${
-                  currentSlide === idx
-                    ? "w-8 bg-[#E02B1D] shadow-[0_0_8px_#E02B1D]"
-                    : "w-3 bg-white/30 group-hover:bg-white/60"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-
-        {/* Scroll Indicator (Right) */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={isIntroDone ? { opacity: 1 } : { opacity: 0 }}
@@ -220,10 +168,10 @@ export default function Hero({ onCheckAvailability, onExploreSuites }: HeroProps
             href="#rooms"
             onClick={(e) => {
               e.preventDefault();
-              onExploreSuites();
+              handleExplore();
             }}
             className="flex items-center space-x-2 text-[#F7F3EC]/70 hover:text-[#C9A96E] transition-colors group cursor-pointer text-[10px] uppercase tracking-[0.25em]"
-            aria-label="Scroll to discover suites"
+            aria-label="Scroll to discover rooms"
           >
             <span>Scroll To Discover</span>
             <motion.div

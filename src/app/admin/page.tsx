@@ -77,7 +77,7 @@ export default async function AdminDashboardPage() {
     occupiedCount,
     confirmedTonight.reduce((sum, r) => sum + (r.rooms_requested || 1), 0)
   );
-  const liveOccupancyRate = Math.round((roomsOccupiedTonight / 12) * 100);
+  const liveOccupancyRate = Math.round((roomsOccupiedTonight / (totalKeys || 21)) * 100);
 
   // Confirmed arrivals today
   const confirmedArrivalsToday = reservations.filter(
@@ -163,7 +163,7 @@ export default async function AdminDashboardPage() {
             className="px-3 py-1.5 rounded-lg text-[#A8A59E] hover:text-white transition flex items-center gap-1.5 shrink-0"
           >
             <BedDouble className="w-3.5 h-3.5" />
-            <span>12 Keys &amp; Availability</span>
+            <span>Rooms &amp; Availability</span>
           </Link>
           <Link
             href="/admin/enquiries"
@@ -199,13 +199,13 @@ export default async function AdminDashboardPage() {
                 <span className="px-2.5 py-0.5 rounded bg-[#E02B1D]/10 text-[#E02B1D] border border-[#E02B1D]/30 text-[10px] font-bold uppercase tracking-widest">
                   Live Operations
                 </span>
-                <span className="text-xs text-[#A8A59E]">· 12 Keys Luxury Inventory</span>
+                <span className="text-xs text-[#A8A59E]">· 21 Keys Inventory</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC]">
                 Welcome, {user.fullName || "Administrator"}
               </h1>
               <p className="text-xs sm:text-sm text-[#A8A59E] max-w-2xl leading-relaxed">
-                Hotel Fremont Enterprise Command Center. Manage R2 media storage, 12-key reservations, guest enquiries, and website CMS content with zero code changes.
+                Hotel Fremont Enterprise Command Center. Manage R2 media storage, room reservations, guest enquiries, and website CMS content with zero code changes.
               </p>
             </div>
 
@@ -216,7 +216,7 @@ export default async function AdminDashboardPage() {
               </div>
               <div className="px-3.5 py-2 rounded-xl bg-black/40 border border-white/10">
                 <span className="text-[10px] uppercase font-mono text-[#A8A59E] block">Physical Keys</span>
-                <span className="text-white font-mono font-bold text-sm">12 Rooms</span>
+                <span className="text-white font-mono font-bold text-sm">21 Rooms</span>
               </div>
             </div>
           </div>
@@ -227,11 +227,11 @@ export default async function AdminDashboardPage() {
           <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-sm flex flex-col justify-between">
             <span className="text-xs font-mono uppercase text-[#A8A59E]">Rooms Occupied Tonight</span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-mono font-bold text-[#C9A96E]">{roomsOccupiedTonight}/12</span>
+              <span className="text-3xl font-mono font-bold text-[#C9A96E]">{roomsOccupiedTonight}/{totalKeys || 21}</span>
               <span className="text-xs text-[#A8A59E]">({liveOccupancyRate}%)</span>
             </div>
             <div className="mt-3 text-[11px] text-emerald-400 font-mono">
-              {Math.max(0, 12 - roomsOccupiedTonight)} Keys Available Tonight
+              {Math.max(0, (totalKeys || 21) - roomsOccupiedTonight)} Keys Available Tonight
             </div>
           </div>
 
@@ -293,7 +293,7 @@ export default async function AdminDashboardPage() {
             </div>
           </Link>
 
-          {/* Card 2: 12 Keys & Availability */}
+          {/* Card 2: Rooms & Availability */}
           <Link
             href="/admin/rooms"
             className="group bg-[#151518] border border-white/10 hover:border-[#C9A96E]/40 rounded-xl p-5 shadow-md transition flex flex-col justify-between space-y-4 cursor-pointer"
@@ -303,7 +303,7 @@ export default async function AdminDashboardPage() {
                 <BedDouble className="w-5 h-5" />
               </div>
               <h3 className="text-base font-serif font-bold text-[#F7F3EC] group-hover:text-[#C9A96E] transition">
-                12 Keys &amp; Calendar
+                Rooms &amp; Calendar
               </h3>
               <p className="text-xs text-[#A8A59E] leading-relaxed">
                 Interactive tape chart, instant status changes, new bookings, and printable invoices.
@@ -420,25 +420,25 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* 12 Keys Inventory Card */}
+          {/* Rooms Inventory Card */}
           <div className="bg-[#151518] border border-white/10 rounded-xl p-5 shadow-md flex flex-col justify-between space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[#F7F3EC] font-semibold text-sm">
                   <BedDouble className="w-4 h-4 text-[#E02B1D]" />
-                  <span>12-Key Inventory</span>
+                  <span>Rooms Inventory</span>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono">
                   100% Verified
                 </span>
               </div>
               <p className="text-xs text-[#A8A59E] leading-relaxed">
-                4 Categories: 6 Deluxe King (101-106), 3 Premier Executive (201-203), 2 Royal Fremont (301-302), 1 Penthouse (401).
+                3 Categories: 9 Deluxe Rooms (101-109), 10 Super Deluxe Rooms (201-210), 2 Premium Rooms (301-302).
               </p>
             </div>
 
             <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-              <span className="text-white font-mono text-[11px]">Total: 12 Rooms</span>
+              <span className="text-white font-mono text-[11px]">Total: 21 Rooms</span>
               <span className="text-[#C9A96E] text-[11px]">Tape Chart Ready</span>
             </div>
           </div>

@@ -3,22 +3,24 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Crown, Users, Maximize2, Sparkles, Calendar, ArrowRight } from "lucide-react";
+import { Users, Maximize2, Calendar } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { useSiteSlots } from "@/context/SiteSlotsContext";
+import PhotoComingSoon from "@/components/PhotoComingSoon";
 import EventEnquiryModal from "./EventEnquiryModal";
 
 export default function EventsSection() {
-  const [selectedVenue, setSelectedVenue] = useState<string>("The Grand Fremont Ballroom");
+  const [selectedVenue, setSelectedVenue] = useState<string>("Cloud Six Banquet");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { events } = siteConfig;
   const { slots } = useSiteSlots();
 
-  const venues = events.venues.map((venue, idx) => {
-    const slotKey = `events.venue_${idx + 1}`;
+  const venues = events.venues.map((venue) => {
+    const slotKey = venue.imageSlot || "cloud-six-banquet";
+    const slotData = slots[slotKey];
     return {
       ...venue,
-      image: slots[slotKey]?.url || venue.image,
+      imageUrl: (slotData?.isActive !== false && slotData?.is_active !== false && slotData?.url) ? slotData.url : null,
     };
   });
 
@@ -62,8 +64,8 @@ export default function EventsSection() {
           </motion.p>
         </div>
 
-        {/* Venues Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Venues Grid (2 Venues) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {venues.map((venue, index) => (
             <motion.div
               key={venue.name}
@@ -75,15 +77,25 @@ export default function EventsSection() {
             >
               <div>
                 {/* Venue Visual */}
-                <div className="relative w-full aspect-[16/11] overflow-hidden">
-                  <Image
-                    src={venue.image}
-                    alt={venue.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#151518] via-transparent to-black/20" />
+                <div className="relative w-full aspect-[16/11] overflow-hidden bg-[#101014]">
+                  {venue.imageUrl ? (
+                    <>
+                      <Image
+                        src={venue.imageUrl}
+                        alt={venue.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#151518] via-transparent to-black/20" />
+                    </>
+                  ) : (
+                    <PhotoComingSoon
+                      title={venue.name}
+                      category={venue.type}
+                      aspectRatio="aspect-[16/11]"
+                    />
+                  )}
 
                   <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] font-sans font-bold tracking-widest uppercase shadow">
                     {venue.type}
@@ -100,14 +112,10 @@ export default function EventsSection() {
                     {venue.desc}
                   </p>
 
-                  <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 text-xs text-[#F7F3EC] mb-4">
+                  <div className="py-3 border-y border-white/5 text-xs text-[#F7F3EC] mb-4">
                     <div className="flex items-center space-x-1.5">
                       <Users className="w-3.5 h-3.5 text-[#E02B1D]" />
                       <span className="text-[11px] font-semibold">{venue.capacity}</span>
-                    </div>
-                    <div className="flex items-center space-x-1.5">
-                      <Maximize2 className="w-3.5 h-3.5 text-[#E02B1D]" />
-                      <span className="text-[11px] font-semibold">{venue.area}</span>
                     </div>
                   </div>
                 </div>

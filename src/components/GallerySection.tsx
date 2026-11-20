@@ -8,7 +8,7 @@ import { siteConfig } from "@/data/content";
 import { useSiteSlots } from "@/context/SiteSlotsContext";
 import GalleryLightbox, { GalleryItem } from "./GalleryLightbox";
 
-const categories = ["All", "Architecture", "Suites", "Dining", "Events"];
+const categories = ["All", "Property", "Rooms", "Venues"];
 
 export default function GallerySection() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -16,64 +16,42 @@ export default function GallerySection() {
   const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
   const { slots } = useSiteSlots();
 
-  const galleryItems: GalleryItem[] = [
+  const potentialItems: (GalleryItem & { active: boolean })[] = [
     {
       id: 1,
-      title: "Hotel Fremont Facade at Dusk",
-      category: "Architecture",
-      src: slots["hero.slide_3"]?.url || "/assets/hero/hero-lobby.webp",
-      span: "col-span-2 row-span-2",
+      title: "Hotel Fremont Facade",
+      category: "Property",
+      src: slots["exterior"]?.url || "/assets/hero/hero-lobby.webp",
+      active: true,
+      span: "col-span-1 sm:col-span-2",
     },
     {
       id: 2,
-      title: "The Royal Fremont Suite",
-      category: "Suites",
-      src: slots["rooms.royal-fremont.main"]?.url || "/assets/placeholder.svg",
-      span: "col-span-1 row-span-1",
+      title: "Super Deluxe Room",
+      category: "Rooms",
+      src: slots["super-deluxe"]?.url || "",
+      active: !!(slots["super-deluxe"]?.url && slots["super-deluxe"]?.isActive !== false && slots["super-deluxe"]?.is_active !== false),
+      span: "col-span-1",
     },
     {
       id: 3,
-      title: "Aura Fine Dining & Cocktail Bar",
-      category: "Dining",
-      src: slots["dining.banner_primary"]?.url || "/assets/placeholder.svg",
-      span: "col-span-1 row-span-1",
+      title: "Premium Room",
+      category: "Rooms",
+      src: slots["premium"]?.url || "",
+      active: !!(slots["premium"]?.url && slots["premium"]?.isActive !== false && slots["premium"]?.is_active !== false),
+      span: "col-span-1",
     },
     {
       id: 4,
-      title: "Grand Fremont Ballroom",
-      category: "Events",
-      src: slots["events.venue_1"]?.url || "/assets/placeholder.svg",
-      span: "col-span-1 row-span-2",
-    },
-    {
-      id: 5,
-      title: "Presidential Penthouse",
-      category: "Suites",
-      src: slots["rooms.presidential-penthouse.main"]?.url || "/assets/placeholder.svg",
-      span: "col-span-1 row-span-1",
-    },
-    {
-      id: 6,
-      title: "Premier Executive Suite",
-      category: "Suites",
-      src: slots["rooms.premier-executive.main"]?.url || "/assets/placeholder.svg",
-      span: "col-span-1 row-span-1",
-    },
-    {
-      id: 7,
-      title: "The Fremont Terrace Lawn",
-      category: "Events",
-      src: slots["events.venue_2"]?.url || "/assets/placeholder.svg",
-      span: "col-span-1 row-span-1",
-    },
-    {
-      id: 8,
-      title: "Deluxe King Room Sanctuary",
-      category: "Suites",
-      src: slots["rooms.deluxe-king.main"]?.url || "/assets/placeholder.svg",
-      span: "col-span-1 row-span-1",
+      title: "Cloud Six Banquet",
+      category: "Venues",
+      src: slots["cloud-six-banquet"]?.url || "",
+      active: !!(slots["cloud-six-banquet"]?.url && slots["cloud-six-banquet"]?.isActive !== false && slots["cloud-six-banquet"]?.is_active !== false),
+      span: "col-span-1 sm:col-span-2",
     },
   ];
+
+  const galleryItems = potentialItems.filter((item) => item.active && item.src);
 
   const filteredItems =
     activeCategory === "All"
@@ -101,10 +79,10 @@ export default function GallerySection() {
           <div>
             <div className="inline-flex items-center space-x-2 text-[11px] font-sans tracking-[0.3em] text-[#C9A96E] uppercase font-semibold mb-3">
               <span className="w-6 h-[1.5px] bg-[#E02B1D]" />
-              <span>VISUAL JOURNAL</span>
+              <span>PROPERTY GALLERY</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#F7F3EC] leading-tight">
-              Moments of Splendour
+              A Glimpse of Hotel Fremont
             </h2>
           </div>
 

@@ -11,7 +11,13 @@ import {
   updateBookingStatusAction,
 } from "@/actions/rooms";
 import { ReservationRecord } from "@/actions/reservations";
-import { updateRoomTypeAction, CalendarDaySummary, CalendarDayStay } from "@/actions/roomTypes";
+import {
+  updateRoomTypeAction,
+  addRoomTypeAction,
+  deleteRoomTypeAction,
+  CalendarDaySummary,
+  CalendarDayStay,
+} from "@/actions/roomTypes";
 import { RoomTypeConfig, DEFAULT_ROOM_TYPES, formatINR } from "@/config/hotel";
 import ReservationsList from "@/components/admin/ReservationsList";
 import { roomCategories } from "@/data/rooms";
@@ -34,6 +40,7 @@ import {
   Settings,
   Edit,
   Save,
+  Trash2,
   DoorClosed,
   AlertCircle,
   Users,
@@ -110,20 +117,64 @@ export default function RoomsManager({
   const [editingRoomType, setEditingRoomType] = useState<RoomTypeConfig | null>(null);
   const [editForm, setEditForm] = useState<{
     name: string;
+    slug: string;
     pricePerNight: number;
     totalRooms: number;
     maxGuests: number;
+    sizeSqft: number;
+    bedType: string;
+    tag: string;
+    shortDescription: string;
+    amenities: string;
+    imageSlot: string;
+    rateCpDouble: number;
+    rateCpSingle: number;
+    rateEpDouble: number;
+    rateEpSingle: number;
     isActive: boolean;
   }>({
     name: "",
-    pricePerNight: 5499,
-    totalRooms: 6,
-    maxGuests: 3,
+    slug: "",
+    pricePerNight: 2299,
+    totalRooms: 1,
+    maxGuests: 2,
+    sizeSqft: 160,
+    bedType: "Plush King-size bed",
+    tag: "",
+    shortDescription: "",
+    amenities: "",
+    imageSlot: "",
+    rateCpDouble: 2799,
+    rateCpSingle: 2499,
+    rateEpDouble: 2499,
+    rateEpSingle: 2299,
     isActive: true,
   });
   const [editWarning, setEditWarning] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
+  const [rateChangeConfirmed, setRateChangeConfirmed] = useState(false);
   const [isSavingRoomType, setIsSavingRoomType] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [canDeactivateInstead, setCanDeactivateInstead] = useState(false);
+  const [isDeletingRoomType, setIsDeletingRoomType] = useState(false);
+  const [isNewRoomTypeOpen, setIsNewRoomTypeOpen] = useState(false);
+  const [newRoomTypeForm, setNewRoomTypeForm] = useState({
+    name: "",
+    code: "",
+    roomsTotal: 1,
+    sizeSqft: 160,
+    bedType: "Plush King-size bed",
+    tag: "",
+    shortDescription: "",
+    amenities: "Air Conditioning, Smart TV, Tea & Coffee Kettle, Wi-Fi",
+    imageSlot: "",
+    rateCpDouble: 2799,
+    rateCpSingle: 2499,
+    rateEpDouble: 2499,
+    rateEpSingle: 2299,
+  });
+  const [isCreatingRoomType, setIsCreatingRoomType] = useState(false);
+  const [createRoomTypeError, setCreateRoomTypeError] = useState<string | null>(null);
 
   // Selected Day for In-House Stays inspection
   const [selectedCalendarDay, setSelectedCalendarDay] = useState<CalendarDaySummary | null>(null);
@@ -190,26 +241,71 @@ export default function RoomsManager({
     setEditingRoomType(rt);
     setEditForm({
       name: rt.name,
+      slug: rt.slug || rt.code,
       pricePerNight: rt.pricePerNight,
-      totalRooms: rt.totalRooms,
-      maxGuests: rt.maxGuests,
+      totalRooms: rt.totalRooms || rt.roomsTotal || 1,
+      maxGuests: rt.maxGuests || 2,
+      sizeSqft: rt.sizeSqft || 160,
+      bedType: rt.bedType || "Plush King-size bed",
+      tag: rt.tag || rt.badge || "",
+      shortDescription: rt.shortDescription || rt.description || "",
+      amenities: Array.isArray(rt.amenities) ? rt.amenities.join(", ") : "",
+      imageSlot: rt.imageSlot || "",
+      rateCpDouble: rt.rateCpDouble || 2799,
+      rateCpSingle: rt.rateCpSingle || 2499,
+      rateEpDouble: rt.rateEpDouble || 2499,
+      rateEpSingle: rt.rateEpSingle || rt.pricePerNight || 2299,
       isActive: rt.isActive,
     });
+    setRateChangeConfirmed(false);
     setEditWarning(null);
     setEditError(null);
+    setDeleteError(null);
+    setCanDeactivateInstead(false);
   };
 
   // Save Room Type updates
   const handleSaveRoomType = async (forceOverride: boolean = false) => {
     if (!editingRoomType) return;
+
+    // Check if any rates changed
+    const ratesChanged =
+      editForm.rateCpDouble !== editingRoomType.rateCpDouble ||
+      editForm.rateCpSingle !== editingRoomType.rateCpSingle ||
+      editForm.rateEpDouble !== editingRoomType.rateEpDouble ||
+      editForm.rateEpSingle !== editingRoomType.rateEpSingle;
+
+    if (ratesChanged && !rateChangeConfirmed && !forceOverride) {
+      setRateChangeConfirmed(true);
+      return;
+    }
+
     setIsSavingRoomType(true);
     setEditError(null);
     try {
+      const amenitiesArr = editForm.amenities
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       const res = await updateRoomTypeAction(editingRoomType.code, {
         name: editForm.name,
-        pricePerNight: Number(editForm.pricePerNight),
+        slug: editForm.slug,
+        pricePerNight: Number(editForm.rateEpSingle),
         totalRooms: Number(editForm.totalRooms),
+        roomsTotal: Number(editForm.totalRooms),
         maxGuests: Number(editForm.maxGuests),
+        sizeSqft: Number(editForm.sizeSqft),
+        bedType: editForm.bedType,
+        tag: editForm.tag,
+        shortDescription: editForm.shortDescription,
+        longDescription: editForm.shortDescription,
+        amenities: amenitiesArr,
+        imageSlot: editForm.imageSlot,
+        rateCpDouble: Number(editForm.rateCpDouble),
+        rateCpSingle: Number(editForm.rateCpSingle),
+        rateEpDouble: Number(editForm.rateEpDouble),
+        rateEpSingle: Number(editForm.rateEpSingle),
         isActive: editForm.isActive,
         forceOverride,
       });
@@ -218,7 +314,7 @@ export default function RoomsManager({
         if (res.warning) {
           setEditWarning(res.warning);
         } else {
-          setEditError(res.error || "Failed to update suite configuration.");
+          setEditError(res.error || "Failed to update room configuration.");
         }
         return;
       }
@@ -230,9 +326,22 @@ export default function RoomsManager({
             ? {
                 ...rt,
                 name: editForm.name,
-                pricePerNight: Number(editForm.pricePerNight),
+                slug: editForm.slug,
+                pricePerNight: Number(editForm.rateEpSingle),
                 totalRooms: Number(editForm.totalRooms),
+                roomsTotal: Number(editForm.totalRooms),
                 maxGuests: Number(editForm.maxGuests),
+                sizeSqft: Number(editForm.sizeSqft),
+                bedType: editForm.bedType,
+                tag: editForm.tag,
+                badge: editForm.tag,
+                shortDescription: editForm.shortDescription,
+                amenities: amenitiesArr,
+                imageSlot: editForm.imageSlot,
+                rateCpDouble: Number(editForm.rateCpDouble),
+                rateCpSingle: Number(editForm.rateCpSingle),
+                rateEpDouble: Number(editForm.rateEpDouble),
+                rateEpSingle: Number(editForm.rateEpSingle),
                 isActive: editForm.isActive,
               }
             : rt
@@ -243,6 +352,117 @@ export default function RoomsManager({
       setEditError(err?.message || "Failed to save configuration.");
     } finally {
       setIsSavingRoomType(false);
+    }
+  };
+
+  // Delete Room Type handler
+  const handleDeleteRoomType = async (code: string) => {
+    setIsDeletingRoomType(true);
+    setDeleteError(null);
+    setCanDeactivateInstead(false);
+    try {
+      const res = await deleteRoomTypeAction(code);
+      if (!res.success) {
+        setDeleteError(res.error || "Failed to delete room category.");
+        if (res.canDeactivate || res.error?.includes("booking") || res.error?.includes("reservation")) {
+          setCanDeactivateInstead(true);
+        }
+        return;
+      }
+      setRoomTypes((prev) => prev.filter((rt) => rt.code !== code));
+      setEditingRoomType(null);
+    } catch (err: any) {
+      setDeleteError(err?.message || "Failed to delete room category.");
+    } finally {
+      setIsDeletingRoomType(false);
+    }
+  };
+
+  // Deactivate Room Type instead of delete
+  const handleDeactivateCategory = async (code: string) => {
+    setIsSavingRoomType(true);
+    try {
+      const res = await updateRoomTypeAction(code, { isActive: false });
+      if (res.success) {
+        setRoomTypes((prev) =>
+          prev.map((rt) => (rt.code === code ? { ...rt, isActive: false } : rt))
+        );
+        setEditingRoomType(null);
+      } else {
+        setDeleteError(res.error || "Failed to deactivate category.");
+      }
+    } finally {
+      setIsSavingRoomType(false);
+    }
+  };
+
+  // Create new Room Type
+  const handleCreateRoomType = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreatingRoomType(true);
+    setCreateRoomTypeError(null);
+
+    try {
+      const amenitiesArr = newRoomTypeForm.amenities
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const res = await addRoomTypeAction({
+        name: newRoomTypeForm.name,
+        code: newRoomTypeForm.code,
+        roomsTotal: Number(newRoomTypeForm.roomsTotal),
+        sizeSqft: Number(newRoomTypeForm.sizeSqft),
+        bedType: newRoomTypeForm.bedType,
+        tag: newRoomTypeForm.tag,
+        shortDescription: newRoomTypeForm.shortDescription,
+        amenities: amenitiesArr,
+        imageSlot: newRoomTypeForm.imageSlot,
+        rateCpDouble: Number(newRoomTypeForm.rateCpDouble),
+        rateCpSingle: Number(newRoomTypeForm.rateCpSingle),
+        rateEpDouble: Number(newRoomTypeForm.rateEpDouble),
+        rateEpSingle: Number(newRoomTypeForm.rateEpSingle),
+        pricePerNight: Number(newRoomTypeForm.rateEpSingle),
+        maxGuests: 2,
+        isActive: true,
+      });
+
+      if (!res.success) {
+        setCreateRoomTypeError(res.error || "Failed to add room category.");
+        return;
+      }
+
+      // Add to local state
+      const newCode = (newRoomTypeForm.code || newRoomTypeForm.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")).replace(/(^-|-$)/g, "");
+      setRoomTypes((prev) => [
+        ...prev,
+        {
+          code: newCode,
+          slug: newCode,
+          name: newRoomTypeForm.name,
+          roomsTotal: Number(newRoomTypeForm.roomsTotal),
+          totalRooms: Number(newRoomTypeForm.roomsTotal),
+          sizeSqft: Number(newRoomTypeForm.sizeSqft),
+          bedType: newRoomTypeForm.bedType,
+          tag: newRoomTypeForm.tag,
+          shortDescription: newRoomTypeForm.shortDescription,
+          amenities: amenitiesArr,
+          imageSlot: newRoomTypeForm.imageSlot,
+          rateCpDouble: Number(newRoomTypeForm.rateCpDouble),
+          rateCpSingle: Number(newRoomTypeForm.rateCpSingle),
+          rateEpDouble: Number(newRoomTypeForm.rateEpDouble),
+          rateEpSingle: Number(newRoomTypeForm.rateEpSingle),
+          pricePerNight: Number(newRoomTypeForm.rateEpSingle),
+          maxGuests: 2,
+          isActive: true,
+          sortOrder: prev.length + 1,
+        },
+      ]);
+      setIsNewRoomTypeOpen(false);
+    } catch (err: any) {
+      setCreateRoomTypeError(err?.message || "Failed to create category.");
+    } finally {
+      setIsCreatingRoomType(false);
     }
   };
 
@@ -357,7 +577,7 @@ export default function RoomsManager({
           <span className="text-[11px] font-mono uppercase text-[#A8A59E]">Total Keys</span>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl font-mono font-bold text-white">{totalRooms}</span>
-            <span className="text-[10px] text-[#C9A96E] font-medium">Boutique</span>
+            <span className="text-[10px] text-[#C9A96E] font-medium">Rooms</span>
           </div>
         </div>
 
@@ -415,7 +635,7 @@ export default function RoomsManager({
             }`}
           >
             <BedDouble className="w-3.5 h-3.5" />
-            <span>12 Keys Board</span>
+            <span>Room Status Board</span>
           </button>
 
           <button
@@ -487,15 +707,16 @@ export default function RoomsManager({
       </div>
 
       {/* ======================================================== */}
-      {/* TAB 1: 12 KEYS ROOM STATUS BOARD */}
+      {/* TAB 1: ROOM STATUS BOARD */}
       {/* ======================================================== */}
       {activeTab === "board" && (
         <div className="space-y-6">
           {/* Grouped by Floors & Categories */}
-          {["deluxe-king", "premier-executive", "royal-fremont", "presidential-penthouse"].map((slug) => {
+          {roomCategories.map((cat) => {
+            const slug = cat.slug;
             const catRooms = filteredRooms.filter((r) => r.categorySlug === slug);
             if (catRooms.length === 0) return null;
-            const categoryMeta = roomCategories.find((c) => c.slug === slug);
+            const categoryMeta = cat;
 
             return (
               <div key={slug} className="space-y-3">
@@ -629,13 +850,13 @@ export default function RoomsManager({
                   </h3>
                 </div>
                 <p className="text-xs text-[#A8A59E] mt-0.5">
-                  Live inventory across all 12 keys. Click any date to view in-house guest stays and room allocations.
+                  Live inventory across all rooms. Click any date to view in-house guest stays and room allocations.
                 </p>
               </div>
 
               <div className="flex items-center gap-2 text-xs">
                 <span className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[#C9A96E]">
-                  Total Hotel Keys: 12 Rooms
+                  Total Hotel Keys: {totalRooms || 21} Rooms
                 </span>
               </div>
             </div>
@@ -693,7 +914,7 @@ export default function RoomsManager({
                               : "text-emerald-400"
                           }`}
                         >
-                          {day.totalOccupied}/12
+                          {day.totalOccupied}/{day.totalInventory || 21}
                         </span>
                       </div>
 
@@ -712,24 +933,14 @@ export default function RoomsManager({
                       </div>
                     </div>
 
-                    {/* Suite-wise breakdown badge */}
+                    {/* Category-wise breakdown badge */}
                     <div className="pt-2 border-t border-white/5 space-y-0.5 text-[10px] font-mono">
-                      <div className="flex justify-between text-[#A8A59E]">
-                        <span>Deluxe:</span>
-                        <span className="text-white">{day.byRoomType["deluxe-king"]?.booked || 0}/6</span>
-                      </div>
-                      <div className="flex justify-between text-[#A8A59E]">
-                        <span>Premier:</span>
-                        <span className="text-white">{day.byRoomType["premier-executive"]?.booked || 0}/3</span>
-                      </div>
-                      <div className="flex justify-between text-[#A8A59E]">
-                        <span>Royal:</span>
-                        <span className="text-white">{day.byRoomType["royal-fremont"]?.booked || 0}/2</span>
-                      </div>
-                      <div className="flex justify-between text-[#A8A59E]">
-                        <span>Penthouse:</span>
-                        <span className="text-white">{day.byRoomType["presidential-penthouse"]?.booked || 0}/1</span>
-                      </div>
+                      {Object.entries(day.byRoomType).map(([catSlug, catData]) => (
+                        <div key={catSlug} className="flex justify-between text-[#A8A59E]">
+                          <span className="capitalize">{catSlug.replace(/-/g, " ")}:</span>
+                          <span className="text-white">{catData?.booked || 0}/{catData?.total || 0}</span>
+                        </div>
+                      ))}
                     </div>
 
                     {day.activeStays.length > 0 && (
@@ -754,7 +965,7 @@ export default function RoomsManager({
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded bg-rose-500/40 border border-[#E02B1D]" />
-                <span>Sold Out (12/12 Rooms Occupied)</span>
+                <span>Sold Out (All Rooms Occupied)</span>
               </div>
             </div>
           </div>
@@ -762,7 +973,7 @@ export default function RoomsManager({
       )}
 
       {/* ======================================================== */}
-      {/* TAB 3: SUITES & RATES INVENTORY CONFIGURATION (12 KEYS) */}
+      {/* TAB 3: ROOMS & RATES INVENTORY CONFIGURATION */}
       {/* ======================================================== */}
       {activeTab === "inventory" && (
         <div className="space-y-6">
@@ -772,7 +983,7 @@ export default function RoomsManager({
               <div className="flex items-center gap-2">
                 <Settings className="w-4 h-4 text-[#C9A96E]" />
                 <h3 className="text-base font-serif font-bold text-white">
-                  12 Keys Inventory &amp; Rate Configuration
+                  Rooms Inventory &amp; Rate Configuration
                 </h3>
               </div>
               <p className="text-xs text-[#A8A59E] mt-0.5 max-w-2xl">
@@ -1137,9 +1348,9 @@ export default function RoomsManager({
                   <h2 className="text-2xl font-serif font-black tracking-tight text-[#E02B1D]">
                     HOTEL FREMONT
                   </h2>
-                  <p className="text-xs text-gray-500 font-medium">Boutique Luxury Sanctuary · 12 Exclusive Keys</p>
+                  <p className="text-xs text-gray-500 font-medium">Thoughtful comfort. Warm hospitality. · 21 Rooms</p>
                   <p className="text-[11px] text-gray-500 mt-1">
-                    Direct Expressway, Airport Road, Mohali, Punjab · +91 98727 68514
+                    Sector 80, Airport Road, Mohali, Punjab · +91 79734 50281
                   </p>
                 </div>
                 <div className="text-right">
@@ -1222,7 +1433,7 @@ export default function RoomsManager({
                   <strong>Check-in Requirement:</strong> Valid Government-issued photo identification (Aadhaar / Passport / Driving License) is mandatory for all staying guests upon arrival.
                 </p>
                 <p>
-                  <strong>Cancellation Policy:</strong> Free cancellation up to 48 hours prior to check-in. For late cancellations or no-shows, a 1-night retention fee applies.
+                  <strong>Cancellation Policy:</strong> Free cancellation up to 24 hours prior to check-in. Cancellations under 24 hours and no-shows are non-refundable.
                 </p>
                 <p className="text-center pt-2 font-mono text-gray-400">
                   Hotel Fremont · Authorized Guest Voucher · Generated on {new Date().toLocaleDateString("en-IN")}
@@ -1234,15 +1445,15 @@ export default function RoomsManager({
       )}
 
       {/* ======================================================== */}
-      {/* MODAL: EDIT SUITE & RATES INVENTORY CONFIGURATION */}
+      {/* MODAL: EDIT ROOM CATEGORY & 4-RATE INVENTORY */}
       {/* ======================================================== */}
       {editingRoomType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg bg-[#151518] border border-[#C9A96E]/30 rounded-2xl shadow-2xl p-6 text-[#F7F3EC] space-y-5">
+          <div className="relative w-full max-w-2xl bg-[#151518] border border-[#C9A96E]/30 rounded-2xl shadow-2xl p-6 text-[#F7F3EC] space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between border-b border-white/10 pb-3">
               <div>
                 <h3 className="text-lg font-serif font-bold text-white">
-                  Edit Suite Configuration
+                  Edit Room Category
                 </h3>
                 <span className="text-[11px] font-mono text-[#C9A96E]">
                   Code: {editingRoomType.code}
@@ -1264,20 +1475,34 @@ export default function RoomsManager({
               </div>
             )}
 
-            {editWarning && (
-              <div className="p-3.5 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-200 text-xs space-y-2">
+            {deleteError && (
+              <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-rose-200 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-rose-300">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>Cannot Delete Room Category</span>
+                </div>
+                <p className="leading-relaxed">{deleteError}</p>
+                {canDeactivateInstead && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeactivateCategory(editingRoomType.code)}
+                    className="px-3.5 py-1.5 rounded-lg bg-[#E02B1D] hover:bg-[#c42215] text-white font-semibold text-xs transition cursor-pointer"
+                  >
+                    Deactivate Category Instead
+                  </button>
+                )}
+              </div>
+            )}
+
+            {rateChangeConfirmed && (
+              <div className="p-3.5 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-200 text-xs space-y-2 animate-fadeIn">
                 <div className="flex items-center gap-2 font-bold text-amber-300">
                   <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Inventory Conflict Warning</span>
+                  <span>Confirm Rate Adjustment</span>
                 </div>
-                <p className="leading-relaxed">{editWarning}</p>
-                <button
-                  type="button"
-                  onClick={() => handleSaveRoomType(true)}
-                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs transition cursor-pointer"
-                >
-                  Force Override &amp; Save
-                </button>
+                <p className="leading-relaxed">
+                  New bookings and online payments will use these rates immediately.
+                </p>
               </div>
             )}
 
@@ -1286,36 +1511,113 @@ export default function RoomsManager({
                 e.preventDefault();
                 handleSaveRoomType(false);
               }}
-              className="space-y-4"
+              className="space-y-4 text-xs"
             >
-              <div>
-                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
-                  Suite Display Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
-                    Rate per Night (₹) *
+                    Category Name *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     required
-                    min={1}
-                    value={editForm.pricePerNight}
-                    onChange={(e) => setEditForm({ ...editForm, pricePerNight: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                   />
                 </div>
 
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    URL Slug
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.slug}
+                    onChange={(e) => setEditForm({ ...editForm, slug: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* 4 Rate Plans Matrix */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-[#C9A96E]/20 space-y-3">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#C9A96E] font-bold block">
+                  4 Rate Plans (Excl. Taxes in INR)
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      With Breakfast · Double
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={editForm.rateCpDouble}
+                      onChange={(e) => {
+                        setEditForm({ ...editForm, rateCpDouble: Number(e.target.value) });
+                        setRateChangeConfirmed(false);
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      With Breakfast · Single
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={editForm.rateCpSingle}
+                      onChange={(e) => {
+                        setEditForm({ ...editForm, rateCpSingle: Number(e.target.value) });
+                        setRateChangeConfirmed(false);
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      Without Breakfast · Double
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={editForm.rateEpDouble}
+                      onChange={(e) => {
+                        setEditForm({ ...editForm, rateEpDouble: Number(e.target.value) });
+                        setRateChangeConfirmed(false);
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      Without Breakfast · Single
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={editForm.rateEpSingle}
+                      onChange={(e) => {
+                        setEditForm({ ...editForm, rateEpSingle: Number(e.target.value) });
+                        setRateChangeConfirmed(false);
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Physical Attributes */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
                     Total Rooms (Keys) *
@@ -1324,60 +1626,323 @@ export default function RoomsManager({
                     type="number"
                     required
                     min={0}
-                    max={20}
+                    max={50}
                     value={editForm.totalRooms}
                     onChange={(e) => setEditForm({ ...editForm, totalRooms: Number(e.target.value) })}
                     className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
-                    Max Guests / Room *
+                    Size (sq ft)
                   </label>
                   <input
                     type="number"
-                    required
-                    min={1}
-                    max={10}
-                    value={editForm.maxGuests}
-                    onChange={(e) => setEditForm({ ...editForm, maxGuests: Number(e.target.value) })}
+                    min={50}
+                    value={editForm.sizeSqft}
+                    onChange={(e) => setEditForm({ ...editForm, sizeSqft: Number(e.target.value) })}
                     className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
-                    Inventory Status
+                    Bed Type
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.bedType}
+                    onChange={(e) => setEditForm({ ...editForm, bedType: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Status
                   </label>
                   <select
                     value={editForm.isActive ? "active" : "inactive"}
                     onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === "active" })}
                     className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                   >
-                    <option value="active">Active (Available on Site)</option>
-                    <option value="inactive">Inactive (Hidden)</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Tag / Badge (e.g. Best choice for corporate stays)
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.tag}
+                    onChange={(e) => setEditForm({ ...editForm, tag: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Photo Slot Key (e.g. super-deluxe, premium)
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.imageSlot}
+                    onChange={(e) => setEditForm({ ...editForm, imageSlot: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  Short Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={editForm.shortDescription}
+                  onChange={(e) => setEditForm({ ...editForm, shortDescription: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                  Amenities (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.amenities}
+                  onChange={(e) => setEditForm({ ...editForm, amenities: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-white/10">
                 <button
                   type="button"
-                  onClick={() => setEditingRoomType(null)}
+                  onClick={() => handleDeleteRoomType(editingRoomType.code)}
+                  disabled={isDeletingRoomType}
+                  className="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{isDeletingRoomType ? "Checking..." : "Delete Category"}</span>
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditingRoomType(null)}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-[#A8A59E] hover:text-white transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingRoomType}
+                    className="px-5 py-2.5 rounded-xl bg-[#E02B1D] hover:bg-[#c42215] disabled:opacity-50 text-white font-semibold text-xs tracking-wider uppercase transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-red-950/40"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>
+                      {isSavingRoomType
+                        ? "Saving..."
+                        : rateChangeConfirmed
+                        ? "Confirm & Publish Rates"
+                        : "Save Changes"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL: ADD NEW ROOM CATEGORY */}
+      {/* ======================================================== */}
+      {isNewRoomTypeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-xl bg-[#151518] border border-[#C9A96E]/30 rounded-2xl shadow-2xl p-6 text-[#F7F3EC] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-white/10 pb-3">
+              <div>
+                <h3 className="text-lg font-serif font-bold text-white">
+                  Add New Room Category
+                </h3>
+                <span className="text-[11px] text-[#A8A59E]">
+                  Create an inventory category for Hotel Fremont
+                </span>
+              </div>
+              <button
+                onClick={() => setIsNewRoomTypeOpen(false)}
+                className="p-1 rounded-lg text-[#A8A59E] hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {createRoomTypeError && (
+              <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-200 text-xs">
+                {createRoomTypeError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateRoomType} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Category Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Executive Studio"
+                    value={newRoomTypeForm.name}
+                    onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Code / Slug (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. executive-studio"
+                    value={newRoomTypeForm.code}
+                    onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, code: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* 4 Rates */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-[#C9A96E]/20 space-y-3">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#C9A96E] font-bold block">
+                  4 Rate Plans (Excl. Taxes in INR)
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      With Breakfast · Double
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={newRoomTypeForm.rateCpDouble}
+                      onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, rateCpDouble: Number(e.target.value) })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      With Breakfast · Single
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={newRoomTypeForm.rateCpSingle}
+                      onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, rateCpSingle: Number(e.target.value) })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      Without Breakfast · Double
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={newRoomTypeForm.rateEpDouble}
+                      onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, rateEpDouble: Number(e.target.value) })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#A8A59E] mb-1 font-medium">
+                      Without Breakfast · Single
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={newRoomTypeForm.rateEpSingle}
+                      onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, rateEpSingle: Number(e.target.value) })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] font-mono focus:border-[#E02B1D] focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Total Rooms (Keys) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    max={50}
+                    value={newRoomTypeForm.roomsTotal}
+                    onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, roomsTotal: Number(e.target.value) })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Size (sq ft)
+                  </label>
+                  <input
+                    type="number"
+                    min={50}
+                    value={newRoomTypeForm.sizeSqft}
+                    onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, sizeSqft: Number(e.target.value) })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans uppercase tracking-wider text-[#C9A96E] mb-1 font-semibold">
+                    Bed Type
+                  </label>
+                  <input
+                    type="text"
+                    value={newRoomTypeForm.bedType}
+                    onChange={(e) => setNewRoomTypeForm({ ...newRoomTypeForm, bedType: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsNewRoomTypeOpen(false)}
                   className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-[#A8A59E] hover:text-white transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isSavingRoomType}
-                  className="px-5 py-2.5 rounded-xl bg-[#E02B1D] hover:bg-[#c42215] disabled:opacity-50 text-white font-semibold text-xs tracking-wider uppercase transition cursor-pointer flex items-center gap-1.5"
+                  disabled={isCreatingRoomType}
+                  className="px-5 py-2.5 rounded-xl bg-[#E02B1D] hover:bg-[#c42215] disabled:opacity-50 text-white font-semibold text-xs tracking-wider uppercase transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-red-950/40"
                 >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>{isSavingRoomType ? "Saving to Supabase..." : "Save Configuration"}</span>
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isCreatingRoomType ? "Creating..." : "Create Category"}</span>
                 </button>
               </div>
             </form>
@@ -1406,11 +1971,11 @@ export default function RoomsManager({
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs font-mono font-bold text-[#E02B1D]">
-                    {selectedCalendarDay.totalOccupied} of 12 Keys Booked ({selectedCalendarDay.occupancyPercentage}% Occupancy)
+                    {selectedCalendarDay.totalOccupied} of {selectedCalendarDay.totalInventory || 21} Keys Booked ({selectedCalendarDay.occupancyPercentage}% Occupancy)
                   </span>
                   <span className="text-[#A8A59E] text-xs">·</span>
                   <span className="text-xs font-mono text-emerald-400">
-                    {Math.max(0, 12 - selectedCalendarDay.totalOccupied)} Rooms Available
+                    {Math.max(0, (selectedCalendarDay.totalInventory || 21) - selectedCalendarDay.totalOccupied)} Rooms Available
                   </span>
                 </div>
               </div>
@@ -1428,7 +1993,7 @@ export default function RoomsManager({
               {selectedCalendarDay.activeStays.length === 0 ? (
                 <div className="py-8 text-center text-[#A8A59E] space-y-2">
                   <DoorClosed className="w-8 h-8 mx-auto text-[#C9A96E]/60" />
-                  <p className="text-sm font-medium text-white">All 12 Keys Vacant</p>
+                  <p className="text-sm font-medium text-white">All Rooms Vacant</p>
                   <p className="text-xs text-[#A8A59E]">
                     No confirmed guest reservations staying in-house on this night.
                   </p>
@@ -1438,7 +2003,7 @@ export default function RoomsManager({
                   const cleanPhone = stay.guestPhone.replace(/\D/g, "").slice(-10);
                   const waUrl = `https://wa.me/91${cleanPhone}?text=Hello%20${encodeURIComponent(
                     stay.guestName
-                  )},%20greeting%20from%20Hotel%20Fremont%20concierge.`;
+                  )},%20greeting%20from%20Hotel%20Fremont%20front%20desk.`;
 
                   return (
                     <div

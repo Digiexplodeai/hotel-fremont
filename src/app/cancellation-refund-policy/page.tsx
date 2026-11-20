@@ -88,17 +88,17 @@ export default function CancellationRefundPolicyPage() {
           <span>1. Cancellation Windows &amp; Associated Charges</span>
         </h2>
         <p>
-          Because Hotel Fremont operates an intimate boutique sanctuary of only 12 luxury keys, cancellations directly affect room availability. Our cancellation rules are applied as follows:
+          At Hotel Fremont, we maintain a clear and transparent cancellation policy. Our cancellation rules are applied as follows:
         </p>
         <ul className="space-y-3 list-disc pl-6 text-[#A8A59E]">
           <li>
-            <strong className="text-[#F7F3EC]">Free Cancellation:</strong> Cancellations made at least {cancellation.freeCancellationHours} (48 hours or more) before the scheduled check-in time ({checkInTime} on the arrival date) are eligible for a <strong>full refund of the amount paid</strong> with zero penalty.
+            <strong className="text-[#F7F3EC]">Free Cancellation:</strong> Cancellations made at least {cancellation.freeCancellationHours} (24 hours or more) before the scheduled check-in time ({checkInTime} on the arrival date) are eligible for a <strong>full refund of the amount paid</strong> with zero penalty.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">Late Cancellation:</strong> Cancellations made less than {cancellation.freeCancellationHours} before the scheduled check-in time will incur a retention fee of <strong>{cancellation.lateCancellationCharge}</strong>, and the balance (if any) will be refunded.
+            <strong className="text-[#F7F3EC]">Late Cancellation:</strong> Cancellations made less than {cancellation.freeCancellationHours} before the scheduled check-in time are <strong>non-refundable</strong>.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">No-Show Policy:</strong> Guests who fail to arrive on the scheduled check-in date without prior documented written notice will be treated as a No-Show. In such cases, <strong>{cancellation.noShowCharge}</strong> is retained, and the remaining nights of the booking will be released for re-allocation.
+            <strong className="text-[#F7F3EC]">No-Show Policy:</strong> Guests who fail to arrive on the scheduled check-in date without prior documented written notice are <strong>non-refundable</strong>, and the remaining nights of the booking will be released for re-allocation.
           </li>
           <li>
             <strong className="text-[#F7F3EC]">Early Check-Out:</strong> In the event of an early check-out or departure after arrival, no refund will be provided for unused nights unless approved in advance by hotel management.
@@ -155,10 +155,10 @@ export default function CancellationRefundPolicyPage() {
           <div className="bg-[#151518] border border-white/10 rounded-xl p-5 space-y-2">
             <div className="flex items-center gap-2 text-[#C9A96E] font-medium text-xs uppercase tracking-wider">
               <Phone className="w-4 h-4" />
-              <span>Direct Concierge Assistance</span>
+              <span>Direct Front Desk Assistance</span>
             </div>
             <p className="text-xs text-[#A8A59E] leading-relaxed">
-              Call our front desk team directly at <a href={siteConfig.phoneTel} className="text-[#F7F3EC] underline font-medium">{siteConfig.phone}</a>. Our concierge will authenticate your reservation and guide you through the process.
+              Call our front desk team directly at <a href={siteConfig.phoneTel} className="text-[#F7F3EC] underline font-medium">{siteConfig.phone}</a>. Our team will authenticate your reservation and guide you through the process.
             </p>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function CancellationRefundPolicyPage() {
           <span>4. Peak Dates, Banquets &amp; Group Bookings</span>
         </h2>
         <p>
-          Reservations booked under non-refundable promotional tariffs, wedding banquet venue agreements (Grand Fremont Ballroom or Fremont Lawn), or peak holiday periods (such as New Year Eve celebrations) may be subject to specialized contractual cancellation terms indicated on your booking agreement. In the event of a conflict, terms in your signed event contract supersede general website policies.
+          Reservations booked under non-refundable promotional tariffs, banquet venue agreements (Cloud Six Banquet or Conference Hall), or peak periods may be subject to specialized contractual cancellation terms indicated on your booking agreement. In the event of a conflict, terms in your signed event contract supersede general website policies.
         </p>
       </section>
     </PolicyLayout>

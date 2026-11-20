@@ -2,7 +2,12 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getCurrentUser, signOutAction } from "@/actions/auth";
-import { getSiteSettingsAction } from "@/actions/content";
+import {
+  getSiteSettingsAction,
+  getFacilitiesAction,
+  getVenuesAction,
+  getNearbyPlacesAction,
+} from "@/actions/content";
 import ContentManager from "@/components/admin/ContentManager";
 import {
   Settings,
@@ -33,7 +38,12 @@ export default async function AdminContentPage() {
     redirect("/admin/login");
   }
 
-  const settingsRes = await getSiteSettingsAction();
+  const [settingsRes, facilitiesRes, venuesRes, nearbyRes] = await Promise.all([
+    getSiteSettingsAction(),
+    getFacilitiesAction(true),
+    getVenuesAction(true),
+    getNearbyPlacesAction(true),
+  ]);
 
   return (
     <div className="min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col">
@@ -115,7 +125,7 @@ export default async function AdminContentPage() {
             className="px-3 py-1.5 rounded-lg text-[#A8A59E] hover:text-white transition flex items-center gap-1.5 shrink-0"
           >
             <BedDouble className="w-3.5 h-3.5" />
-            <span>12 Keys &amp; Availability</span>
+            <span>Rooms &amp; Availability</span>
           </Link>
           <Link
             href="/admin/enquiries"
@@ -161,6 +171,9 @@ export default async function AdminContentPage() {
         {/* Content Manager Component */}
         <ContentManager
           initialSettings={settingsRes.settings}
+          initialFacilities={facilitiesRes.facilities}
+          initialVenues={venuesRes.venues}
+          initialNearbyPlaces={nearbyRes.places}
           isDatabase={settingsRes.isDatabase}
         />
       </main>

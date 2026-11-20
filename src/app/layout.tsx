@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Manrope } from "next/font/google";
 import "./globals.css";
 import { siteConfig as contentConfig } from "@/data/content";
-import { TOTAL_ROOMS, HOTEL_REPUTATION } from "@/data/rooms";
-import { CONTACT } from "@/data/contact";
+import { TOTAL_ROOMS } from "@/data/rooms";
 import { siteConfig } from "@/lib/site-config";
 
 const playfair = Playfair_Display({
@@ -28,21 +27,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Hotel Fremont | Luxury Hotel near Airport Road, Mohali",
+  title: "Hotel Fremont | Comfortable Hotel on Airport Road, Mohali",
   description:
-    "Experience intimate 5-star boutique luxury at Hotel Fremont, Airport Road, Sector 80, SAS Nagar, Mohali. Featuring 12 elegantly appointed rooms and suites, fine dining, and grand banquets just 10 minutes from Chandigarh International Airport (IXC).",
+    "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
   keywords: [
     "hotel in Mohali",
     "hotel near Chandigarh airport",
-    "best hotel Airport Road Mohali",
-    "luxury hotel Mohali",
-    "12 room luxury hotel Mohali",
-    "boutique hotel Airport Road Mohali",
+    "hotel Airport Road Mohali",
     "banquet hall Mohali",
-    "wedding venue Mohali",
-    "Hotel Fremont",
-    "Sector 80 Mohali hotels",
-    "boutique hotel Chandigarh Tricity",
+    "Hotel Fremont Sector 80",
   ],
   authors: [{ name: "Hotel Fremont Hospitality" }],
   creator: "Hotel Fremont",
@@ -52,9 +45,9 @@ export const metadata: Metadata = {
     canonical: siteConfig.siteUrl,
   },
   openGraph: {
-    title: "Hotel Fremont | Luxury Boutique Hotel near Airport Road, Mohali",
+    title: "Hotel Fremont | Comfortable Hotel on Airport Road, Mohali",
     description:
-      "Stay Beyond Ordinary. An intimate 12-key 5-star boutique hotel in Mohali, Punjab, minutes from Chandigarh Airport. 12 luxury rooms and suites, fine dining, and banquet venues.",
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and conference facilities.",
     url: siteConfig.siteUrl,
     siteName: siteConfig.siteName,
     locale: "en_IN",
@@ -70,9 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hotel Fremont | Luxury Hotel near Airport Road, Mohali",
+    title: "Hotel Fremont | Comfortable Hotel on Airport Road, Mohali",
     description:
-      "Stay Beyond Ordinary at Hotel Fremont, Sector 80, Airport Road, Mohali. 12 bespoke rooms & suites, 10 mins from Chandigarh Airport.",
+      "Hotel Fremont on Sector 80, Airport Road, Mohali. Thoughtfully appointed guest rooms, in-house restaurant, banquet and conference facilities.",
     images: [`${siteConfig.siteUrl}/assets/logo.png`],
   },
   icons: {
@@ -98,32 +91,16 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Hotel",
     name: siteConfig.siteName,
-    legalName: contentConfig.brand.legalName,
-    alternateName: contentConfig.brand.logoWordmark,
     description: contentConfig.brand.shortDescription,
     image: `${siteConfig.siteUrl}/assets/logo.png`,
     logo: `${siteConfig.siteUrl}/assets/logo.png`,
     url: siteConfig.siteUrl,
-    telephone: siteConfig.phoneRaw, // +919872768514
+    telephone: siteConfig.phone,
     email: siteConfig.email,
-    priceRange: "₹₹₹₹",
-    numberOfRooms: TOTAL_ROOMS, // Exactly 12 rooms & suites
-    checkinTime: "14:00",
-    checkoutTime: "12:00",
-    founder: {
-      "@type": "Person",
-      name: siteConfig.proprietorName,
-    },
-    starRating: {
-      "@type": "Rating",
-      ratingValue: "5",
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: HOTEL_REPUTATION.rating,
-      bestRating: "5",
-      worstRating: "1",
-    },
+    priceRange: "Rs 2,299 - Rs 4,799 + taxes",
+    numberOfRooms: TOTAL_ROOMS || 21,
+    checkinTime: "13:00",
+    checkoutTime: "11:00",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road",

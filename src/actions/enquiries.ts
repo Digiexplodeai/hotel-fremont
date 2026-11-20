@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
 
-export type EnquiryType = "rate_check" | "book_now" | "dining_aura" | "event_banquet" | "contact";
+export type EnquiryType = "rate_check" | "book_now" | "dining_aura" | "dining" | "event_banquet" | "contact";
 export type EnquiryStatus = "new" | "contacted" | "in_discussion" | "converted" | "closed";
 
 export interface EnquiryRecord {
@@ -44,7 +44,7 @@ export interface SubmitEnquiryInput {
 
 /**
  * Public Server Action to capture leads from all public modals & forms
- * (Check Rates, Room Booking, Aura Dining, Banquet Events, Contact).
+ * (Check Rates, Room Booking, Restaurant Dining, Banquet Events, Contact).
  * Inserts directly into public.reservations using the Supabase anon key client.
  * Strictly adheres to anon INSERT-only RLS policy (no .select()).
  */
@@ -99,7 +99,7 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
     let estimatedTotal = 0;
 
     if (input.type === "dining_aura") {
-      roomType = "Aura Fine Dining";
+      roomType = "Hotel Fremont Restaurant";
       if (input.dates) {
         const rawDate = input.dates.split(" ")[0].trim();
         if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
@@ -110,7 +110,7 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       }
       guestsCount = Number(input.guests) || 2;
     } else if (input.type === "event_banquet") {
-      roomType = input.details?.venue || "The Grand Fremont Ballroom";
+      roomType = input.details?.venue || "Cloud Six Banquet";
       if (input.dates && /^\d{4}-\d{2}-\d{2}$/.test(input.dates)) {
         checkIn = input.dates;
         const nextDay = new Date(new Date(input.dates).getTime() + 86400000).toISOString().slice(0, 10);
@@ -118,7 +118,7 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       }
       guestsCount = Number(input.guests) || 50;
     } else if (input.type === "rate_check" || input.type === "book_now") {
-      roomType = input.details?.suite || "Deluxe King Room";
+      roomType = input.details?.suite || "Deluxe Room";
       if (input.dates && input.dates.includes(" to ")) {
         const parts = input.dates.split(" to ");
         if (parts[0] && parts[1]) {
@@ -211,7 +211,7 @@ function determineChannel(row: any): EnquiryType {
   const req = (row.special_request || "").toLowerCase();
   const eventType = (row.event_type || "").toLowerCase();
 
-  if (room.includes("dining") || req.includes("dining") || req.includes("table reservation") || req.includes("aura")) {
+  if (room.includes("dining") || req.includes("dining") || req.includes("table reservation") || room.includes("restaurant") || req.includes("restaurant")) {
     return "dining_aura";
   }
   if (

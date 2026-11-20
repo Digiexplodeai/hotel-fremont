@@ -85,7 +85,7 @@ export async function requestPresignedUploadUrl({
     const uniqueId = randomUUID().substring(0, 8);
     const objectKey = `site/${section}/${cleanBase}-${Date.now()}-${uniqueId}.${cleanExt}`;
 
-    // 5. Generate Presigned PUT URL (valid for 600 seconds / 10 minutes)
+    // 5. Generate Presigned PUT URL (valid for 600 seconds)
     // Explicitly sign 'host' and 'content-type' to match the browser payload exactly
     const command = new PutObjectCommand({
       Bucket: bucketName,

@@ -1,20 +1,22 @@
 /**
  * HOTEL FREMONT - MASTER CONTENT & CONFIGURATION
  * 
- * All website text, prices, contact details, and images are managed here.
- * You can edit this file to update any information across the entire website instantly.
+ * Real client profile data (honest 3-star hotel).
+ * Single source of truth for fallback website text and structure.
  */
 
-import { roomCategories, TOTAL_ROOMS, HOTEL_REPUTATION } from "./rooms";
+import { roomCategories, TOTAL_ROOMS } from "./rooms";
 import { CONTACT } from "./contact";
 
 export const siteConfig = {
   brand: {
     name: "Hotel Fremont",
-    legalName: "Hotel Fremont Hospitality Pvt Ltd",
-    logoWordmark: "HOTEL FREMONT",
-    tagline: "Stay Beyond Ordinary.",
-    shortDescription: "An intimate 5-star boutique hotel on Airport Road, Sector 80, Mohali, featuring 12 elegantly appointed rooms and suites, gourmet dining, and magnificent celebration venues.",
+    tagline: "Thoughtful comfort. Warm hospitality.",
+    subline: "A convenient address on Airport Road.",
+    heroLine: "A comfortable stay in Mohali.",
+    badge: "3-Star Hotel",
+    shortDescription:
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
     accentColor: "#E02B1D",
     goldColor: "#C9A96E",
     darkColor: "#0E0E10",
@@ -24,12 +26,12 @@ export const siteConfig = {
   },
 
   contact: {
-    address: "Hotel Fremont, Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road, Mohali (SAS Nagar), Punjab - 140308",
-    city: "Mohali",
+    address:
+      "Hotel Fremont, Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road, Mohali (SAS Nagar), Punjab - 140308",
+    city: "Mohali (SAS Nagar)",
     state: "Punjab",
     postalCode: "140308",
     country: "India",
-    airportDistance: "10 Minutes from Chandigarh International Airport (IXC)",
     phone: CONTACT.phoneDisplay,
     phoneDisplay: CONTACT.phoneDisplay,
     phoneTel: CONTACT.phoneTel,
@@ -41,14 +43,14 @@ export const siteConfig = {
     bookingEmail: "hotelfremont1@gmail.com",
     eventsEmail: "hotelfremont1@gmail.com",
     receptionEmail: "hotelfremont1@gmail.com",
-    mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13725.291307738392!2d76.711448!3d30.686523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390feb02fa5d6545%3A0x6b9d6a2f4cfbe6e8!2sSector%2080%2C%20Sahibzada%20Ajit%20Singh%20Nagar%2C%20Punjab!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
-    directionsUrl: "https://maps.google.com/?q=Hotel+Fremont+Airport+Road+Sector+80+SAS+Nagar+Mohali+Punjab",
+    directionsUrl:
+      "https://maps.google.com/?q=Hotel+Fremont+Airport+Road+Sector+80+SAS+Nagar+Mohali+Punjab",
   },
 
   navLinks: [
-    { label: "Suites", href: "/#rooms" },
+    { label: "Rooms & Stays", href: "/#rooms" },
     { label: "Dining", href: "/#dining" },
-    { label: "Amenities", href: "/#amenities" },
+    { label: "Facilities", href: "/#amenities" },
     { label: "Events", href: "/#events" },
     { label: "Gallery", href: "/#gallery" },
     { label: "Location", href: "/#location" },
@@ -56,231 +58,208 @@ export const siteConfig = {
   ],
 
   hero: {
-    eyebrow: "MOHALI'S FINEST BOUTIQUE LUXURY",
-    headlinePart1: "Stay Beyond",
-    headlinePart2: "Ordinary.",
-    description: "Welcome to Hotel Fremont on Airport Road, Mohali. A seamless fusion of bespoke architecture, personalized 5-star service, and peaceful indulgence minutes from Chandigarh International Airport.",
+    eyebrow: "3-STAR HOTEL · AIRPORT ROAD, MOHALI",
+    badge: "3-Star Hotel",
+    headlinePart1: "A comfortable stay",
+    headlinePart2: "in Mohali.",
+    tagline: "Thoughtful comfort. Warm hospitality.",
+    subline: "A convenient address on Airport Road.",
+    description:
+      "Hotel Fremont brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room on Airport Road, Sector 80, Mohali.",
     ctaPrimary: "Book Your Stay",
-    ctaSecondary: "Explore Suites",
-    // Replace with local video or high-res photography
-    bgImage: "/assets/hero/hero-suite.webp",
-    videoUrl: null, // Optional mp4 video stream url if available
+    ctaSecondary: "View Rooms",
+    startingRateText: "From Rs 2,299 + taxes",
   },
 
   stats: [
-    { value: TOTAL_ROOMS, suffix: "", label: "Luxury Rooms & Suites", sub: "Designed for Tranquility" },
-    { value: "24/7", suffix: "", label: "Concierge & Butler Service", sub: "Dedicated Around the Clock" },
-    { value: 10, suffix: " Mins", label: "Airport Proximity", sub: "Shaheed Bhagat Singh IXC" },
-    { value: HOTEL_REPUTATION.rating, suffix: HOTEL_REPUTATION.ratingSuffix, label: HOTEL_REPUTATION.ratingLabel, sub: HOTEL_REPUTATION.reviewsSub },
+    { value: 21, suffix: " Rooms", label: "Guest Rooms", sub: "Deluxe, Super Deluxe & Premium" },
+    { value: 3, suffix: " Categories", label: "Room Categories", sub: "Designed for Comfort" },
+    { value: "50", suffix: " Covers", label: "In-House Restaurant", sub: "Ground Floor Dining" },
+    { value: "150", suffix: " Guests", label: "Cloud Six Banquet", sub: "Celebrations & Meetings" },
   ],
 
   about: {
-    eyebrow: "OUR HERITAGE & SPIRIT",
-    title: "An Oasis of Modern Royalty on Airport Road",
-    paragraph1: "Rising gracefully along Mohali’s thriving Airport Road, Hotel Fremont redefines boutique luxury in Punjab with 12 bespoke rooms and suites. Conceived for the cosmopolitan traveler, business visionary, and destination wedding parties, every detail—from our Italian marble corridors to custom silk furnishings—radiates calm authority.",
-    paragraph2: "Whether you are landing from an international red-eye flight, hosting a royal celebration in our Grand Fremont Ballroom, or savoring artisanal Punjabi flavours at Aura, our dedicated 24-hour concierge and butler service ensures your stay is nothing short of exceptional.",
+    eyebrow: "ABOUT HOTEL FREMONT",
+    title: "A Contemporary Hotel on Airport Road, Mohali",
+    paragraph1:
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
+    paragraph2:
+      "Guests enjoy 24-hour reception assistance, high-speed Wi-Fi, secure on-site parking, and an in-house kitchen open daily until 10:30 PM. With three room categories accommodating singles and couples, Hotel Fremont provides practical comfort along Mohali's premier arterial road.",
     features: [
-      { title: "Direct Airport Arterial", desc: "Effortless 10-minute commute to Chandigarh International Airport (IXC) via smooth six-lane expressway." },
-      { title: "Bespoke Hospitality", desc: "Private butler assistance, personalized pillow menus, and custom in-room dining around the clock." },
-      { title: "Grand Celebration Hub", desc: "Pillarless banquet halls and manicured lawns catering to up to 600 wedding and corporate guests." },
-      { title: "Architectural Peace", desc: "Acoustic triple-glazed sound insulation ensuring complete sanctuary from the bustling city." }
+      {
+        title: "Three Room Categories",
+        desc: "21 guest rooms across Deluxe, Super Deluxe, and Premium categories, featuring plush king-size beds and air-conditioning.",
+      },
+      {
+        title: "Dining & Celebrations",
+        desc: "Hotel Fremont Restaurant on the ground floor (50 covers), Cloud Six Banquet (150 guests), and conference hall (40-50 guests).",
+      },
+      {
+        title: "Convenient Location",
+        desc: "Situated on Airport Road, Sector 80, with straightforward access to Sohana, IT hubs, shopping malls, and Chandigarh Airport.",
+      },
+      {
+        title: "Essential Modern Comforts",
+        desc: "24-hour front desk, complimentary Wi-Fi, Smart TV, in-room tea and coffee maker, central hot water, and on-site parking.",
+      },
     ],
-    // High-resolution photography for about section
-    imagePrimary: "/assets/hero/hero-room-1.webp",
-    imageSecondary: "/assets/hero/hero-room-2.webp",
-    imageInterior: "/assets/hero/hero-lobby.webp",
   },
 
   rooms: roomCategories,
 
   amenities: [
     {
+      icon: "Clock",
+      title: "24-Hour Reception",
+      desc: "Front desk assistance available 24 hours a day, 7 days a week.",
+    },
+    {
       icon: "Wifi",
-      title: "High-Speed Wi-Fi 6",
-      desc: "Ultra-fast encrypted connectivity property-wide for uninterrupted video conferences and streaming."
-    },
-    {
-      icon: "Plane",
-      title: "Airport Chauffeur",
-      desc: "Chauffeured luxury transfers directly to and from Chandigarh International Airport (IXC) in 10 mins."
-    },
-    {
-      icon: "UtensilsCrossed",
-      title: "Aura Gourmet Dining",
-      desc: "Celebrated multi-cuisine dining, authentic Amritsari specialties, and signature wood-fired delicacies."
-    },
-    {
-      icon: "Crown",
-      title: "Grand Banquet Hall",
-      desc: "Opulent pillarless event venues accommodating up to 600 guests for weddings, galas, and corporate summits."
+      title: "Complimentary Wi-Fi",
+      desc: "High-speed wireless internet access across all rooms and common areas.",
     },
     {
       icon: "Car",
-      title: "Valet & EV Charging",
-      desc: "Secure basement parking with 24-hour valet service and high-speed DC fast-chargers for all electric vehicles."
+      title: "On-Site Parking",
+      desc: "Convenient and secure parking space for staying guests and visitors.",
     },
     {
-      icon: "Clock",
-      title: "24/7 In-Room Dining",
-      desc: "Around-the-clock chef-crafted dining brought to your room with white-glove presentation."
+      icon: "Wind",
+      title: "Air Conditioning",
+      desc: "Fully air-conditioned guest rooms with individual climate control.",
     },
     {
-      icon: "Dumbbell",
-      title: "Fitness & Wellness",
-      desc: "Technogym cardiovascular equipment, free weights, yoga deck, and private wellness trainers on request."
+      icon: "Tv",
+      title: "Smart TV",
+      desc: "In-room entertainment with high-definition smart television.",
     },
     {
-      icon: "ShieldCheck",
-      title: "24/7 Concierge & Security",
-      desc: "Discreet multi-tier security, smart card access, baggage handling, and tailored Mohali/Chandigarh tours."
-    }
+      icon: "Coffee",
+      title: "Tea & Coffee Kettle",
+      desc: "In-room electric kettle with daily supplies of tea and coffee.",
+    },
+    {
+      icon: "Flame",
+      title: "Central Hot Water",
+      desc: "Continuous central hot-water system for comfort around the clock.",
+    },
+    {
+      icon: "Sparkles",
+      title: "Housekeeping Service",
+      desc: "Daily professional housekeeping maintaining cleanliness and hygiene.",
+    },
+    {
+      icon: "BedDouble",
+      title: "Premium Linen & Duvets",
+      desc: "Specially made duvets, plush king-size bed linen, and quality washroom amenities.",
+    },
   ],
 
   dining: {
-    name: "AURA RESTAURANT & LOUNGE",
-    eyebrow: "CULINARY EXCELLENCE",
-    tagline: "An Epicurean Journey of Modern Heritage",
-    description: "Immerse yourself in a warm, amber-lit sanctuary where our master chefs transform seasonal ingredients into sublime works of art. Featuring Punjab's rich tandoori traditions alongside delicate European bistro favorites and handcrafted botanical cocktails.",
-    timing: "Breakfast: 7:00 AM – 10:30 AM | All-Day Dining: 12:00 PM – 11:30 PM",
-    features: ["Live Tandoor & Robata Grill", "Handpicked Global Wine Cellar", "Private Dining Room (PDR) for 16", "Artisanal High Tea Service"],
-    highlights: [
-      { name: "Dal Fremont Dum Pukht", desc: "Slow-simmered overnight over charcoal embers, finished with organic churned butter.", price: "₹650" },
-      { name: "Truffle & Wild Porcini Risotto", desc: "Acquerello aged carnaroli rice, winter black truffle shavings, aged parmesan.", price: "₹850" },
-      { name: "Charred Bhatti Murgh", desc: "Free-range chicken steeped in crushed spices, mustard oil and pomegranate reduction.", price: "₹795" },
-      { name: "Saffron Tres Leches & Pistachio Tuile", desc: "Kashmiri saffron-infused sponge soaked in cardamom milk with Iranian pistachios.", price: "₹450" }
+    eyebrow: "IN-HOUSE DINING",
+    name: "Hotel Fremont Restaurant",
+    tagline: "Thoughtfully prepared meals on the ground floor",
+    location: "Ground Floor",
+    covers: "50 Covers",
+    timing: "Daily until 10:30 PM",
+    description:
+      "Hotel Fremont Restaurant is located on the ground floor with seating for approximately 50 covers. Guests enjoy a morning breakfast buffet and fresh à la carte dining from our in-house kitchen open daily until 10:30 PM. Breakfast is complimentary with breakfast-inclusive room rates.",
+    features: [
+      "Ground Floor Location",
+      "50 Covers Seating",
+      "Breakfast Buffet",
+      "In-House Kitchen Daily until 10:30 PM",
     ],
-    imagePrimary: "/assets/placeholder.svg",
-    imageSecondary: "/assets/placeholder.svg",
   },
 
   events: {
-    eyebrow: "CELEBRATIONS & SUMMITS",
-    title: "Unforgettable Moments in Regal Splendour",
-    subtitle: "From fairytale Punjabi weddings to high-profile corporate summits, Hotel Fremont offers the most prestigious event spaces in Mohali.",
+    eyebrow: "BANQUET & MEETINGS",
+    title: "Celebrations & Conference Venues",
+    subtitle:
+      "Dedicated venues for private celebrations, corporate meetings, and social gatherings in Mohali.",
     venues: [
       {
-        name: "The Grand Fremont Ballroom",
-        capacity: "Up to 600 Guests",
-        area: "7,500 sq.ft",
-        type: "Weddings, Receptions & Galas",
-        desc: "Pillarless grand hall with crystal chandelier ceilings, motorized stage lighting, bridal vanity suite, and private pre-function lobby.",
-        image: "/assets/placeholder.svg",
+        name: "Cloud Six Banquet",
+        type: "Banquet Venue",
+        capacity: "Up to 150 guests",
+        imageSlot: "cloud-six-banquet",
+        desc: "An elegant venue for celebrations and special occasions, accommodating up to 150 guests.",
       },
       {
-        name: "The Fremont Terrace Lawn",
-        capacity: "Up to 350 Guests",
-        area: "5,000 sq.ft",
-        type: "Cocktail Evenings & Sangeet",
-        desc: "Open-air landscaped terrace under the starlit sky, featuring live barbecue counters and ambient fire pits.",
-        image: "/assets/placeholder.svg",
+        name: "Conference Hall",
+        type: "Conference Hall",
+        capacity: "40 to 50 guests",
+        imageSlot: "conference-hall",
+        desc: "A dedicated setting for meetings, seminars, and business discussions with contemporary layout options.",
       },
-      {
-        name: "The Executive Boardroom",
-        capacity: "Up to 35 Delegates",
-        area: "1,200 sq.ft",
-        type: "Board Meetings & Strategic Conclaves",
-        desc: "Equipped with 85-inch 4K conferencing display, noise-cancelling directional mics, and dedicated butler refreshments.",
-        image: "/assets/placeholder.svg",
-      }
-    ]
+    ],
   },
 
-  gallery: [
-    { id: 1, title: "Hotel Fremont Facade at Dusk", category: "Architecture", src: "/assets/hero/hero-lobby.webp", span: "col-span-2 row-span-2" },
-    { id: 2, title: "The Royal Fremont Suite", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
-    { id: 3, title: "Aura Fine Dining & Cocktail Bar", category: "Dining", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
-    { id: 4, title: "Grand Fremont Ballroom", category: "Events", src: "/assets/placeholder.svg", span: "col-span-1 row-span-2" },
-    { id: 5, title: "Presidential Penthouse", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
-    { id: 6, title: "Premier Executive Suite", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
-    { id: 7, title: "The Fremont Terrace Lawn", category: "Events", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
-    { id: 8, title: "Deluxe King Room Sanctuary", category: "Suites", src: "/assets/placeholder.svg", span: "col-span-1 row-span-1" },
-  ],
-
-  testimonials: [
-    {
-      id: 1,
-      name: "Vikramaditya Sharma",
-      role: "Managing Director, Global Logistics",
-      rating: 5,
-      date: "October 2026",
-      source: "Google Verified Review",
-      text: "Hotel Fremont is an absolute benchmark for luxury in Mohali. Being just 10 minutes from the airport makes it the most convenient stay for our international executives. The suites are whisper-quiet, the food at Aura is world-class, and the staff treats you like royalty.",
-    },
-    {
-      id: 2,
-      name: "Dr. Harpreet & Jasleen Kaur",
-      role: "Destination Wedding Hosts",
-      rating: 5,
-      date: "September 2026",
-      source: "Google Verified Review",
-      text: "We hosted our daughter's wedding reception at the Grand Fremont Ballroom. Our guests are still raving about the chandelier decor, the flawless catering, and the spacious guest suites. Every single request was handled with grace and warmth. Unforgettable!",
-    },
-    {
-      id: 3,
-      name: "Aanya Chawla",
-      role: "Architectural Consultant, New Delhi",
-      rating: 5,
-      date: "August 2026",
-      source: "Google Verified Review",
-      text: "As an architect, I am deeply impressed by the restraint and polish of the interiors. No gaudy excess—pure elegance, impeccable Italian marble, high ceilings, and sublime lighting design. Hotel Fremont is truly in a league of its own.",
-    },
-    {
-      id: 4,
-      name: "Rajeshwar Sen",
-      role: "Frequent Flyer & Tech Founder",
-      rating: 5,
-      date: "July 2026",
-      source: "Google Verified Review",
-      text: "The complimentary airport drop in their private sedan at 5:00 AM was punctual to the second, complete with a warm breakfast box packed for my flight. This attention to detail is why Fremont is my only stay in the Tricity.",
-    }
-  ],
-
   location: {
-    eyebrow: "PRIME MOHALI SANCTUARY",
-    headline: "Minutes from the Airport, Connected to Everything",
-    description: "Strategically situated directly on Airport Road in Sector 80, SAS Nagar, Hotel Fremont offers immediate transit to the airport terminal, Mohali's premier business corridors, and Chandigarh's iconic landmarks.",
-    addressLine: "Hotel Fremont, Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road, Mohali (SAS Nagar), Punjab - 140308",
-    distances: [
-      { destination: "Chandigarh Int'l Airport (IXC)", time: "10 Mins", dist: "8.5 km", highlight: true },
-      { destination: "Mohali Cricket Stadium (PCA)", time: "8 Mins", dist: "5.2 km", highlight: false },
-      { destination: "IT City Mohali / Bestech Mall", time: "6 Mins", dist: "3.8 km", highlight: false },
-      { destination: "Sector 17 City Centre, Chandigarh", time: "18 Mins", dist: "12.5 km", highlight: false },
-      { destination: "Fortis Hospital Mohali", time: "5 Mins", dist: "3.5 km", highlight: false },
-    ]
+    eyebrow: "ACCESSIBILITY & NEIGHBOURHOOD",
+    title: "Airport Road, Sector 80, Mohali",
+    address:
+      "Hotel Fremont, Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road, Mohali (SAS Nagar), Punjab - 140308",
+    note: "Travel times vary with route and traffic.",
+    nearbyPlaces: [
+      "Gurdwara Singh Shaheedan, Sohana",
+      "CP67 Mall and other shopping destinations",
+      "Chandigarh International Airport",
+      "Mohali IT, commercial and industrial hubs",
+      "Local car-wash facility in the surrounding area",
+    ],
+    convenientFor: [
+      "Business travellers",
+      "Guests attending meetings and events",
+      "Visitors exploring Sohana and the Tricity",
+      "Families",
+    ],
   },
 
   finalCta: {
-    eyebrow: "YOUR SANCTUARY AWAITS",
-    title: "Experience Punjab’s Foremost Luxury Boutique Hotel",
-    subtitle: "Book direct today for guaranteed best rates, complimentary airport drop, and priority suite upgrades.",
-    buttonText: "Reserve Your Experience",
-    callText: `Speak with Reservations: ${CONTACT.phoneDisplay}`,
+    eyebrow: "RESERVE YOUR STAY",
+    title: "Thoughtful Comfort. Warm Hospitality.",
+    subtitle: "Experience convenient comfort on Airport Road, Mohali.",
+    description:
+      "Experience convenient comfort on Airport Road, Mohali. Book direct for verified best rates.",
+    ctaPrimary: "Book Your Room",
+    ctaSecondary: "Contact Front Desk",
   },
 
   footer: {
-    about: "Hotel Fremont is an intimate 12-key luxury boutique destination on Airport Road, Sector 80, Mohali. Dedicated to authentic hospitality, culinary passion, and unforgettable stays.",
+    about:
+      "A contemporary 3-star hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed rooms, in-house restaurant, banquet and conference facilities.",
+    brandDescription:
+      "A contemporary 3-star hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed rooms, in-house restaurant, banquet and conference facilities.",
     quickLinks: [
-      { label: "Home", href: "/" },
-      { label: "Rooms & Suites", href: "/#rooms" },
-      { label: "Dining & Bar", href: "/#dining" },
-      { label: "Banquets & Weddings", href: "/#events" },
-      { label: "Hotel Amenities", href: "/#amenities" },
-      { label: "Photo Gallery", href: "/#gallery" },
-      { label: "Location & Directions", href: "/#location" },
-    ],
-    legalLinks: [
-      { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "Terms of Service", href: "/terms-and-conditions" },
-      { label: "Cancellation Policy", href: "/cancellation-refund-policy" },
-      { label: "Shipping Policy", href: "/shipping-policy" },
+      { label: "Rooms & Stays", href: "/#rooms" },
+      { label: "Dining", href: "/#dining" },
+      { label: "Facilities", href: "/#amenities" },
+      { label: "Events", href: "/#events" },
+      { label: "Gallery", href: "/#gallery" },
+      { label: "Location", href: "/#location" },
       { label: "Contact Us", href: "/contact-us" },
     ],
-    socials: [
-      { name: "Instagram", href: "https://instagram.com", icon: "Instagram" },
-      { name: "Facebook", href: "https://facebook.com", icon: "Facebook" },
-      { name: "LinkedIn", href: "https://linkedin.com", icon: "Linkedin" },
-      { name: "YouTube", href: "https://youtube.com", icon: "Youtube" },
+    legalLinks: [
+      { label: "Cancellation & Refund", href: "/cancellation-refund-policy" },
+      { label: "Terms & Conditions", href: "/terms-and-conditions" },
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Shipping Policy", href: "/shipping-policy" },
     ],
-    copyright: "© 2026 Hotel Fremont. All Rights Reserved. Crafted for Discerning Guests."
-  }
+    copyright: "© 2026 Hotel Fremont. All rights reserved.",
+    links: [
+      { label: "Rooms & Stays", href: "/#rooms" },
+      { label: "Dining", href: "/#dining" },
+      { label: "Facilities", href: "/#amenities" },
+      { label: "Events", href: "/#events" },
+      { label: "Gallery", href: "/#gallery" },
+      { label: "Location", href: "/#location" },
+      { label: "Contact Us", href: "/contact-us" },
+      { label: "Cancellation & Refund", href: "/cancellation-refund-policy" },
+      { label: "Terms & Conditions", href: "/terms-and-conditions" },
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Shipping Policy", href: "/shipping-policy" },
+    ],
+    socials: [], // Empty by default; only show if set in admin
+  },
 };

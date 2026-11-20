@@ -27,7 +27,7 @@ export default function ContactUsPage() {
   return (
     <PolicyLayout
       title="Contact Us"
-      subtitle="Connect with Hotel Fremont reservations, concierge, and management. We are at your service 24 hours a day, 7 days a week."
+      subtitle="Connect with Hotel Fremont reservations and front desk. We are at your service 24 hours a day, 7 days a week."
     >
       {/* Official Merchant Details Card (Razorpay Required) */}
       <div className="bg-[#151518] border border-[#C9A96E]/20 rounded-2xl p-6 sm:p-8 space-y-4">
@@ -76,7 +76,7 @@ export default function ContactUsPage() {
               <div className="w-10 h-10 rounded-xl bg-[#E02B1D]/10 border border-[#E02B1D]/20 flex items-center justify-center text-[#E02B1D]">
                 <Phone className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-serif font-bold text-[#F7F3EC]">Telephone & Concierge</h3>
+              <h3 className="text-base font-serif font-bold text-[#F7F3EC]">Telephone &amp; Front Desk</h3>
               <p className="text-xs text-[#A8A59E]">24/7 Front desk support and reservation inquiries.</p>
             </div>
             <div className="pt-3 border-t border-white/5">
@@ -136,35 +136,30 @@ export default function ContactUsPage() {
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-serif font-semibold text-[#F7F3EC] pb-2 border-b border-white/10 flex items-center gap-2.5">
           <MapPin className="w-5 h-5 text-[#C9A96E]" />
-          <span>Location & Strategic Connectivity</span>
+          <span>Location &amp; Neighborhood</span>
         </h2>
         <p className="text-[#A8A59E] leading-relaxed">
-          {location.description}
+          {contact.address}
         </p>
 
-        {/* Transit Distance Highlights */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {location.distances.map((dist, idx) => (
-            <div
-              key={idx}
-              className={`p-3.5 rounded-xl border text-xs flex items-center justify-between ${
-                dist.highlight
-                  ? "bg-[#E02B1D]/10 border-[#E02B1D]/30 text-[#F7F3EC]"
-                  : "bg-[#151518] border-white/5 text-[#A8A59E]"
-              }`}
-            >
-              <span className="font-medium truncate pr-2">{dist.destination}</span>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[11px] text-[#C9A96E]">{dist.dist}</span>
-                <span className="px-2 py-0.5 rounded-md bg-white/10 text-[10px] font-semibold text-white">
-                  {dist.time}
-                </span>
+        {/* Nearby Key Landmarks */}
+        <div className="space-y-2 pt-2">
+          <h3 className="text-sm font-serif font-semibold text-white">Nearby Key Destinations</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {location.nearbyPlaces.map((place: string, idx: number) => (
+              <div
+                key={idx}
+                className="p-3.5 rounded-xl border border-white/10 bg-[#151518] text-xs text-[#F7F3EC] flex items-center gap-2"
+              >
+                <MapPin className="w-3.5 h-3.5 text-[#E02B1D] shrink-0" />
+                <span>{place}</span>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <p className="text-xs text-[#A8A59E] italic mt-2">{location.note}</p>
         </div>
 
-        {/* Google Maps Actions & Embed */}
+        {/* Google Maps Actions */}
         <div className="bg-[#151518] border border-white/10 rounded-2xl overflow-hidden p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -172,7 +167,7 @@ export default function ContactUsPage() {
               <p className="text-xs text-[#A8A59E]">Airport Road, Sector 80, SAS Nagar, Mohali, Punjab</p>
             </div>
             <a
-              href={siteConfig.googleMapsUrl}
+              href={contact.directionsUrl || siteConfig.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] text-white text-xs font-semibold tracking-wider uppercase transition flex items-center gap-2 shrink-0 shadow"
@@ -181,20 +176,6 @@ export default function ContactUsPage() {
               <span>Open in Google Maps</span>
               <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
             </a>
-          </div>
-
-          <div className="relative aspect-[16/9] sm:aspect-[21/9] rounded-xl overflow-hidden border border-white/10 bg-black">
-            <iframe
-              src={contact.mapEmbedUrl}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen={false}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Hotel Fremont Location Map"
-              className="w-full h-full filter invert-[0.9] hue-rotate-180 contrast-[1.2]"
-            />
           </div>
         </div>
       </section>

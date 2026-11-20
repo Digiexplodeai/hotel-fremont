@@ -114,7 +114,7 @@ export default async function AdminImagesPage() {
             className="px-3 py-1.5 rounded-lg text-[#A8A59E] hover:text-white transition flex items-center gap-1.5 shrink-0"
           >
             <BedDouble className="w-3.5 h-3.5" />
-            <span>12 Keys &amp; Availability</span>
+            <span>Rooms &amp; Availability</span>
           </Link>
           <Link
             href="/admin/enquiries"

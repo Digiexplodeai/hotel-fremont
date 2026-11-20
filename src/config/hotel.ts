@@ -1,89 +1,166 @@
 /**
  * HOTEL FREMONT - CENTRAL INVENTORY & RATE CONFIGURATION
  * 
- * 12 Keys Luxury Boutique Inventory (Airport Road, Mohali)
+ * 21 Keys Inventory · Airport Road, Sector 80, Mohali
  * Single source of truth for config constants, fallback room types, and tax rates.
  */
 
 export interface RoomTypeConfig {
   code: string;
   name: string;
+  slug?: string;
   pricePerNight: number;
   totalRooms: number;
+  roomsTotal?: number;
   maxGuests: number;
   isActive: boolean;
   sortOrder: number;
-  description?: string;
+  sizeSqft?: number;
+  bedType?: string;
   badge?: string;
+  tag?: string;
+  description?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  amenities?: string[];
+  rateCpDouble?: number;
+  rateCpSingle?: number;
+  rateEpDouble?: number;
+  rateEpSingle?: number;
+  imageSlot?: string;
 }
 
 export const HOTEL_CONFIG = {
   name: "Hotel Fremont",
-  tagline: "12 Luxury Keys · Airport Road, Sector 80, Mohali",
-  phone: "+91 98727 68514",
-  cleanPhone: "919872768514",
-  whatsappNumber: "919872768514",
-  gstRate: 0.18, // 18% Luxury Hotel GST (editable)
-  gstPercentageLabel: "18%",
+  tagline: "Thoughtful comfort. Warm hospitality.",
+  subline: "A convenient address on Airport Road.",
+  heroLine: "A comfortable stay in Mohali.",
+  badge: "3-Star Hotel",
+  phone: "+91 79734 50281",
+  cleanPhone: "917973450281",
+  whatsappNumber: "917973450281",
+  whatsappLink: "https://wa.me/917973450281",
+  email: "hotelfremont1@gmail.com",
+  address: "Hotel Fremont, Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road, Mohali (SAS Nagar), Punjab - 140308",
+  checkInTime: "1:00 PM",
+  checkOutTime: "11:00 AM",
+  cancellationHours: 24,
+  // GST Threshold Rules (per room per night)
+  gstThreshold: 7500,
+  gstRate: 0.05,
+  gstRateLow: 0.05, // 5% GST for base tariff up to Rs 7,500
+  gstRateHigh: 0.18, // 18% GST for base tariff above Rs 7,500
   maxStayNights: 30,
-  maxRoomsPerBooking: 12,
-  totalHotelKeys: 12,
+  maxRoomsPerBooking: 21,
+  totalHotelKeys: 21,
   currencySymbol: "₹",
   refCodePrefix: "FRM-",
 };
 
 /**
- * 12 Physical Rooms Inventory across 4 luxury room categories
- * Exactly 12 keys total:
- * - Deluxe King Room: 6 rooms (Rs 5,499)
- * - Premier Executive Suite: 3 rooms (Rs 8,999)
- * - The Royal Fremont Suite: 2 rooms (Rs 14,999)
- * - Presidential Penthouse: 1 room (Rs 24,999)
+ * 21 Physical Rooms Inventory across 3 room categories
+ * Exactly 21 keys total:
+ * - Deluxe Room: 9 rooms (approx 160 sq ft, rates from Rs 2,299)
+ * - Super Deluxe Room: 10 rooms (approx 250 sq ft, rates from Rs 3,299)
+ * - Premium Room: 2 rooms (approx 365 sq ft, rates from Rs 4,299)
  */
 export const DEFAULT_ROOM_TYPES: RoomTypeConfig[] = [
   {
-    code: "deluxe-king",
-    name: "Deluxe King Room",
-    pricePerNight: 5499,
-    totalRooms: 6,
-    maxGuests: 3,
+    code: "deluxe-room",
+    slug: "deluxe-room",
+    name: "Deluxe Room",
+    pricePerNight: 2299,
+    totalRooms: 9,
+    roomsTotal: 9,
+    maxGuests: 2,
     isActive: true,
     sortOrder: 1,
-    badge: "Most Popular",
-    description: "Expansive king bedroom with handcrafted walnut furnishings, marble ensuite, and runway sunset views.",
+    sizeSqft: 160,
+    bedType: "Plush King-size bed",
+    tag: "",
+    shortDescription: "A practical, comfortable stay with essential modern conveniences.",
+    longDescription: "A practical, comfortable stay with essential modern conveniences. Features a plush king-size bed, air conditioning, Smart TV, tea and coffee maker, and complimentary Wi-Fi.",
+    description: "A practical, comfortable stay with essential modern conveniences. Features a plush king-size bed, air conditioning, Smart TV, tea and coffee maker, and complimentary Wi-Fi.",
+    amenities: [
+      "Air Conditioning",
+      "Smart TV",
+      "Tea & Coffee Kettle",
+      "Complimentary Wi-Fi",
+      "Washroom Amenities",
+      "Central Hot Water",
+      "Housekeeping Service",
+      "Premium Linen & Duvets",
+    ],
+    rateCpDouble: 2799,
+    rateCpSingle: 2499,
+    rateEpDouble: 2499,
+    rateEpSingle: 2299,
+    imageSlot: "deluxe-room",
   },
   {
-    code: "premier-executive",
-    name: "Premier Executive Suite",
-    pricePerNight: 8999,
-    totalRooms: 3,
-    maxGuests: 3,
+    code: "super-deluxe-room",
+    slug: "super-deluxe-room",
+    name: "Super Deluxe Room",
+    pricePerNight: 3299,
+    totalRooms: 10,
+    roomsTotal: 10,
+    maxGuests: 2,
     isActive: true,
     sortOrder: 2,
-    badge: "Executive Choice",
-    description: "Separate executive lounge, workstation, Italian espresso bar, and walk-in rain shower.",
+    sizeSqft: 250,
+    bedType: "Plush King-size bed",
+    tag: "Best choice for corporate stays",
+    badge: "Best choice for corporate stays",
+    shortDescription: "More room to unwind, with a calm palette and inviting interiors.",
+    longDescription: "More room to unwind, with a calm palette and inviting interiors. The Super Deluxe Room pairs a plush king-size bed with warm wood finishes, soft lighting and a calm, contemporary look.",
+    description: "More room to unwind, with a calm palette and inviting interiors. The Super Deluxe Room pairs a plush king-size bed with warm wood finishes, soft lighting and a calm, contemporary look.",
+    amenities: [
+      "Air Conditioning",
+      "Smart TV",
+      "Tea & Coffee Kettle",
+      "Complimentary Wi-Fi",
+      "Washroom Amenities",
+      "Central Hot Water",
+      "Housekeeping Service",
+      "Premium Linen & Duvets",
+    ],
+    rateCpDouble: 3799,
+    rateCpSingle: 3499,
+    rateEpDouble: 3499,
+    rateEpSingle: 3299,
+    imageSlot: "super-deluxe",
   },
   {
-    code: "royal-fremont",
-    name: "The Royal Fremont Suite",
-    pricePerNight: 14999,
+    code: "premium-room",
+    slug: "premium-room",
+    name: "Premium Room",
+    pricePerNight: 4299,
     totalRooms: 2,
-    maxGuests: 4,
+    roomsTotal: 2,
+    maxGuests: 2,
     isActive: true,
     sortOrder: 3,
-    badge: "Signature Experience",
-    description: "Dual-aspect suites with brass accents, private dining alcove, whirlpool jacuzzi, and dedicated butler service.",
-  },
-  {
-    code: "presidential-penthouse",
-    name: "Presidential Penthouse",
-    pricePerNight: 24999,
-    totalRooms: 1,
-    maxGuests: 6,
-    isActive: true,
-    sortOrder: 4,
-    badge: "Ultra Luxury",
-    description: "Crown jewel top floor penthouse with grand piano lounge, private rooftop terrace, and round-the-clock chef service.",
+    sizeSqft: 365,
+    bedType: "Plush King-size bed",
+    tag: "",
+    shortDescription: "A more spacious stay with distinctive styling and a refined feel.",
+    longDescription: "A more spacious stay with distinctive styling and a refined feel. The Premium Room features elegant burgundy interiors, a plush king-size bed and contemporary furnishings. Its generous layout offers a welcoming place to relax, work or recharge.",
+    description: "A more spacious stay with distinctive styling and a refined feel. The Premium Room features elegant burgundy interiors, a plush king-size bed and contemporary furnishings. Its generous layout offers a welcoming place to relax, work or recharge.",
+    amenities: [
+      "Air Conditioning",
+      "Smart TV",
+      "Tea & Coffee Kettle",
+      "Complimentary Wi-Fi",
+      "Washroom Amenities",
+      "Central Hot Water",
+      "Housekeeping Service",
+      "Premium Linen & Duvets",
+    ],
+    rateCpDouble: 4799,
+    rateCpSingle: 4499,
+    rateEpDouble: 4499,
+    rateEpSingle: 4299,
+    imageSlot: "premium",
   },
 ];
 
@@ -116,9 +193,8 @@ export function validateIndianPhone(phone: string): { isValid: boolean; cleanPho
 }
 
 /**
- * Format currency with Indian grouping (e.g. ₹14,999)
+ * Format currency with Indian grouping (e.g. ₹2,299)
  */
 export function formatINR(amount: number): string {
   return "₹" + Math.round(amount).toLocaleString("en-IN");
 }
-

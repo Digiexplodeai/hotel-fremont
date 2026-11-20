@@ -253,7 +253,11 @@ export async function submitReservationAction(input: SubmitReservationInput): Pr
         }
 
         const subtotal = diffNights * roomInfo.pricePerNight * roomsRequested;
-        const gst = Math.round(subtotal * HOTEL_CONFIG.gstRate);
+        const gstRate =
+          roomInfo.pricePerNight > HOTEL_CONFIG.gstThreshold
+            ? HOTEL_CONFIG.gstRateHigh
+            : HOTEL_CONFIG.gstRateLow;
+        const gst = Math.round(subtotal * gstRate);
         const total = subtotal + gst;
         const refCode = `FRM-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -411,10 +415,10 @@ export async function getReservationsAction(): Promise<{
     // Add any bookings not yet in reservations (pending, failed, or direct)
     if (bookingsData && bookingsData.length > 0) {
       const categoryMap: Record<string, string> = {
-        "deluxe-king": "Deluxe King Room",
-        "premier-executive": "Premier Executive Suite",
-        "royal-fremont": "The Royal Fremont Suite",
-        "presidential-penthouse": "Presidential Penthouse",
+        "deluxe-room": "Deluxe Room",
+        "super-deluxe": "Super Deluxe Room",
+        "premium": "Premium Room",
+        "premium-room": "Premium Room",
       };
 
       for (const b of bookingsData) {

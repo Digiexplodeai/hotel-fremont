@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimit";
-import { DEFAULT_ROOM_TYPES, HOTEL_CONFIG, validateIndianPhone } from "@/config/hotel";
-import { calculateServerBookingPrice, PAYMENT_CONFIG } from "@/lib/payment-config";
+import { DEFAULT_ROOM_TYPES, HOTEL_CONFIG, validateIndianPhone, RoomTypeConfig } from "@/config/hotel";
+import { calculateServerBookingPrice, PAYMENT_CONFIG, MealPlan, Occupancy } from "@/lib/payment-config";
 import { createRazorpayOrder, getRazorpayCredentials } from "@/lib/razorpay";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
@@ -38,7 +38,9 @@ export async function POST(req: NextRequest) {
       checkIn,
       checkOut,
       roomsRequested = 1,
-      guests = 1,
+      guests = 2,
+      mealPlan = "without_breakfast",
+      occupancy = "double",
       specialRequests,
       agreedToPolicy,
     } = body;
@@ -116,10 +118,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Room category lookup
-    const room = DEFAULT_ROOM_TYPES.find(
+    // 3. Fetch active Room Types from Supabase
+    const supabase = createAdminSupabaseClient();
+    let roomTypes: RoomTypeConfig[] = DEFAULT_ROOM_TYPES;
+
+    if (supabase) {
+      const { data: dbRoomTypes } = await supabase
+        .from("room_types")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (dbRoomTypes && dbRoomTypes.length > 0) {
+        roomTypes = dbRoomTypes.map((row: any) => ({
+          code: row.code,
+          slug: row.slug || row.code,
+          name: row.name,
+          pricePerNight: Number(row.price_per_night || 2299),
+          totalRooms: Number(row.rooms_total || row.total_rooms || 1),
+          roomsTotal: Number(row.rooms_total || row.total_rooms || 1),
+          maxGuests: Number(row.max_guests || 2),
+          isActive: Boolean(row.is_active !== false),
+          sortOrder: Number(row.sort_order || 0),
+          rateCpDouble: row.rate_cp_double ? Number(row.rate_cp_double) : undefined,
+          rateCpSingle: row.rate_cp_single ? Number(row.rate_cp_single) : undefined,
+          rateEpDouble: row.rate_ep_double ? Number(row.rate_ep_double) : undefined,
+          rateEpSingle: row.rate_ep_single ? Number(row.rate_ep_single) : undefined,
+        }));
+      }
+    }
+
+    const room = roomTypes.find(
       (r) =>
         r.code.toLowerCase() === (roomCategory || "").toLowerCase() ||
+        r.slug?.toLowerCase() === (roomCategory || "").toLowerCase() ||
         r.name.toLowerCase() === (roomCategory || "").toLowerCase()
     );
 
@@ -130,27 +162,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const totalCategoryRooms = room.roomsTotal || room.totalRooms || 21;
     const parsedRooms = Math.max(1, parseInt(String(roomsRequested), 10) || 1);
-    if (parsedRooms > room.totalRooms) {
+    if (parsedRooms > totalCategoryRooms) {
       return NextResponse.json(
-        { success: false, error: `We only have ${room.totalRooms} keys for ${room.name}.` },
+        { success: false, error: `Only ${totalCategoryRooms} rooms exist for ${room.name}.` },
         { status: 400 }
       );
     }
 
+    const maxGuestsAllowed = parsedRooms * (room.maxGuests || 2);
     const parsedGuests = Math.max(1, parseInt(String(guests), 10) || 1);
-    if (parsedGuests > parsedRooms * room.maxGuests) {
+    if (parsedGuests > maxGuestsAllowed) {
       return NextResponse.json(
         {
           success: false,
-          error: `${parsedRooms} ${room.name} can accommodate up to ${parsedRooms * room.maxGuests} guests.`,
+          error: `${parsedRooms} ${room.name} can accommodate up to ${maxGuestsAllowed} guests (max ${room.maxGuests || 2} per room).`,
         },
         { status: 400 }
       );
     }
 
-    // 3. Supabase verification & Concurrency Check
-    const supabase = createAdminSupabaseClient();
+    // 4. Supabase verification & Concurrency Check
     if (supabase) {
       // Clean up stale pending bookings first
       try {
@@ -163,11 +196,11 @@ export async function POST(req: NextRequest) {
         console.warn("[Stale cleanup warning]:", err);
       }
 
-      // Check overlapping active bookings
+      // Check overlapping active bookings (paid or unexpired pending)
       const { data: overlappingBookings } = await supabase
         .from("bookings")
-        .select("rooms_requested, check_in, check_out")
-        .eq("room_category", room.code)
+        .select("rooms_requested, rooms_count, check_in, check_out, status, expires_at")
+        .or(`room_category.eq.${room.code},room_category.eq.${room.slug || room.code}`)
         .in("status", ["paid", "pending"])
         .lt("check_in", checkOut)
         .gt("check_out", checkIn);
@@ -181,46 +214,60 @@ export async function POST(req: NextRequest) {
         .lt("check_in", checkOut)
         .gt("check_out", checkIn);
 
+      const activeBookings = (overlappingBookings || []).filter((b) => {
+        if (b.status === "paid") return true;
+        if (b.status === "pending" && b.expires_at && new Date(b.expires_at) > new Date()) return true;
+        return false;
+      });
+
       // Calculate max occupied rooms on any night during stay
       const occupancyByDate: Record<string, number> = {};
-      const allActive = [
-        ...(overlappingBookings || []),
-        ...(overlappingReservations || []),
-      ];
 
-      for (const item of allActive) {
+      for (const item of [...activeBookings, ...(overlappingReservations || [])]) {
         const itemStart = new Date(item.check_in);
         const itemEnd = new Date(item.check_out);
+        const bookedCount = Number((item as any).rooms_count || item.rooms_requested || 1);
+
         for (let d = new Date(itemStart); d < itemEnd; d.setDate(d.getDate() + 1)) {
           const dKey = d.toISOString().slice(0, 10);
           if (dKey >= checkIn && dKey < checkOut) {
-            occupancyByDate[dKey] = (occupancyByDate[dKey] || 0) + (item.rooms_requested || 1);
+            occupancyByDate[dKey] = (occupancyByDate[dKey] || 0) + bookedCount;
           }
         }
       }
 
       const peakOccupied = Math.max(0, ...Object.values(occupancyByDate));
-      if (peakOccupied + parsedRooms > room.totalRooms) {
+      const roomsRemaining = Math.max(0, totalCategoryRooms - peakOccupied);
+
+      if (peakOccupied + parsedRooms > totalCategoryRooms) {
         return NextResponse.json(
           {
             success: false,
-            error: `Apologies, only ${Math.max(0, room.totalRooms - peakOccupied)} room(s) are left for ${room.name} on the selected dates.`,
+            error: `Apologies, only ${roomsRemaining} room(s) available for ${room.name} on the selected dates.`,
           },
           { status: 409 }
         );
       }
     }
 
-    // 4. Calculate server-side price (strictly tamper-proof)
-    const price = calculateServerBookingPrice(room.code, checkIn, checkOut, parsedRooms);
+    // 5. Calculate server-side price (strictly tamper-proof)
+    const price = calculateServerBookingPrice(
+      room.code,
+      checkIn,
+      checkOut,
+      parsedRooms,
+      mealPlan as MealPlan,
+      occupancy as Occupancy,
+      roomTypes
+    );
 
-    // 5. Generate secure identifiers
+    // 6. Generate secure identifiers
     const randomSuffix = crypto.randomBytes(3).toString("hex").toUpperCase();
     const bookingRef = `${HOTEL_CONFIG.refCodePrefix}${randomSuffix}`; // e.g. FRM-A1B2C3
     const accessToken = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + PAYMENT_CONFIG.HOLD_MINUTES * 60 * 1000).toISOString();
 
-    // 6. Create Razorpay order
+    // 7. Create Razorpay order
     const { keyId } = getRazorpayCredentials();
     const order = await createRazorpayOrder({
       amountPaise: price.amountInPaise,
@@ -236,10 +283,12 @@ export async function POST(req: NextRequest) {
         checkOut,
         roomsRequested: String(parsedRooms),
         guests: String(parsedGuests),
+        mealPlan: price.mealPlan,
+        occupancy: price.occupancy,
       },
     });
 
-    // 7. Store pending booking in Supabase
+    // 8. Store pending booking in Supabase
     if (supabase) {
       const { error: insertError } = await supabase.from("bookings").insert({
         booking_ref: bookingRef,
@@ -249,10 +298,17 @@ export async function POST(req: NextRequest) {
         email: email.trim().toLowerCase(),
         room_category: room.code,
         rooms_requested: parsedRooms,
+        rooms_count: parsedRooms,
         check_in: checkIn,
         check_out: checkOut,
         nights: price.nights,
         guests: parsedGuests,
+        meal_plan: price.mealPlan,
+        occupancy: price.occupancy,
+        rate_per_night: price.ratePerNight,
+        base_amount: price.baseAmount,
+        gst_percent: price.gstPercent,
+        gst_amount: price.gstAmount,
         total_amount: price.totalAmount,
         amount_paid: 0,
         currency: PAYMENT_CONFIG.CURRENCY,
@@ -264,7 +320,6 @@ export async function POST(req: NextRequest) {
 
       if (insertError) {
         console.error("[Supabase Bookings Insert Error]:", insertError);
-        // Note: We still proceed since Razorpay order was minted, but log the error
       }
     }
 

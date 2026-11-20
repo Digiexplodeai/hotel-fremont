@@ -76,13 +76,13 @@ export default function PrivacyPolicyPage() {
           <div className="bg-[#151518]/70 border border-white/5 rounded-xl p-4">
             <h3 className="text-sm font-serif font-bold text-[#C9A96E] mb-1">Reservation & Service Delivery</h3>
             <p className="text-xs text-[#A8A59E] leading-relaxed">
-              Confirming accommodation, allocating inventory across our 12 luxury keys, preparing arrival amenities, and fulfilling bespoke concierge requests.
+              Confirming accommodation, allocating inventory across our 21 guest rooms, preparing arrival amenities, and fulfilling guest requests.
             </p>
           </div>
           <div className="bg-[#151518]/70 border border-white/5 rounded-xl p-4">
             <h3 className="text-sm font-serif font-bold text-[#C9A96E] mb-1">Guest Communication</h3>
             <p className="text-xs text-[#A8A59E] leading-relaxed">
-              Transmitting digital booking vouchers, airport transit coordination, payment receipts, and responding to direct inquiries via email, phone, or WhatsApp.
+              Transmitting digital booking vouchers, reservation coordination, payment receipts, and responding to direct inquiries via email, phone, or WhatsApp.
             </p>
           </div>
           <div className="bg-[#151518]/70 border border-white/5 rounded-xl p-4">

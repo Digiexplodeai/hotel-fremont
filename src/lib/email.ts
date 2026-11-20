@@ -18,6 +18,12 @@ export interface BookingEmailData {
   currency: string;
   razorpayPaymentId?: string;
   specialRequests?: string;
+  mealPlan?: string;
+  occupancy?: string;
+  ratePerNight?: number;
+  baseAmount?: number;
+  gstPercent?: number;
+  gstAmount?: number;
 }
 
 export interface SendEmailResult {
@@ -75,7 +81,6 @@ export async function sendBookingConfirmationEmails(
   const adminEmails = getAdminEmails();
   const customerEmail = booking.email?.trim().toLowerCase();
 
-  // If RESEND_API_KEY is not configured, log warning and gracefully return without failing
   if (!resendApiKey) {
     console.warn(
       `[Resend Email] RESEND_API_KEY is not configured in environment. Skipping email dispatch for booking ${booking.bookingRef}.`
@@ -94,6 +99,16 @@ export async function sendBookingConfirmationEmails(
   const confirmationUrl = `${siteUrl}/booking-confirmation/${booking.bookingRef}?t=${booking.accessToken}`;
   const policyUrl = `${siteUrl}/cancellation-refund-policy`;
   const cleanPhone = booking.phone.replace(/\D/g, "");
+
+  const mealPlanLabel =
+    booking.mealPlan === "with_breakfast" || booking.mealPlan === "cp"
+      ? "With Breakfast (Buffet Included)"
+      : "Without Breakfast (Room Only)";
+
+  const occupancyLabel =
+    booking.occupancy === "single" ? "Single Occupancy (1 Guest)" : "Double Occupancy (2 Guests)";
+
+  const gstRate = booking.gstPercent || 5;
 
   // 1. Hotel Admin Notification Email Template
   const adminEmailSubject = `[Confirmed Booking] ${booking.bookingRef} - ${booking.guestName} (${booking.roomCategory})`;
@@ -137,6 +152,14 @@ export async function sendBookingConfirmationEmails(
             <td style="padding: 10px 0; font-weight: 600; text-align: right;">${booking.roomCategory}</td>
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 10px 0; color: #6b7280; font-weight: 500;">Meal Plan</td>
+            <td style="padding: 10px 0; font-weight: 600; text-align: right;">${mealPlanLabel}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 10px 0; color: #6b7280; font-weight: 500;">Occupancy</td>
+            <td style="padding: 10px 0; text-align: right;">${occupancyLabel}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;">
             <td style="padding: 10px 0; color: #6b7280; font-weight: 500;">Rooms Booked</td>
             <td style="padding: 10px 0; text-align: right;">${booking.roomsRequested} room(s)</td>
           </tr>
@@ -153,14 +176,18 @@ export async function sendBookingConfirmationEmails(
             <td style="padding: 10px 0; text-align: right;">${booking.nights} night${booking.nights > 1 ? "s" : ""}</td>
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
-            <td style="padding: 10px 0; color: #6b7280; font-weight: 500;">Guests Count</td>
-            <td style="padding: 10px 0; text-align: right;">${booking.guests} guest(s)</td>
+            <td style="padding: 10px 0; color: #6b7280; font-weight: 500;">Base Amount</td>
+            <td style="padding: 10px 0; text-align: right;">₹${(booking.baseAmount || booking.totalAmount).toLocaleString("en-IN")}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 10px 0; color: #6b7280; font-weight: 500;">GST (${gstRate}%)</td>
+            <td style="padding: 10px 0; text-align: right;">₹${(booking.gstAmount || 0).toLocaleString("en-IN")}</td>
           </tr>
           <tr style="border-bottom: 1px solid #f0f0f0;">
             <td style="padding: 10px 0; color: #6b7280; font-weight: 500;">Total Amount Paid</td>
             <td style="padding: 10px 0; font-size: 16px; font-weight: 700; color: #16a34a; text-align: right;">
               ₹${booking.totalAmount.toLocaleString("en-IN")}
-              <div style="font-size: 11px; font-weight: normal; color: #6b7280;">100% Online Payment (Incl. 18% GST)</div>
+              <div style="font-size: 11px; font-weight: normal; color: #6b7280;">100% Online Payment (Incl. ${gstRate}% GST)</div>
             </td>
           </tr>
           ${
@@ -217,6 +244,14 @@ export async function sendBookingConfirmationEmails(
               <td style="padding: 6px 0; font-weight: 600; text-align: right; color: #111827;">${booking.roomCategory}</td>
             </tr>
             <tr>
+              <td style="padding: 6px 0; color: #6b7280;">Meal Plan</td>
+              <td style="padding: 6px 0; font-weight: 600; text-align: right; color: #111827;">${mealPlanLabel}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #6b7280;">Occupancy</td>
+              <td style="padding: 6px 0; text-align: right; color: #111827;">${occupancyLabel}</td>
+            </tr>
+            <tr>
               <td style="padding: 6px 0; color: #6b7280;">Number of Rooms</td>
               <td style="padding: 6px 0; text-align: right; color: #111827;">${booking.roomsRequested} room(s)</td>
             </tr>
@@ -232,17 +267,13 @@ export async function sendBookingConfirmationEmails(
               <td style="padding: 6px 0; color: #6b7280;">Duration</td>
               <td style="padding: 6px 0; text-align: right; color: #111827;">${booking.nights} night${booking.nights > 1 ? "s" : ""}</td>
             </tr>
-            <tr>
-              <td style="padding: 6px 0; color: #6b7280;">Guests</td>
-              <td style="padding: 6px 0; text-align: right; color: #111827;">${booking.guests} guest(s)</td>
-            </tr>
             <tr style="border-top: 1px solid #e5e7eb;">
               <td style="padding: 10px 0 4px 0; color: #374151; font-weight: 600;">Total Amount Paid</td>
               <td style="padding: 10px 0 4px 0; font-weight: 700; color: #16a34a; font-size: 18px; text-align: right;">₹${booking.totalAmount.toLocaleString("en-IN")}</td>
             </tr>
             <tr>
               <td style="padding: 0 0 6px 0; font-size: 11px; color: #6b7280;">Payment Status</td>
-              <td style="padding: 0 0 6px 0; font-size: 11px; color: #16a34a; text-align: right;">100% Full Payment Settled Online (Incl. 18% GST)</td>
+              <td style="padding: 0 0 6px 0; font-size: 11px; color: #16a34a; text-align: right;">100% Full Payment Settled Online (Incl. ${gstRate}% GST)</td>
             </tr>
             ${
               booking.razorpayPaymentId
@@ -262,7 +293,7 @@ export async function sendBookingConfirmationEmails(
         </div>
 
         <div style="background-color: #fef2f2; border-left: 4px solid #E02B1D; padding: 14px 16px; margin: 24px 0; font-size: 13px; color: #7f1d1d; border-radius: 0 6px 6px 0;">
-          <strong style="display: block; margin-bottom: 4px; color: #991b1b;">Cancellation &amp; Refund Policy</strong>
+          <strong style="display: block; margin-bottom: 4px; color: #991b1b;">Cancellation &amp; Refund Policy (24-Hour Rule)</strong>
           ${PAYMENT_CONFIG.CANCELLATION_SUMMARY}
           <div style="margin-top: 8px;">
             <a href="${policyUrl}" style="color: #b91c1c; text-decoration: underline; font-weight: 500;">Read complete policy &rarr;</a>
@@ -272,6 +303,7 @@ export async function sendBookingConfirmationEmails(
         <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 24px; font-size: 13px; color: #6b7280;">
           <p style="margin: 0 0 4px 0; font-weight: 600; color: #1f2937;">${SITE_CONFIG.siteName}</p>
           <p style="margin: 0 0 4px 0;">${SITE_CONFIG.address}</p>
+          <p style="margin: 0 0 4px 0;">Front Desk: 24x7 Assistance</p>
           <p style="margin: 0 0 4px 0;">Phone: <a href="tel:${SITE_CONFIG.phone}" style="color: #0284c7; text-decoration: none;">${SITE_CONFIG.phone}</a></p>
           <p style="margin: 0 0 0 0;">Email: <a href="mailto:${SITE_CONFIG.email}" style="color: #0284c7; text-decoration: none;">${SITE_CONFIG.email}</a></p>
         </div>
@@ -283,7 +315,6 @@ export async function sendBookingConfirmationEmails(
   let adminSent = false;
   let errorMessage: string | undefined;
 
-  // Single helper to POST to Resend API
   const sendEmailViaResend = async (
     recipients: string[],
     subject: string,
@@ -307,65 +338,36 @@ export async function sendBookingConfirmationEmails(
       });
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => "");
-        console.error(
-          `[Resend Email Error] HTTP ${response.status} sending to [${recipients.join(", ")}]:`,
-          errorText
-        );
+        const errorText = await response.text();
+        console.error(`[Resend Email] API responded with HTTP ${response.status}:`, errorText);
         errorMessage = `HTTP ${response.status}: ${errorText}`;
         return false;
       }
 
-      const responseData = await response.json().catch(() => ({}));
-      console.info(
-        `[Resend Email Success] Email sent to [${recipients.join(", ")}], id: ${responseData.id || "ok"}`
-      );
+      const json = await response.json();
+      console.log(`[Resend Email] Email sent successfully to ${recipients.join(", ")}. ID:`, json?.id);
       return true;
-    } catch (fetchErr) {
-      console.error(
-        `[Resend Email Exception] Error connecting to Resend API for [${recipients.join(", ")}]:`,
-        fetchErr
-      );
-      errorMessage = fetchErr instanceof Error ? fetchErr.message : "Network failure";
+    } catch (err) {
+      console.error(`[Resend Email] Network exception sending email to ${recipients.join(", ")}:`, err);
+      errorMessage = err instanceof Error ? err.message : "Network error";
       return false;
     }
   };
 
   try {
-    // Dispatch to Customer and Admin(s) in parallel
-    const tasks: Promise<boolean>[] = [];
+    if (customerEmail) {
+      customerSent = await sendEmailViaResend([customerEmail], customerEmailSubject, customerEmailHtml);
+    }
+  } catch (err) {
+    console.error("[Resend Email] Unhandled exception sending to customer:", err);
+  }
 
-    // Admin email task
+  try {
     if (adminEmails.length > 0) {
-      tasks.push(
-        sendEmailViaResend(adminEmails, adminEmailSubject, adminEmailHtml).then(
-          (success) => {
-            adminSent = success;
-            return success;
-          }
-        )
-      );
+      adminSent = await sendEmailViaResend(adminEmails, adminEmailSubject, adminEmailHtml);
     }
-
-    // Customer email task
-    if (customerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-      tasks.push(
-        sendEmailViaResend([customerEmail], customerEmailSubject, customerEmailHtml).then(
-          (success) => {
-            customerSent = success;
-            return success;
-          }
-        )
-      );
-    } else {
-      console.warn(
-        `[Resend Email Warning] Customer email missing or invalid (${customerEmail}). Skipping customer email.`
-      );
-    }
-
-    await Promise.allSettled(tasks);
-  } catch (outerErr) {
-    console.error("[Resend Email Warning] Unexpected error during email dispatch:", outerErr);
+  } catch (err) {
+    console.error("[Resend Email] Unhandled exception sending to admin(s):", err);
   }
 
   return {

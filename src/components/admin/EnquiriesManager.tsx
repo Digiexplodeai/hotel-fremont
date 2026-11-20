@@ -53,7 +53,13 @@ const typeConfig: Record<
     border: "border-emerald-500/30",
   },
   dining_aura: {
-    label: "Aura Dining",
+    label: "Restaurant Dining",
+    bg: "bg-amber-500/10",
+    text: "text-amber-400",
+    border: "border-amber-500/30",
+  },
+  dining: {
+    label: "Restaurant Dining",
     bg: "bg-amber-500/10",
     text: "text-amber-400",
     border: "border-amber-500/30",
@@ -384,7 +390,7 @@ export default function EnquiriesManager({
             <option value="all">All Channels</option>
             <option value="book_now">Room Reservation</option>
             <option value="rate_check">Rate Check</option>
-            <option value="dining_aura">Aura Dining</option>
+            <option value="dining_aura">Restaurant Dining</option>
             <option value="event_banquet">Event &amp; Banquet</option>
             <option value="contact">General Contact</option>
           </select>

@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "12 Keys & Reservations | Hotel Fremont Admin",
+  title: "Rooms & Availability | Hotel Fremont Admin",
   robots: {
     index: false,
     follow: false,
@@ -64,7 +64,7 @@ export default async function AdminRoomsPage() {
             <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-black/40 border border-white/10 rounded-full text-xs">
               <BedDouble className="w-3.5 h-3.5 text-[#E02B1D]" />
               <span className="text-[#C9A96E] font-serif text-[11px] font-semibold tracking-wider uppercase">
-                12 Keys Management
+                Rooms &amp; Availability
               </span>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default async function AdminRoomsPage() {
             className="px-3 py-1.5 rounded-lg bg-[#E02B1D]/15 text-[#E02B1D] border border-[#E02B1D]/30 font-semibold flex items-center gap-1.5 shrink-0"
           >
             <BedDouble className="w-3.5 h-3.5" />
-            <span>12 Keys &amp; Availability</span>
+            <span>Rooms &amp; Availability</span>
           </Link>
           <Link
             href="/admin/enquiries"
@@ -152,15 +152,15 @@ export default async function AdminRoomsPage() {
               <span>Admin</span>
             </Link>
             <span>/</span>
-            <span className="text-[#C9A96E]">12 Keys Inventory &amp; Reservations</span>
+            <span className="text-[#C9A96E]">Rooms &amp; Availability</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC]">
-                12-Key Inventory &amp; Status Board
+                Rooms &amp; Availability
               </h1>
               <p className="text-xs sm:text-sm text-[#A8A59E] mt-1">
-                Real-time room occupancy, housekeeping sanitization, tape chart scheduling, and double-booking protection.
+                Real-time room occupancy, housekeeping sanitization, tape chart scheduling, and double-booking protection across 21 rooms.
               </p>
             </div>
           </div>

@@ -101,24 +101,26 @@ export default function Footer() {
               {footer.about}
             </p>
 
-            {/* Social Icons */}
-            <div className="flex items-center space-x-3 pt-2">
-              {footer.socials.map((social) => {
-                const IconComp = socialIcons[social.name] || InstagramIcon;
-                return (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-full bg-[#151518] hover:bg-[#E02B1D] text-[#A8A59E] hover:text-white border border-white/10 flex items-center justify-center transition-all duration-300"
-                    aria-label={social.name}
-                  >
-                    <IconComp className="w-4 h-4" />
-                  </a>
-                );
-              })}
-            </div>
+            {/* Social Icons - only if configured */}
+            {footer.socials && footer.socials.length > 0 && (
+              <div className="flex items-center space-x-3 pt-2">
+                {(footer.socials as any[]).map((social) => {
+                  const IconComp = socialIcons[social.name] || InstagramIcon;
+                  return (
+                    <a
+                      key={social.name}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-9 h-9 rounded-full bg-[#151518] hover:bg-[#E02B1D] text-[#A8A59E] hover:text-white border border-white/10 flex items-center justify-center transition-all duration-300"
+                      aria-label={social.name}
+                    >
+                      <IconComp className="w-4 h-4" />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Quick Links Column */}
@@ -144,7 +146,7 @@ export default function Footer() {
           {/* Contact Details Column */}
           <div className="lg:col-span-5 space-y-4">
             <span className="text-xs font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-bold block">
-              Hotel Fremont & Concierge
+              Hotel Fremont Front Desk &amp; Reception
             </span>
 
             <div className="space-y-3.5 text-xs text-[#A8A59E] font-light">
@@ -165,12 +167,6 @@ export default function Footer() {
                 <a href={`mailto:${contact.bookingEmail}`} className="hover:text-white transition-colors">
                   {contact.bookingEmail}
                 </a>
-              </div>
-
-              <div className="pt-2">
-                <span className="inline-block px-3 py-1 rounded-md bg-[#E02B1D]/10 border border-[#E02B1D]/20 text-[11px] text-[#C9A96E]">
-                  {contact.airportDistance}
-                </span>
               </div>
             </div>
           </div>

@@ -44,16 +44,16 @@ export default function TermsAndConditionsPage() {
         </h2>
         <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
-            <strong className="text-[#F7F3EC]">Inventory Allocation:</strong> Hotel Fremont operates an intimate boutique inventory of exactly 12 luxury rooms and suites. All reservations are subject to real-time room availability.
+            <strong className="text-[#F7F3EC]">Inventory Allocation:</strong> Hotel Fremont operates 21 guest rooms across three categories: Deluxe Room, Super Deluxe Room, and Premium Room. All reservations are subject to real-time room availability.
           </li>
           <li>
             <strong className="text-[#F7F3EC]">Binding Confirmation:</strong> A reservation is considered confirmed only after the required advance payment or authorization has been successfully validated and an official booking confirmation voucher containing a unique reference code (e.g. <code>FRM-XXXXXX</code>) is issued via email or WhatsApp.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">Cancellation &amp; Refund Rules:</strong> All cancellations, no-shows, and refunds are governed strictly by our <Link href="/cancellation-refund-policy" className="text-[#C9A96E] underline hover:text-white transition-colors">Cancellation &amp; Refund Policy</Link>. Notice provided at least {siteConfig.cancellation.freeCancellationHours} before check-in qualifies for a full refund. Cancellations made less than {siteConfig.cancellation.freeCancellationHours} prior to check-in retain {siteConfig.cancellation.lateCancellationCharge}. No-shows retain {siteConfig.cancellation.noShowCharge}, and early departures are non-refundable for unused nights unless approved by management.
+            <strong className="text-[#F7F3EC]">Cancellation &amp; Refund Rules:</strong> All cancellations, no-shows, and refunds are governed strictly by our <Link href="/cancellation-refund-policy" className="text-[#C9A96E] underline hover:text-white transition-colors">Cancellation &amp; Refund Policy</Link>. Notice provided at least {siteConfig.cancellation.freeCancellationHours} before check-in qualifies for a full refund. Cancellations made less than {siteConfig.cancellation.freeCancellationHours} prior to check-in, as well as no-shows, are non-refundable. Early departures are non-refundable for unused nights unless approved by management.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">Guest Occupancy Limits:</strong> Each suite category maintains strict maximum guest occupancy limits to guarantee fire safety and refined comfort. Exceeding designated room capacity without prior written concierge approval is strictly prohibited.
+            <strong className="text-[#F7F3EC]">Guest Occupancy Limits:</strong> Each room category maintains strict maximum guest occupancy limits (up to 2 guests per room). Exceeding designated room capacity without prior written management approval is strictly prohibited.
           </li>
         </ul>
       </section>
@@ -145,7 +145,7 @@ export default function TermsAndConditionsPage() {
         </h2>
         <ul className="space-y-2 list-disc pl-6 text-[#A8A59E]">
           <li>
-            <strong className="text-[#F7F3EC]">Sanctuary Decorum:</strong> Guests are expected to maintain civilized conduct and respect the tranquility of other patrons. Loud music, disruptive behaviour, or unlawful activities are grounds for immediate eviction without refund.
+            <strong className="text-[#F7F3EC]">Guest Decorum:</strong> Guests are expected to maintain courteous conduct and respect the tranquility of other patrons. Loud music, disruptive behaviour, or unlawful activities are grounds for immediate eviction without refund.
           </li>
           <li>
             <strong className="text-[#F7F3EC]">Damage Liability:</strong> The primary guest named on the booking is financially responsible for any breakage, staining, structural damage, or missing fixtures within the allocated room or public areas caused by themselves or their invited visitors. Full replacement or restoration costs will be charged directly prior to departure.

@@ -17,6 +17,7 @@ export interface CancellationPolicyConfig {
   noShowCharge: string;
   refundDays: string;
   refundMethod: string;
+  refundTimelineText: string;
 }
 
 export interface SiteConfig {
@@ -39,6 +40,7 @@ export interface SiteConfig {
   phone: string;
   phoneRaw: string;
   phoneTel: string;
+  whatsappLink: string;
   email: string;
   checkInTime: string;
   checkOutTime: string;
@@ -68,20 +70,22 @@ export const siteConfig: SiteConfig = {
     postalCode: "140308",
     country: "India",
   },
-  phone: "+91 98727 68514",
-  phoneRaw: "+919872768514",
-  phoneTel: "tel:+919872768514",
+  phone: "+91 79734 50281",
+  phoneRaw: "+917973450281",
+  phoneTel: "tel:+917973450281",
+  whatsappLink: "https://wa.me/917973450281",
   email: "hotelfremont1@gmail.com",
-  checkInTime: "2:00 PM",
-  checkOutTime: "12:00 PM",
+  checkInTime: "1:00 PM",
+  checkOutTime: "11:00 AM",
   cancellation: {
-    freeCancellationHours: "48 hours",
-    lateCancellationCharge: "one night's room tariff (inclusive of applicable taxes)",
-    noShowCharge: "100% of the first night's room tariff",
+    freeCancellationHours: "24 hours",
+    lateCancellationCharge: "non-refundable (100% of booking total)",
+    noShowCharge: "non-refundable (100% of booking total)",
     refundDays: "5 to 7 working days",
     refundMethod: "original payment method",
+    refundTimelineText: "Refunds are processed to the original payment method, usually within 5 to 7 working days.",
   },
-  lastUpdated: "November 16, 2026",
+  lastUpdated: "November 20, 2026",
   googleMapsUrl: "https://maps.google.com/?q=Hotel+Fremont+Airport+Road+Sector+80+SAS+Nagar+Mohali+Punjab",
   coordinates: {
     latitude: "30.6865",

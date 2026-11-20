@@ -24,7 +24,7 @@ export default function ShippingPolicyPage() {
   return (
     <PolicyLayout
       title="Shipping & Delivery Policy"
-      subtitle="Hotel Fremont provides luxury hospitality, accommodation, and dining services. Learn how booking confirmations are issued."
+      subtitle="Hotel Fremont provides hospitality, accommodation, and dining services. Learn how booking confirmations are issued."
     >
       {/* Scope Overview Card */}
       <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 sm:p-8 space-y-4">
@@ -36,7 +36,7 @@ export default function ShippingPolicyPage() {
           No Physical Goods Shipped
         </h2>
         <p className="text-[#A8A59E] leading-relaxed text-sm sm:text-base m-0">
-          <strong>Hotel Fremont</strong> is a boutique hospitality establishment offering accommodation across 12 luxury rooms and suites, gourmet dining at Aura Restaurant, and event celebration venues. <strong>We do not sell, package, or dispatch tangible physical products or merchandise requiring postal or courier delivery.</strong>
+          <strong>Hotel Fremont</strong> is a contemporary hotel offering accommodation across 21 guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room. <strong>We do not sell, package, or dispatch tangible physical products or merchandise requiring postal or courier delivery.</strong>
         </p>
       </div>
 
@@ -63,10 +63,10 @@ export default function ShippingPolicyPage() {
           <div className="bg-[#151518] border border-white/5 rounded-xl p-5 space-y-2">
             <div className="flex items-center gap-2 text-[#C9A96E] font-medium text-xs uppercase tracking-wider">
               <Smartphone className="w-4 h-4 text-[#E02B1D]" />
-              <span>WhatsApp / SMS Concierge</span>
+              <span>WhatsApp / SMS Confirmation</span>
             </div>
             <p className="text-xs text-[#A8A59E] leading-relaxed">
-              An instant reservation reference notification and concierge contact card is delivered to your designated Indian or international mobile number.
+              An instant reservation reference notification and contact card is delivered to your designated Indian or international mobile number.
             </p>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function ShippingPolicyPage() {
           <span>3. Inquiries Concerning Your Confirmation</span>
         </h2>
         <p>
-          If you have completed an advance deposit or payment but have not received your digital confirmation within 2 hours, please check your email spam/junk folder or contact our concierge desk directly:
+          If you have completed payment but have not received your digital confirmation within 2 hours, please check your email spam/junk folder or contact our front desk directly:
         </p>
         <div className="bg-[#151518] border border-white/10 rounded-xl p-5 text-xs sm:text-sm space-y-1.5 text-[#A8A59E]">
           <p className="text-[#F7F3EC] font-semibold">{siteConfig.siteName} Concierge Desk</p>

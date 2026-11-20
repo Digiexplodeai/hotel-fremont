@@ -7,6 +7,8 @@ export interface SlotData {
   altText: string;
   focalPoint: string;
   isCustom: boolean;
+  isActive?: boolean;
+  is_active?: boolean;
   updatedAt?: string;
 }
 
@@ -15,58 +17,33 @@ export const DEFAULT_SLOTS: Record<string, { url: string; altText: string; focal
   "branding.icon": { url: "/assets/f-icon.png", altText: "Hotel Fremont Favicon", focalPoint: "50% 50%" },
   "seo.og_image": { url: "/assets/logo.png", altText: "Hotel Fremont OpenGraph Preview", focalPoint: "50% 50%" },
 
-  "hero.slide_1": { url: "/assets/hero/hero-suite.webp", altText: "Classic Luxury Suite", focalPoint: "50% 50%" },
-  "hero.slide_2": { url: "/assets/hero/hero-room-1.webp", altText: "Deluxe King Room", focalPoint: "50% 50%" },
-  "hero.slide_3": { url: "/assets/hero/hero-lobby.webp", altText: "Panoramic Modern Suite", focalPoint: "50% 50%" },
-  "hero.slide_4": { url: "/assets/hero/hero-room-2.webp", altText: "Executive Lounge Suite", focalPoint: "50% 50%" },
+  // Four Real Photo Slots
+  exterior: { url: "", altText: "Hotel Fremont Exterior on Airport Road, Mohali", focalPoint: "50% 50%" },
+  "super-deluxe": { url: "", altText: "Super Deluxe Room at Hotel Fremont", focalPoint: "50% 50%" },
+  premium: { url: "", altText: "Premium Room with burgundy styling at Hotel Fremont", focalPoint: "50% 50%" },
+  "cloud-six-banquet": { url: "", altText: "Cloud Six Banquet Hall at Hotel Fremont", focalPoint: "50% 50%" },
 
-  "about.image_primary": { url: "/assets/hero/hero-room-1.webp", altText: "Hotel Fremont Suite Sanctuary", focalPoint: "50% 50%" },
-  "about.image_secondary": { url: "/assets/hero/hero-room-2.webp", altText: "Luxury Interior", focalPoint: "50% 50%" },
-  "about.image_interior": { url: "/assets/hero/hero-suite.webp", altText: "Architectural Interior", focalPoint: "50% 50%" },
+  // Additional Real Venue / Room Slots
+  "deluxe-room": { url: "", altText: "Deluxe Room at Hotel Fremont", focalPoint: "50% 50%" },
+  restaurant: { url: "", altText: "Hotel Fremont Restaurant Ground Floor", focalPoint: "50% 50%" },
+  "conference-hall": { url: "", altText: "Conference Hall for meetings and discussions", focalPoint: "50% 50%" },
 
-  // Deluxe King Room (1 Main + 4 Gallery slots)
-  "rooms.deluxe-king.main": { url: "/assets/placeholder.svg", altText: "Deluxe King Room", focalPoint: "50% 50%" },
-  "rooms.deluxe-king.gallery-1": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 1", focalPoint: "50% 50%" },
-  "rooms.deluxe-king.gallery-2": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 2", focalPoint: "50% 50%" },
-  "rooms.deluxe-king.gallery-3": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 3", focalPoint: "50% 50%" },
-  "rooms.deluxe-king.gallery-4": { url: "/assets/placeholder.svg", altText: "Deluxe King Room - View 4", focalPoint: "50% 50%" },
-
-  // Premier Executive Suite (1 Main + 4 Gallery slots)
-  "rooms.premier-executive.main": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite", focalPoint: "50% 50%" },
-  "rooms.premier-executive.gallery-1": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 1", focalPoint: "50% 50%" },
-  "rooms.premier-executive.gallery-2": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 2", focalPoint: "50% 50%" },
-  "rooms.premier-executive.gallery-3": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 3", focalPoint: "50% 50%" },
-  "rooms.premier-executive.gallery-4": { url: "/assets/placeholder.svg", altText: "Premier Executive Suite - View 4", focalPoint: "50% 50%" },
-
-  // The Royal Fremont Suite (1 Main + 4 Gallery slots)
-  "rooms.royal-fremont.main": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite", focalPoint: "50% 50%" },
-  "rooms.royal-fremont.gallery-1": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 1", focalPoint: "50% 50%" },
-  "rooms.royal-fremont.gallery-2": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 2", focalPoint: "50% 50%" },
-  "rooms.royal-fremont.gallery-3": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 3", focalPoint: "50% 50%" },
-  "rooms.royal-fremont.gallery-4": { url: "/assets/placeholder.svg", altText: "The Royal Fremont Suite - View 4", focalPoint: "50% 50%" },
-
-  // Presidential Penthouse (1 Main + 4 Gallery slots)
-  "rooms.presidential-penthouse.main": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse", focalPoint: "50% 50%" },
-  "rooms.presidential-penthouse.gallery-1": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 1", focalPoint: "50% 50%" },
-  "rooms.presidential-penthouse.gallery-2": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 2", focalPoint: "50% 50%" },
-  "rooms.presidential-penthouse.gallery-3": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 3", focalPoint: "50% 50%" },
-  "rooms.presidential-penthouse.gallery-4": { url: "/assets/placeholder.svg", altText: "Presidential Penthouse - View 4", focalPoint: "50% 50%" },
-
-  // Aura Dining
-  "dining.banner_primary": { url: "/assets/placeholder.svg", altText: "Aura Gourmet Restaurant and Lounge", focalPoint: "50% 50%" },
-
-  // Banquets & Events Venues
-  "events.venue_1": { url: "/assets/placeholder.svg", altText: "The Grand Fremont Ballroom", focalPoint: "50% 50%" },
-  "events.venue_2": { url: "/assets/placeholder.svg", altText: "The Fremont Terrace Lawn", focalPoint: "50% 50%" },
-  "events.venue_3": { url: "/assets/placeholder.svg", altText: "The Executive Boardroom", focalPoint: "50% 50%" },
+  // Legacy mappings aliased to real slots
+  "hero.slide_1": { url: "", altText: "Hotel Fremont Exterior", focalPoint: "50% 50%" },
+  "about.image_primary": { url: "", altText: "Hotel Fremont Exterior", focalPoint: "50% 50%" },
+  "rooms.deluxe-room.main": { url: "", altText: "Deluxe Room", focalPoint: "50% 50%" },
+  "rooms.super-deluxe-room.main": { url: "", altText: "Super Deluxe Room", focalPoint: "50% 50%" },
+  "rooms.premium-room.main": { url: "", altText: "Premium Room", focalPoint: "50% 50%" },
+  "dining.banner_primary": { url: "", altText: "Hotel Fremont Restaurant", focalPoint: "50% 50%" },
+  "events.venue_1": { url: "", altText: "Cloud Six Banquet", focalPoint: "50% 50%" },
+  "events.venue_2": { url: "", altText: "Conference Hall", focalPoint: "50% 50%" },
 };
 
 /**
  * Loads dynamic slot pointers from the Supabase image_slots table.
- * Appends cache-busting (?v=<updated_at>) and falls back to default assets when no row exists.
+ * Filters for active slots only.
  */
 export async function getImageSlotsMap(): Promise<Record<string, SlotData>> {
-  // Start with default slots
   const map: Record<string, SlotData> = {};
   for (const [key, val] of Object.entries(DEFAULT_SLOTS)) {
     map[key] = {
@@ -74,19 +51,19 @@ export async function getImageSlotsMap(): Promise<Record<string, SlotData>> {
       altText: val.altText,
       focalPoint: val.focalPoint,
       isCustom: false,
+      isActive: true,
     };
   }
 
   try {
     const supabase = createAdminSupabaseClient();
     if (!supabase) {
-      console.log("[Slots Read] Supabase client unavailable, using default assets.");
       return map;
     }
 
     const { data: rows, error } = await supabase
       .from("image_slots")
-      .select("slot_key, url, alt_text, focal_x, focal_y, updated_at");
+      .select("slot_key, url, alt_text, focal_x, focal_y, is_active, updated_at");
 
     if (error) {
       console.warn("[Slots Read] Error reading image_slots table:", error.message);
@@ -94,15 +71,15 @@ export async function getImageSlotsMap(): Promise<Record<string, SlotData>> {
     }
 
     if (rows && rows.length > 0) {
-      console.log(`[Slots Read] Successfully read ${rows.length} rows from image_slots table:`);
       for (const row of rows) {
-        if (!row.slot_key || !row.url) continue;
+        if (!row.slot_key) continue;
+        // If row is explicitly deactivated, set isActive to false
+        const isActive = row.is_active !== false;
 
-        // Cache busting with updated_at timestamp
-        let finalUrl = row.url;
-        if (row.updated_at) {
+        let finalUrl = row.url || "";
+        if (finalUrl && row.updated_at) {
           const v = new Date(row.updated_at).getTime();
-          finalUrl = `${row.url}${row.url.includes("?") ? "&" : "?"}v=${v}`;
+          finalUrl = `${finalUrl}${finalUrl.includes("?") ? "&" : "?"}v=${v}`;
         }
 
         const focalX = row.focal_x || "50%";
@@ -113,25 +90,31 @@ export async function getImageSlotsMap(): Promise<Record<string, SlotData>> {
           url: finalUrl,
           altText: row.alt_text || DEFAULT_SLOTS[row.slot_key]?.altText || "Hotel Fremont",
           focalPoint,
-          isCustom: true,
+          isCustom: !!row.url,
+          isActive,
           updatedAt: row.updated_at,
         };
 
         map[row.slot_key] = slotData;
 
-        // Ensure both gallery-X and gallery.X keys resolve to the same slot
-        if (row.slot_key.includes(".gallery-")) {
-          const dotKey = row.slot_key.replace(".gallery-", ".gallery.");
-          map[dotKey] = slotData;
-        } else if (row.slot_key.includes(".gallery.")) {
-          const dashKey = row.slot_key.replace(".gallery.", ".gallery-");
-          map[dashKey] = slotData;
+        // Alias convenient aliases
+        if (row.slot_key === "exterior") {
+          map["hero.slide_1"] = slotData;
+          map["about.image_primary"] = slotData;
+        } else if (row.slot_key === "super-deluxe") {
+          map["rooms.super-deluxe-room.main"] = slotData;
+        } else if (row.slot_key === "premium") {
+          map["rooms.premium-room.main"] = slotData;
+        } else if (row.slot_key === "deluxe-room") {
+          map["rooms.deluxe-room.main"] = slotData;
+        } else if (row.slot_key === "cloud-six-banquet") {
+          map["events.venue_1"] = slotData;
+        } else if (row.slot_key === "conference-hall") {
+          map["events.venue_2"] = slotData;
+        } else if (row.slot_key === "restaurant") {
+          map["dining.banner_primary"] = slotData;
         }
-
-        console.log(`  -> Slot '${row.slot_key}' mapped to: ${finalUrl}`);
       }
-    } else {
-      console.log("[Slots Read] image_slots table returned 0 rows (using default assets).");
     }
 
     return map;

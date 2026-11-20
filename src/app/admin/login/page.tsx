@@ -67,7 +67,7 @@ function LoginForm() {
             Management Portal
           </h1>
           <p className="text-xs text-[#A8A59E] font-sans mt-1">
-            Airport Road, Sector 80, Mohali · 12 Luxury Keys
+            Airport Road, Sector 80, Mohali · 21 Keys
           </p>
         </div>
 

@@ -1,190 +1,197 @@
 /**
- * HOTEL FREMONT - CENTRAL ROOMS & SUITES DATA SOURCE
+ * HOTEL FREMONT - CENTRAL ROOMS DATA SOURCE
  * 
  * Single source of truth for all room categories, inventory, and capacity.
- * Exactly 12 rooms in total across 4 distinct boutique categories.
+ * Exactly 21 rooms in total across 3 distinct categories.
  */
+
+export interface RoomRatePlans {
+  cpDouble: number; // With Breakfast, Double Occupancy
+  cpSingle: number; // With Breakfast, Single Occupancy
+  epDouble: number; // Without Breakfast, Double Occupancy
+  epSingle: number; // Without Breakfast, Single Occupancy
+}
 
 export interface RoomCategory {
   slug: string;
   id: string; // compatibility with existing code
+  code: string;
   name: string;
   title: string; // compatibility with existing components
   totalRooms: number;
+  roomsTotal: number;
   inventoryLabel: string;
   roomNumbers: string[];
   price: number;
   priceLabel: string;
+  startingPriceLabel: string;
   size: string;
+  sizeSqft: number;
   maxGuests: number;
   bed: string;
+  bedType: string;
   occupancy: string;
   badge: string;
+  tag: string;
   view: string;
   description: string;
+  shortDescription: string;
+  longDescription: string;
   highlights: string[];
   amenities: string[];
   image: string;
+  imageSlot: string;
   gallery: string[];
+  ratePlans: RoomRatePlans;
 }
 
-/**
- * REPUTATION & REVIEWS CONFIGURATION
- * TODO: Replace with real Google Business Profile rating and verified review count once verified.
- * Do not invent review numbers.
- */
-export const HOTEL_REPUTATION = {
-  rating: "4.9",
-  ratingSuffix: "★",
-  ratingLabel: "Google Guest Rating",
-  reviewsSub: "Verified Guest Feedback", // Neutral verified text without invented counts
-  // When verified review count is known, set here:
-  // reviewCount: "42",
-};
+export const TOTAL_ROOMS = 21;
+
+const COMMON_AMENITIES = [
+  "Air Conditioning",
+  "Smart TV",
+  "Tea & Coffee Kettle",
+  "Complimentary Wi-Fi",
+  "Washroom Amenities",
+  "Central Hot Water",
+  "Housekeeping Service",
+  "Premium Linen & Duvets",
+];
 
 export const roomCategories: RoomCategory[] = [
   {
-    slug: "deluxe-king",
-    id: "deluxe-king",
-    name: "Deluxe King Room",
-    title: "Deluxe King Room",
-    totalRooms: 6,
-    inventoryLabel: "6 Rooms",
-    roomNumbers: ["101", "102", "103", "104", "105", "106"],
-    price: 5499,
-    priceLabel: "₹5,499",
-    size: "380 sq.ft",
+    slug: "deluxe-room",
+    id: "deluxe-room",
+    code: "deluxe-room",
+    name: "Deluxe Room",
+    title: "Deluxe Room",
+    totalRooms: 9,
+    roomsTotal: 9,
+    inventoryLabel: "9 Rooms",
+    roomNumbers: ["101", "102", "103", "104", "105", "106", "107", "108", "109"],
+    price: 2299,
+    priceLabel: "₹2,299",
+    startingPriceLabel: "From Rs 2,299 + taxes",
+    size: "approx. 160 sq ft",
+    sizeSqft: 160,
     maxGuests: 2,
-    bed: "King Bed",
-    occupancy: "2 Guests",
-    badge: "Best Value",
-    view: "City Skyline & Courtyard View",
-    description: "A sanctuary of calm featuring warm wooden textures, custom atmospheric lighting, an Italian marble en-suite with rain shower, and a high-speed ergonomic workstation.",
+    bed: "Plush King-size bed",
+    bedType: "Plush King-size bed",
+    occupancy: "Up to 2 Guests",
+    badge: "",
+    tag: "",
+    view: "City View",
+    shortDescription: "A practical, comfortable stay with essential modern conveniences.",
+    longDescription:
+      "A practical, comfortable stay with essential modern conveniences. Features a plush king-size bed, air conditioning, Smart TV, tea and coffee maker, and complimentary Wi-Fi.",
+    description:
+      "A practical, comfortable stay with essential modern conveniences. Features a plush king-size bed, air conditioning, Smart TV, tea and coffee maker, and complimentary Wi-Fi.",
     highlights: [
-      "Free Airport Drop",
-      "High-speed Wi-Fi 6",
-      "50-inch 4K Smart TV",
-      "Artisanal Coffee Maker",
-      "Complimentary Breakfast"
+      "Plush King-size Bed",
+      "Air Conditioning",
+      "Smart TV & Wi-Fi",
+      "Tea & Coffee Kettle",
+      "Central Hot Water",
     ],
-    amenities: [
-      "King Bed",
-      "Rain Shower",
-      "Work Desk",
-      "Mini Bar",
-      "Soundproof",
-      "Safe Locker",
-      "24/7 Room Service"
-    ],
-    image: "/assets/placeholder.svg",
-    gallery: []
+    amenities: COMMON_AMENITIES,
+    image: "",
+    imageSlot: "deluxe-room",
+    gallery: [],
+    ratePlans: {
+      cpDouble: 2799,
+      cpSingle: 2499,
+      epDouble: 2499,
+      epSingle: 2299,
+    },
   },
   {
-    slug: "premier-executive",
-    id: "premier-executive",
-    name: "Premier Executive Suite",
-    title: "Premier Executive Suite",
-    totalRooms: 3,
-    inventoryLabel: "3 Suites",
-    roomNumbers: ["201", "202", "203"],
-    price: 8999,
-    priceLabel: "₹8,999",
-    size: "540 sq.ft",
-    maxGuests: 3,
-    bed: "King Bed",
-    occupancy: "3 Guests",
-    badge: "Corporate Choice",
-    view: "Panoramic Airport Road & Boulevard View",
-    description: "Generously proportioned with a private living lounge, plush velvet seating, walk-in dressing closet, and deep-soaking bathtub. Ideal for business leaders and extended stays.",
+    slug: "super-deluxe-room",
+    id: "super-deluxe-room",
+    code: "super-deluxe-room",
+    name: "Super Deluxe Room",
+    title: "Super Deluxe Room",
+    totalRooms: 10,
+    roomsTotal: 10,
+    inventoryLabel: "10 Rooms",
+    roomNumbers: ["201", "202", "203", "204", "205", "206", "207", "208", "209", "210"],
+    price: 3299,
+    priceLabel: "₹3,299",
+    startingPriceLabel: "From Rs 3,299 + taxes",
+    size: "approx. 250 sq ft",
+    sizeSqft: 250,
+    maxGuests: 2,
+    bed: "Plush King-size bed",
+    bedType: "Plush King-size bed",
+    occupancy: "Up to 2 Guests",
+    badge: "Best choice for corporate stays",
+    tag: "Best choice for corporate stays",
+    view: "Airport Road & City View",
+    shortDescription: "More room to unwind, with a calm palette and inviting interiors.",
+    longDescription:
+      "More room to unwind, with a calm palette and inviting interiors. The Super Deluxe Room pairs a plush king-size bed with warm wood finishes, soft lighting and a calm, contemporary look.",
+    description:
+      "More room to unwind, with a calm palette and inviting interiors. The Super Deluxe Room pairs a plush king-size bed with warm wood finishes, soft lighting and a calm, contemporary look.",
     highlights: [
-      "Complimentary Airport Chauffeur",
-      "Lounge Access",
-      "Bathtub & Jacuzzi Jet",
-      "Espresso Machine",
-      "Express Check-in"
+      "Best choice for corporate stays",
+      "Plush King-size Bed",
+      "Work-friendly seating",
+      "Smart TV & Wi-Fi",
+      "Tea & Coffee Kettle",
     ],
-    amenities: [
-      "Separate Living Room",
-      "Soaking Tub",
-      "Walk-in Closet",
-      "Nespresso Bar",
-      "Balcony",
-      "Smart Climate Control"
-    ],
-    image: "/assets/placeholder.svg",
-    gallery: []
+    amenities: COMMON_AMENITIES,
+    image: "",
+    imageSlot: "super-deluxe",
+    gallery: [],
+    ratePlans: {
+      cpDouble: 3799,
+      cpSingle: 3499,
+      epDouble: 3499,
+      epSingle: 3299,
+    },
   },
   {
-    slug: "royal-fremont",
-    id: "royal-fremont",
-    name: "The Royal Fremont Suite",
-    title: "The Royal Fremont Suite",
+    slug: "premium-room",
+    id: "premium-room",
+    code: "premium-room",
+    name: "Premium Room",
+    title: "Premium Room",
     totalRooms: 2,
-    inventoryLabel: "2 Suites",
+    roomsTotal: 2,
+    inventoryLabel: "2 Rooms",
     roomNumbers: ["301", "302"],
-    price: 14999,
-    priceLabel: "₹14,999",
-    size: "780 sq.ft",
-    maxGuests: 4,
-    bed: "King Bed",
-    occupancy: "4 Guests",
-    badge: "Signature Experience",
-    view: "Dual-Aspect Garden & Horizon View",
-    description: "The epitome of boutique grandeur. Features a 6-seater private dining alcove, hand-finished brass accents, champagne welcome bar, and dedicated butler service on call.",
+    price: 4299,
+    priceLabel: "₹4,299",
+    startingPriceLabel: "From Rs 4,299 + taxes",
+    size: "approx. 365 sq ft",
+    sizeSqft: 365,
+    maxGuests: 2,
+    bed: "Plush King-size bed",
+    bedType: "Plush King-size bed",
+    occupancy: "Up to 2 Guests",
+    badge: "",
+    tag: "",
+    view: "Expansive Horizon View",
+    shortDescription: "A more spacious stay with distinctive styling and a refined feel.",
+    longDescription:
+      "A more spacious stay with distinctive styling and a refined feel. The Premium Room features elegant burgundy interiors, a plush king-size bed and contemporary furnishings. Its generous layout offers a welcoming place to relax, work or recharge.",
+    description:
+      "A more spacious stay with distinctive styling and a refined feel. The Premium Room features elegant burgundy interiors, a plush king-size bed and contemporary furnishings. Its generous layout offers a welcoming place to relax, work or recharge.",
     highlights: [
-      "Dedicated Private Butler",
-      "Chauffeured Luxury Sedan",
-      "Free Mini-bar & Champagne",
-      "Luxury Hydrotherapy Jacuzzi",
-      "Priority Dining"
+      "Generous 365 sq ft Layout",
+      "Elegant Burgundy Interiors",
+      "Plush King-size Bed",
+      "Smart TV & Wi-Fi",
+      "Tea & Coffee Kettle",
     ],
-    amenities: [
-      "Private Dining Area",
-      "Jacuzzi",
-      "Butler Service",
-      "Champagne Bar",
-      "Powder Room",
-      "Panoramic Terrace"
-    ],
-    image: "/assets/placeholder.svg",
-    gallery: []
+    amenities: COMMON_AMENITIES,
+    image: "",
+    imageSlot: "premium",
+    gallery: [],
+    ratePlans: {
+      cpDouble: 4799,
+      cpSingle: 4499,
+      epDouble: 4499,
+      epSingle: 4299,
+    },
   },
-  {
-    slug: "presidential-penthouse",
-    id: "presidential-penthouse",
-    name: "Presidential Penthouse",
-    title: "Presidential Penthouse",
-    totalRooms: 1,
-    inventoryLabel: "1 Penthouse",
-    roomNumbers: ["401"],
-    price: 24999,
-    priceLabel: "₹24,999",
-    size: "1,250 sq.ft",
-    maxGuests: 6,
-    bed: "King Bed",
-    occupancy: "6 Guests",
-    badge: "Ultra Luxury",
-    view: "Top-Floor 360° Skyline & Airport Runway Sunset View",
-    description: "Our crowning jewel on the highest tier. Boasting two luxurious master bedrooms, a private terrace, grand Steinway piano lounge, bespoke gold-leaf ceiling, and round-the-clock personal chef availability.",
-    highlights: [
-      "Private Rooftop Terrace",
-      "Personal Chef on Demand",
-      "Luxury Airport Limousine",
-      "Full Bar & Cellar",
-      "VIP Security Access"
-    ],
-    amenities: [
-      "2 Master Bedrooms",
-      "Private Terrace",
-      "Chef Service",
-      "Steinway Lounge",
-      "Sauna & Steam",
-      "VIP Elevator"
-    ],
-    image: "/assets/placeholder.svg",
-    gallery: []
-  }
 ];
-
-export const TOTAL_ROOMS = roomCategories.reduce((sum, c) => sum + c.totalRooms, 0); // must equal 12
-

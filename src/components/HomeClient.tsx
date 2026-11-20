@@ -12,7 +12,6 @@ import AmenitiesSection from "@/components/AmenitiesSection";
 import DiningSection from "@/components/DiningSection";
 import EventsSection from "@/components/EventsSection";
 import GallerySection from "@/components/GallerySection";
-import TestimonialsSection from "@/components/TestimonialsSection";
 import LocationSection from "@/components/LocationSection";
 import FinalCta from "@/components/FinalCta";
 import Footer from "@/components/Footer";
@@ -104,7 +103,7 @@ export default function HomeClient() {
             {/* 8-Icon Luxury Amenities Grid */}
             <AmenitiesSection />
 
-            {/* Aura Fine Dining & Lounge with Table Reservation Modal */}
+            {/* In-House Restaurant & Dining */}
             <DiningSection />
 
             {/* Grand Banquets & Corporate Event Venues */}
@@ -113,10 +112,7 @@ export default function HomeClient() {
             {/* Visual Gallery Masonry Grid & Fullscreen Lightbox */}
             <GallerySection />
 
-            {/* Verified Google 4.9 Star Guest Testimonials Carousel */}
-            <TestimonialsSection />
-
-            {/* Interactive Google Map & Airport Proximity Card */}
+            {/* Interactive Google Map & Location Details */}
             <LocationSection />
 
             {/* Grand Final CTA Band */}
