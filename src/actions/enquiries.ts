@@ -490,3 +490,39 @@ export async function deleteEnquiryAction(id: string): Promise<{
     return { success: false, error: error.message || "Failed to delete inquiry." };
   }
 }
+
+/**
+ * Add / update internal note for an inquiry
+ */
+export async function addEnquiryNoteAction(
+  enquiryId: string,
+  note: string,
+  author?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return { success: false, error: "Unauthorized: Admin session required." };
+    }
+
+    const supabase = await createServerSupabaseClient();
+    if (supabase) {
+      const formattedNote = `[${new Date().toLocaleDateString()}] ${author || "Admin"}: ${note}`;
+      const { error } = await supabase
+        .from("reservations")
+        .update({ special_request: formattedNote })
+        .eq("id", enquiryId);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+    }
+
+    revalidatePath("/admin/enquiries");
+    return { success: true };
+  } catch (err: unknown) {
+    const error = err as Error;
+    return { success: false, error: error.message || "Failed to save note." };
+  }
+}
+

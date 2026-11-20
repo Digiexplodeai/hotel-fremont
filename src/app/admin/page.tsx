@@ -1,36 +1,35 @@
 import { redirect } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { getCurrentUser, signOutAction } from "@/actions/auth";
-import { isSupabaseConfigured } from "@/lib/supabase/client";
-import { getR2ConfigSummary } from "@/lib/r2";
+import { getCurrentUser } from "@/actions/auth";
 import { getRoomsWithStatusAction, getBookingsAction } from "@/actions/rooms";
 import { getEnquiriesAction } from "@/actions/enquiries";
 import { getReservationsAction } from "@/actions/reservations";
-import MediaManager from "@/components/admin/MediaManager";
-import ReservationsList from "@/components/admin/ReservationsList";
+import AdminLayoutShell from "@/components/admin/AdminLayoutShell";
 import {
-  Database,
-  Cloud,
   BedDouble,
-  LogOut,
-  ExternalLink,
-  CheckCircle2,
-  ImageIcon,
-  MessageSquare,
-  Settings,
-  LayoutDashboard,
+  CalendarCheck,
   Calendar,
   Users,
+  MessageSquare,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  ImageIcon,
   ChevronRight,
-  TrendingUp,
+  Phone,
+  Building,
+  CreditCard,
+  Sparkles,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Admin Command Center | Hotel Fremont",
+  title: "Dashboard Overview | Hotel Fremont Admin",
   robots: {
     index: false,
     follow: false,
@@ -44,9 +43,6 @@ export default async function AdminDashboardPage() {
     redirect("/admin/login");
   }
 
-  const supabaseConfigured = isSupabaseConfigured();
-  const r2Summary = getR2ConfigSummary();
-
   const [roomsRes, bookingsRes, enquiriesRes, reservationsRes] = await Promise.all([
     getRoomsWithStatusAction(),
     getBookingsAction(),
@@ -59,420 +55,441 @@ export default async function AdminDashboardPage() {
   const enquiries = enquiriesRes.enquiries;
   const reservations = reservationsRes.reservations || [];
 
-  const totalKeys = rooms.length;
+  const totalKeys = 21;
   const occupiedCount = rooms.filter((r) => r.status === "occupied").length;
-  const availableCount = rooms.filter((r) => r.status === "available").length;
-  const cleaningCount = rooms.filter((r) => r.status === "cleaning").length;
-  const occupancyRate = totalKeys > 0 ? Math.round((occupiedCount / totalKeys) * 100) : 0;
-  const newLeadsCount = enquiries.filter((e) => e.status === "new").length;
-  const newReservationsCount = reservations.filter((r) => r.status === "new").length;
-
+  const availableCount = Math.max(0, totalKeys - occupiedCount);
   const todayStr = new Date().toISOString().slice(0, 10);
-  
-  // Confirmed in-house reservations active tonight
-  const confirmedTonight = reservations.filter(
-    (r) => (r.status === "confirmed" || r.status === "converted") && r.check_in <= todayStr && r.check_out > todayStr
-  );
-  const roomsOccupiedTonight = Math.max(
-    occupiedCount,
-    confirmedTonight.reduce((sum, r) => sum + (r.rooms_requested || 1), 0)
-  );
-  const liveOccupancyRate = Math.round((roomsOccupiedTonight / (totalKeys || 21)) * 100);
 
-  // Confirmed arrivals today
-  const confirmedArrivalsToday = reservations.filter(
-    (r) => (r.status === "confirmed" || r.status === "converted") && r.check_in === todayStr
-  );
-  const todaysArrivalsCount = confirmedArrivalsToday.length + bookings.filter((b) => b.checkIn === todayStr).length;
+  // Today's arrivals (from both reservations & bookings)
+  const arrivalsFromRes = reservations.filter((r) => r.check_in === todayStr);
+  const arrivalsFromBookings = bookings.filter((b) => b.checkIn === todayStr);
+  const todaysArrivals = [
+    ...arrivalsFromRes.map((r) => ({
+      id: r.id,
+      ref: r.reference_code || `RES-${r.id.slice(0, 6)}`,
+      name: r.full_name,
+      phone: r.phone,
+      roomType: r.room_type,
+      guests: r.guests,
+      status: r.status,
+      isPaid: false,
+      amount: r.estimated_total,
+    })),
+    ...arrivalsFromBookings.map((b) => ({
+      id: b.id,
+      ref: b.bookingCode,
+      name: b.guestName,
+      phone: b.guestPhone,
+      roomType: b.categoryName || b.categorySlug,
+      guests: b.guestsCount || 1,
+      status: b.status,
+      isPaid: b.status === "paid" || b.status === "confirmed",
+      amount: b.totalAmount,
+    })),
+  ];
+
+  // Today's departures
+  const departuresFromRes = reservations.filter((r) => r.check_out === todayStr);
+  const departuresFromBookings = bookings.filter((b) => b.checkOut === todayStr);
+  const todaysDepartures = [
+    ...departuresFromRes.map((r) => ({
+      id: r.id,
+      ref: r.reference_code || `RES-${r.id.slice(0, 6)}`,
+      name: r.full_name,
+      roomType: r.room_type,
+      status: r.status,
+    })),
+    ...departuresFromBookings.map((b) => ({
+      id: b.id,
+      ref: b.bookingCode,
+      name: b.guestName,
+      roomType: b.categoryName || b.categorySlug,
+      status: b.status,
+    })),
+  ];
+
+  // Secondary counts
+  const pendingReservations = reservations.filter((r) => r.status === "new" || r.status === "in_discussion");
+  const pendingPayments = bookings.filter((b) => b.status === "pending");
+  const newEnquiries = enquiries.filter((e) => e.status === "new");
+
+  // Reservations requiring attention (new leads or unverified pending bookings)
+  const attentionItems = [
+    ...pendingReservations.slice(0, 4).map((r) => ({
+      id: r.id,
+      title: `${r.full_name} (${r.room_type})`,
+      desc: `${r.check_in} to ${r.check_out} · ₹${r.estimated_total?.toLocaleString("en-IN") || 0}`,
+      tag: "Pending Review",
+      link: "/admin/reservations",
+      time: r.created_at,
+    })),
+    ...newEnquiries.slice(0, 3).map((e) => ({
+      id: e.id,
+      title: `${e.name} (${e.type.replace(/_/g, " ")})`,
+      desc: `Phone: ${e.phone} · Received today`,
+      tag: "New Lead",
+      link: "/admin/enquiries",
+      time: e.createdAt,
+    })),
+  ];
 
   return (
-    <div className="min-h-screen bg-[#0E0E10] text-[#F7F3EC] flex flex-col">
-      {/* Top Admin Header Bar */}
-      <header className="sticky top-0 z-40 bg-[#151518]/95 backdrop-blur-md border-b border-white/10 px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          {/* Brand */}
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 group">
-              <Image
-                src="/assets/logo.png"
-                alt="Hotel Fremont"
-                width={150}
-                height={28}
-                className="h-7 w-auto object-contain"
-                priority
-              />
-            </Link>
-            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-black/40 border border-white/10 rounded-full text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#E02B1D] animate-pulse" />
-              <span className="text-[#C9A96E] font-serif text-[11px] font-semibold tracking-wider uppercase">
-                Enterprise Command Center
-              </span>
+    <AdminLayoutShell
+      userEmail={user.email}
+      title="Front Desk & Operations Overview"
+      subtitle="Hotel Fremont · Sector 80, Airport Road, Mohali · 21 Verified Keys"
+    >
+      {/* Top 4 Primary KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Available Rooms */}
+        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm hover:shadow transition">
+          <div className="flex items-center justify-between text-xs font-medium text-[#6B7280]">
+            <span>Available Rooms</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <BedDouble className="w-4 h-4" />
             </div>
           </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-serif font-bold text-[#24272B]">
+              {availableCount}
+            </span>
+            <span className="text-xs font-sans text-[#6B7280]">/ {totalKeys} Keys</span>
+          </div>
+          <div className="mt-2 text-[11px] font-medium text-emerald-700 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>Ready for walk-in or booking</span>
+          </div>
+        </div>
 
-          {/* User info & Actions */}
+        {/* Occupied Rooms */}
+        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm hover:shadow transition">
+          <div className="flex items-center justify-between text-xs font-medium text-[#6B7280]">
+            <span>Occupied Tonight</span>
+            <div className="w-8 h-8 rounded-xl bg-[#742B40]/10 text-[#742B40] flex items-center justify-center">
+              <Building className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-serif font-bold text-[#742B40]">
+              {occupiedCount}
+            </span>
+            <span className="text-xs font-sans text-[#6B7280]">
+              ({Math.round((occupiedCount / totalKeys) * 100)}% occupancy)
+            </span>
+          </div>
+          <div className="mt-2 text-[11px] font-medium text-[#742B40] flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#742B40]" />
+            <span>In-house staying guests</span>
+          </div>
+        </div>
+
+        {/* Today's Arrivals */}
+        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm hover:shadow transition">
+          <div className="flex items-center justify-between text-xs font-medium text-[#6B7280]">
+            <span>Today&apos;s Arrivals</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+              <ArrowDownLeft className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-serif font-bold text-[#24272B]">
+              {todaysArrivals.length}
+            </span>
+            <span className="text-xs font-sans text-[#6B7280]">Expected</span>
+          </div>
+          <div className="mt-2 text-[11px] font-medium text-blue-700 flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Standard check-in 1:00 PM</span>
+          </div>
+        </div>
+
+        {/* Today's Departures */}
+        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm hover:shadow transition">
+          <div className="flex items-center justify-between text-xs font-medium text-[#6B7280]">
+            <span>Today&apos;s Departures</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-serif font-bold text-[#24272B]">
+              {todaysDepartures.length}
+            </span>
+            <span className="text-xs font-sans text-[#6B7280]">Check-outs</span>
+          </div>
+          <div className="mt-2 text-[11px] font-medium text-amber-700 flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Standard check-out 11:00 AM</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Secondary Information Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Link
+          href="/admin/reservations"
+          className="bg-white border border-[#EAE8E3] hover:border-[#742B40]/30 rounded-xl px-4 py-3 flex items-center justify-between transition group shadow-sm"
+        >
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex flex-col items-end text-xs">
-              <span className="text-[#F7F3EC] font-medium">{user.fullName || user.email}</span>
-              <span className="text-[10px] text-[#A8A59E] uppercase font-mono tracking-wider">
-                Role: <span className="text-[#C9A96E] font-semibold">{user.role}</span>
+            <div className="w-7 h-7 rounded-lg bg-[#F8F7F4] flex items-center justify-center text-[#6B7280] group-hover:text-[#742B40]">
+              <CalendarCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-xs text-[#6B7280] block">Pending Reservations</span>
+              <span className="text-sm font-semibold text-[#24272B]">
+                {pendingReservations.length} to confirm
               </span>
             </div>
-
-            <Link
-              href="/"
-              target="_blank"
-              className="text-xs text-[#A8A59E] hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition flex items-center gap-1.5"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-[#C9A96E]" />
-              <span className="hidden sm:inline">Live Site</span>
-            </Link>
-
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="text-xs text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg border border-red-900/40 hover:bg-red-950/30 transition flex items-center gap-1.5 cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
-            </form>
           </div>
-        </div>
-      </header>
+          <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#742B40] transition" />
+        </Link>
 
-      {/* Sub-navigation bar */}
-      <nav className="bg-[#121215] border-b border-white/5 px-6 py-2.5">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto text-xs">
-          <Link
-            href="/admin"
-            className="px-3 py-1.5 rounded-lg bg-[#E02B1D]/15 text-[#E02B1D] border border-[#E02B1D]/30 font-semibold flex items-center gap-1.5 shrink-0"
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Overview</span>
-          </Link>
-          <Link
-            href="/admin/images"
-            className="px-3 py-1.5 rounded-lg text-[#A8A59E] hover:text-white transition flex items-center gap-1.5 shrink-0"
-          >
-            <ImageIcon className="w-3.5 h-3.5" />
-            <span>Image Manager</span>
-          </Link>
-          <Link
-            href="/admin/rooms"
-            className="px-3 py-1.5 rounded-lg text-[#A8A59E] hover:text-white transition flex items-center gap-1.5 shrink-0"
-          >
-            <BedDouble className="w-3.5 h-3.5" />
-            <span>Rooms &amp; Availability</span>
-          </Link>
-          <Link
-            href="/admin/enquiries"
-            className="px-3 py-1.5 rounded-lg text-[#A8A59E] hover:text-white transition flex items-center gap-1.5 shrink-0"
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Enquiries &amp; Leads</span>
-            {newLeadsCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-[#E02B1D] text-white text-[9px] font-bold">
-                {newLeadsCount}
+        <Link
+          href="/admin/payments"
+          className="bg-white border border-[#EAE8E3] hover:border-[#742B40]/30 rounded-xl px-4 py-3 flex items-center justify-between transition group shadow-sm"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-[#F8F7F4] flex items-center justify-center text-[#6B7280] group-hover:text-[#742B40]">
+              <CreditCard className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-xs text-[#6B7280] block">Pending Payments</span>
+              <span className="text-sm font-semibold text-[#24272B]">
+                {pendingPayments.length} transactions
               </span>
-            )}
-          </Link>
-          <Link
-            href="/admin/content"
-            className="px-3 py-1.5 rounded-lg text-[#A8A59E] hover:text-white transition flex items-center gap-1.5 shrink-0"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span>Website CMS</span>
-          </Link>
-        </div>
-      </nav>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#742B40] transition" />
+        </Link>
 
-      {/* Main Dashboard Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {/* Welcome & Role Banner */}
-        <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#E02B1D]/5 rounded-full blur-3xl pointer-events-none" />
+        <Link
+          href="/admin/enquiries"
+          className="bg-white border border-[#EAE8E3] hover:border-[#742B40]/30 rounded-xl px-4 py-3 flex items-center justify-between transition group shadow-sm"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-[#F8F7F4] flex items-center justify-center text-[#6B7280] group-hover:text-[#742B40]">
+              <MessageSquare className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-xs text-[#6B7280] block">New Enquiries &amp; Leads</span>
+              <span className="text-sm font-semibold text-[#24272B]">
+                {newEnquiries.length} uncontacted
+              </span>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#742B40] transition" />
+        </Link>
+      </div>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div className="space-y-2">
+      {/* Main Grid: Arrivals / Departures & Attention List */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left 2 Cols: Today's Operational Board */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Section 1: Today's Arrivals */}
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded bg-[#E02B1D]/10 text-[#E02B1D] border border-[#E02B1D]/30 text-[10px] font-bold uppercase tracking-widest">
-                  Live Operations
-                </span>
-                <span className="text-xs text-[#A8A59E]">· 21 Keys Inventory</span>
+                <ArrowDownLeft className="w-4 h-4 text-blue-600" />
+                <h3 className="text-sm font-serif font-bold text-[#24272B]">
+                  Today&apos;s Expected Arrivals ({todaysArrivals.length})
+                </h3>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC]">
-                Welcome, {user.fullName || "Administrator"}
-              </h1>
-              <p className="text-xs sm:text-sm text-[#A8A59E] max-w-2xl leading-relaxed">
-                Hotel Fremont Enterprise Command Center. Manage R2 media storage, room reservations, guest enquiries, and website CMS content with zero code changes.
-              </p>
+              <Link
+                href="/admin/reservations"
+                className="text-xs text-[#742B40] hover:underline font-medium"
+              >
+                View all reservations &rarr;
+              </Link>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <div className="px-3.5 py-2 rounded-xl bg-black/40 border border-white/10">
-                <span className="text-[10px] uppercase font-mono text-[#A8A59E] block">Authorized Role</span>
-                <span className="text-[#C9A96E] font-serif font-bold capitalize text-sm">{user.role}</span>
+            {todaysArrivals.length > 0 ? (
+              <div className="divide-y divide-[#EAE8E3]">
+                {todaysArrivals.map((arrival) => (
+                  <div
+                    key={arrival.id}
+                    className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-[#24272B]">{arrival.name}</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#F8F7F4] text-[#6B7280] border border-[#EAE8E3]">
+                          {arrival.ref}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#6B7280] mt-0.5 flex items-center gap-2">
+                        <span>{arrival.roomType}</span>
+                        <span>&bull;</span>
+                        <span>{arrival.guests} Guests</span>
+                        <span>&bull;</span>
+                        <span className="font-mono">{arrival.phone}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                          arrival.isPaid
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                        }`}
+                      >
+                        {arrival.isPaid ? "Paid Online" : "Payment Pending"}
+                      </span>
+                      <Link
+                        href={`/admin/reservations?id=${arrival.id}`}
+                        className="px-3 py-1 rounded-lg bg-[#742B40] hover:bg-[#5E2233] text-white text-[11px] font-medium transition cursor-pointer"
+                      >
+                        Check In
+                      </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="px-3.5 py-2 rounded-xl bg-black/40 border border-white/10">
-                <span className="text-[10px] uppercase font-mono text-[#A8A59E] block">Physical Keys</span>
-                <span className="text-white font-mono font-bold text-sm">21 Rooms</span>
+            ) : (
+              <div className="py-8 text-center text-xs text-[#6B7280]">
+                No new guest arrivals scheduled for today.
               </div>
+            )}
+          </div>
+
+          {/* Section 2: Today's Departures */}
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
+              <div className="flex items-center gap-2">
+                <ArrowUpRight className="w-4 h-4 text-amber-600" />
+                <h3 className="text-sm font-serif font-bold text-[#24272B]">
+                  Today&apos;s Departures &amp; Check-outs ({todaysDepartures.length})
+                </h3>
+              </div>
+              <span className="text-[11px] text-[#6B7280]">Standard: 11:00 AM</span>
             </div>
+
+            {todaysDepartures.length > 0 ? (
+              <div className="divide-y divide-[#EAE8E3]">
+                {todaysDepartures.map((departure) => (
+                  <div
+                    key={departure.id}
+                    className="py-3 flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div>
+                      <span className="font-semibold text-[#24272B]">{departure.name}</span>
+                      <div className="text-[11px] text-[#6B7280] mt-0.5">
+                        {departure.roomType} · Ref: {departure.ref}
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/admin/reservations?id=${departure.id}`}
+                      className="px-3 py-1 rounded-lg bg-[#F8F7F4] hover:bg-[#EAE8E3] text-[#24272B] text-[11px] font-medium border border-[#EAE8E3] transition"
+                    >
+                      Process Check-Out
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-xs text-[#6B7280]">
+                No guest departures scheduled for today.
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Live Operational Metrics Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-[#A8A59E]">Rooms Occupied Tonight</span>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-mono font-bold text-[#C9A96E]">{roomsOccupiedTonight}/{totalKeys || 21}</span>
-              <span className="text-xs text-[#A8A59E]">({liveOccupancyRate}%)</span>
-            </div>
-            <div className="mt-3 text-[11px] text-emerald-400 font-mono">
-              {Math.max(0, (totalKeys || 21) - roomsOccupiedTonight)} Keys Available Tonight
+        {/* Right Col: Attention Items & Quick Actions Hub */}
+        <div className="space-y-6">
+          {/* Quick Actions Card */}
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm space-y-3">
+            <h3 className="text-xs font-sans tracking-wider uppercase font-bold text-[#9CA3AF]">
+              Operational Quick Actions
+            </h3>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <Link
+                href="/admin/reservations?action=new"
+                className="p-3 rounded-xl bg-[#F8F7F4] hover:bg-[#742B40] text-[#24272B] hover:text-white transition group border border-[#EAE8E3] flex flex-col justify-between space-y-2"
+              >
+                <Plus className="w-4 h-4 text-[#742B40] group-hover:text-white transition" />
+                <span className="font-medium text-xs leading-tight">New Reservation</span>
+              </Link>
+
+              <Link
+                href="/admin/calendar"
+                className="p-3 rounded-xl bg-[#F8F7F4] hover:bg-[#742B40] text-[#24272B] hover:text-white transition group border border-[#EAE8E3] flex flex-col justify-between space-y-2"
+              >
+                <Calendar className="w-4 h-4 text-[#742B40] group-hover:text-white transition" />
+                <span className="font-medium text-xs leading-tight">Room Calendar</span>
+              </Link>
+
+              <Link
+                href="/admin/enquiries"
+                className="p-3 rounded-xl bg-[#F8F7F4] hover:bg-[#742B40] text-[#24272B] hover:text-white transition group border border-[#EAE8E3] flex flex-col justify-between space-y-2"
+              >
+                <MessageSquare className="w-4 h-4 text-[#742B40] group-hover:text-white transition" />
+                <span className="font-medium text-xs leading-tight">Add Enquiry</span>
+              </Link>
+
+              <Link
+                href="/admin/images"
+                className="p-3 rounded-xl bg-[#F8F7F4] hover:bg-[#742B40] text-[#24272B] hover:text-white transition group border border-[#EAE8E3] flex flex-col justify-between space-y-2"
+              >
+                <ImageIcon className="w-4 h-4 text-[#742B40] group-hover:text-white transition" />
+                <span className="font-medium text-xs leading-tight">Website Media</span>
+              </Link>
             </div>
           </div>
 
-          <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-[#A8A59E]">Arrivals Today</span>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-mono font-bold text-white">{todaysArrivalsCount}</span>
-              <span className="text-xs text-[#A8A59E]">Guests Arriving</span>
-            </div>
-            <div className="mt-3 text-[11px] text-[#C9A96E] font-mono">
-              VIP Transfers &amp; Check-In Ready
-            </div>
-          </div>
-
-          <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-[#A8A59E]">Uncontacted Leads</span>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-mono font-bold text-[#E02B1D]">{newLeadsCount}</span>
-              <span className="text-xs text-[#A8A59E]">New Enquiries</span>
-            </div>
-            <div className="mt-3 text-[11px] text-[#E02B1D]/80 font-mono">
-              Requires 1-Click WhatsApp Followup
-            </div>
-          </div>
-
-          <div className="bg-[#151518] border border-white/10 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-[#A8A59E]">Housekeeping</span>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-mono font-bold text-amber-400">{cleaningCount}</span>
-              <span className="text-xs text-[#A8A59E]">Sanitizing</span>
-            </div>
-            <div className="mt-3 text-[11px] text-amber-400/80 font-mono">
-              Ready for Afternoon Arrivals
-            </div>
-          </div>
-        </div>
-
-        {/* 4 Core Module Action Launchpads */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Images */}
-          <Link
-            href="/admin/images"
-            className="group bg-[#151518] border border-white/10 hover:border-[#C9A96E]/40 rounded-xl p-5 shadow-md transition flex flex-col justify-between space-y-4 cursor-pointer"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-[#E02B1D]/10 border border-[#E02B1D]/30 flex items-center justify-center text-[#E02B1D] group-hover:scale-110 transition">
-                <ImageIcon className="w-5 h-5" />
+          {/* Reservations Requiring Attention */}
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-[#B69A68]" />
+                <h3 className="text-sm font-serif font-bold text-[#24272B]">
+                  Requires Attention
+                </h3>
               </div>
-              <h3 className="text-base font-serif font-bold text-[#F7F3EC] group-hover:text-[#C9A96E] transition">
-                Image Manager
-              </h3>
-              <p className="text-xs text-[#A8A59E] leading-relaxed">
-                Replace, crop, focal-align, and drag-and-drop reorder every photograph on Cloudflare R2.
-              </p>
-            </div>
-            <div className="pt-2 flex items-center text-xs font-semibold text-[#C9A96E] gap-1 group-hover:translate-x-1 transition">
-              <span>Open Image Studio</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
-
-          {/* Card 2: Rooms & Availability */}
-          <Link
-            href="/admin/rooms"
-            className="group bg-[#151518] border border-white/10 hover:border-[#C9A96E]/40 rounded-xl p-5 shadow-md transition flex flex-col justify-between space-y-4 cursor-pointer"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition">
-                <BedDouble className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-serif font-bold text-[#F7F3EC] group-hover:text-[#C9A96E] transition">
-                Rooms &amp; Calendar
-              </h3>
-              <p className="text-xs text-[#A8A59E] leading-relaxed">
-                Interactive tape chart, instant status changes, new bookings, and printable invoices.
-              </p>
-            </div>
-            <div className="pt-2 flex items-center text-xs font-semibold text-emerald-400 gap-1 group-hover:translate-x-1 transition">
-              <span>View Tape Chart</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
-
-          {/* Card 3: Leads & Enquiries */}
-          <Link
-            href="/admin/enquiries"
-            className="group bg-[#151518] border border-white/10 hover:border-[#C9A96E]/40 rounded-xl p-5 shadow-md transition flex flex-col justify-between space-y-4 cursor-pointer"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition">
-                <MessageSquare className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-serif font-bold text-[#F7F3EC] group-hover:text-[#C9A96E] transition">
-                Guest Enquiries
-              </h3>
-              <p className="text-xs text-[#A8A59E] leading-relaxed">
-                Review rate checks, dining requests, and event proposals with 1-click WhatsApp follow-up.
-              </p>
-            </div>
-            <div className="pt-2 flex items-center text-xs font-semibold text-purple-400 gap-1 group-hover:translate-x-1 transition">
-              <span>Follow Up Leads ({newLeadsCount})</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
-
-          {/* Card 4: CMS & Settings */}
-          <Link
-            href="/admin/content"
-            className="group bg-[#151518] border border-white/10 hover:border-[#C9A96E]/40 rounded-xl p-5 shadow-md transition flex flex-col justify-between space-y-4 cursor-pointer"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition">
-                <Settings className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-serif font-bold text-[#F7F3EC] group-hover:text-[#C9A96E] transition">
-                Website CMS
-              </h3>
-              <p className="text-xs text-[#A8A59E] leading-relaxed">
-                Manage contact phones (+91 98727 68514), WhatsApp, Google rating badge, and social links.
-              </p>
-            </div>
-            <div className="pt-2 flex items-center text-xs font-semibold text-amber-400 gap-1 group-hover:translate-x-1 transition">
-              <span>Edit Site Settings</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
-        </div>
-
-        {/* System Foundation Health Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Cloudflare R2 Card */}
-          <div className="bg-[#151518] border border-white/10 rounded-xl p-5 shadow-md flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[#F7F3EC] font-semibold text-sm">
-                  <Cloud className="w-4 h-4 text-[#E02B1D]" />
-                  <span>Cloudflare R2 Media</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              </div>
-              <p className="text-xs text-[#A8A59E] leading-relaxed">
-                Bucket: <code className="text-white font-mono">{r2Summary.bucketName}</code>
-              </p>
-              <p className="text-[11px] text-[#A8A59E]/70 font-mono truncate">
-                {r2Summary.publicUrl}
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-              <span className="text-emerald-400 flex items-center gap-1 text-[11px]">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Edge CDN Ready</span>
-              </span>
-              <span className="text-[#C9A96E] text-[11px]">Presigned PUT Ready</span>
-            </div>
-          </div>
-
-          {/* Supabase Database Card */}
-          <div className="bg-[#151518] border border-white/10 rounded-xl p-5 shadow-md flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[#F7F3EC] font-semibold text-sm">
-                  <Database className="w-4 h-4 text-[#C9A96E]" />
-                  <span>Supabase Postgres</span>
-                </div>
-                {supabaseConfigured ? (
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                ) : (
-                  <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-mono">
-                    Fallback Active
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-[#A8A59E] leading-relaxed">
-                {supabaseConfigured
-                  ? "Connected to Supabase PostgreSQL database with RLS policies enabled."
-                  : "Using local content.js & rooms.ts data. Connect Supabase credentials to persist database rows."}
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-              <span className="text-[11px] text-[#A8A59E]">
-                {supabaseConfigured ? "Tables Migrated" : "Schema Ready in /supabase"}
-              </span>
-              <span className="text-[11px] text-[#C9A96E]">RLS Protected</span>
-            </div>
-          </div>
-
-          {/* Rooms Inventory Card */}
-          <div className="bg-[#151518] border border-white/10 rounded-xl p-5 shadow-md flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[#F7F3EC] font-semibold text-sm">
-                  <BedDouble className="w-4 h-4 text-[#E02B1D]" />
-                  <span>Rooms Inventory</span>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono">
-                  100% Verified
-                </span>
-              </div>
-              <p className="text-xs text-[#A8A59E] leading-relaxed">
-                3 Categories: 9 Deluxe Rooms (101-109), 10 Super Deluxe Rooms (201-210), 2 Premium Rooms (301-302).
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-              <span className="text-white font-mono text-[11px]">Total: 21 Rooms</span>
-              <span className="text-[#C9A96E] text-[11px]">Tape Chart Ready</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Online Reservations Section (Direct from Supabase) */}
-        <div className="space-y-4 pt-2">
-          <ReservationsList initialReservations={reservations} />
-        </div>
-
-        {/* Media Manager Section (Integrated) */}
-        <div className="space-y-4 pt-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-serif font-bold text-[#F7F3EC]">
-                Cloudflare R2 Media Vault
-              </h2>
-              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#E02B1D]/10 text-[#E02B1D] border border-[#E02B1D]/20">
-                Core Module
+              <span className="text-[11px] font-mono text-[#6B7280]">
+                {attentionItems.length} items
               </span>
             </div>
-            <Link
-              href="/admin/images"
-              className="text-xs text-[#C9A96E] hover:underline flex items-center gap-1 font-semibold"
-            >
-              <span>Full Studio View</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
+
+            {attentionItems.length > 0 ? (
+              <div className="space-y-3">
+                {attentionItems.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.link}
+                    className="block p-3 rounded-xl bg-[#F8F7F4] hover:bg-[#F3F1EC] transition border border-[#EAE8E3] space-y-1 group"
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-[#24272B] group-hover:text-[#742B40] transition truncate max-w-[180px]">
+                        {item.title}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                        {item.tag}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] truncate">{item.desc}</p>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="py-6 text-center text-xs text-[#6B7280]">
+                All reservations and leads are up to date.
+              </div>
+            )}
           </div>
 
-          {/* Media Manager Component */}
-          <MediaManager />
+          {/* Quick Property Info */}
+          <div className="bg-[#FAF9F7] border border-[#EAE8E3] rounded-2xl p-4 text-xs text-[#6B7280] space-y-2">
+            <div className="flex items-center gap-2 text-[#24272B] font-semibold">
+              <Building className="w-4 h-4 text-[#742B40]" />
+              <span>Hotel Fremont Property Details</span>
+            </div>
+            <p className="text-[11px] leading-relaxed">
+              Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road, Mohali · Reception +91 79734 50281
+            </p>
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayoutShell>
   );
 }

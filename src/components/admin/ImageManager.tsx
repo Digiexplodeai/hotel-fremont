@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useTransition } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import {
   Upload,
   RefreshCw,
   Copy,
   Check,
-  ExternalLink,
   RotateCcw,
   Trash2,
   Edit2,
   Sparkles,
   AlertCircle,
-  Eye,
   Sliders,
   Layers,
   Folder,
@@ -23,7 +20,12 @@ import {
   X,
   Plus,
   GripVertical,
-  ArrowLeft,
+  Search,
+  Filter,
+  Eye,
+  ExternalLink,
+  Building,
+  Utensils,
 } from "lucide-react";
 import {
   DndContext,
@@ -49,7 +51,6 @@ import {
   confirmUploadAction,
   updateSlotMetaAction,
   restoreSlotDefaultAction,
-  deleteMediaAction,
   getOrphanObjectsAction,
 } from "@/actions/r2";
 
@@ -77,13 +78,142 @@ export interface GalleryItemUI {
   caption?: string;
 }
 
-// Initial Slot Registry for the entire website
 const INITIAL_SLOTS: ImageSlotUI[] = [
+  {
+    key: "exterior",
+    label: "Hotel Exterior & Main Facade",
+    section: "exterior",
+    location: "Homepage Hero, About Intro, and Property Highlights",
+    recommendedSize: "1920×1080 px",
+    aspectRatio: "16:9 Landscape",
+    currentUrl: "/assets/hero/hero-lobby.webp",
+    altText: "Hotel Fremont Exterior Facade on Airport Road Mohali",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: true,
+  },
+  {
+    key: "deluxe-room",
+    label: "Deluxe Room (9 Keys)",
+    section: "rooms",
+    location: "Deluxe Room Card, Details Modal, and Booking Selector",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Deluxe Room - Hotel Fremont Mohali",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: true,
+  },
+  {
+    key: "super-deluxe",
+    label: "Super Deluxe Room (10 Keys)",
+    section: "rooms",
+    location: "Super Deluxe Room Card, Modal, and Booking Showcase",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Super Deluxe Room - Hotel Fremont Mohali",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: true,
+  },
+  {
+    key: "premium",
+    label: "Premium Room (2 Keys)",
+    section: "rooms",
+    location: "Premium Room Card, Modal, and Booking Showcase",
+    recommendedSize: "1600×1000 px",
+    aspectRatio: "16:10 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Premium Room - Hotel Fremont Mohali",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: true,
+  },
+  {
+    key: "restaurant",
+    label: "In-House Restaurant (Ground Floor)",
+    section: "dining",
+    location: "Dining Section Hero, Menu Modal, and Restaurant Banner",
+    recommendedSize: "1920×820 px",
+    aspectRatio: "21:9 Ultra-wide",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Hotel Fremont In-House Restaurant Ground Floor",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: true,
+  },
+  {
+    key: "dining.banner_primary",
+    label: "Dining Showcase Secondary",
+    section: "dining",
+    location: "Dining Section Ambience & Breakfast Presentation",
+    recommendedSize: "1600×900 px",
+    aspectRatio: "16:9 Landscape",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Dining Experience at Hotel Fremont",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "cloud-six-banquet",
+    label: "Cloud Six Banquet (250 Pax)",
+    section: "events",
+    location: "Events & Banquets Showcase Card and Enquiry Modal",
+    recommendedSize: "1600×1100 px",
+    aspectRatio: "16:11 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Cloud Six Banquet Hall - Hotel Fremont Mohali",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: true,
+  },
+  {
+    key: "conference-hall",
+    label: "Conference Hall (40-50 Pax)",
+    section: "events",
+    location: "Corporate Events & Meetings Section Card",
+    recommendedSize: "1600×1100 px",
+    aspectRatio: "16:11 Aspect",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Conference Hall - Hotel Fremont Mohali",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: true,
+  },
+  {
+    key: "about.image_primary",
+    label: "About Hotel Fremont (Primary Showcase)",
+    section: "about",
+    location: "About Hotel Section - Main Property Story",
+    recommendedSize: "1200×800 px",
+    aspectRatio: "3:2 Standard",
+    currentUrl: "/assets/hero/hero-lobby.webp",
+    altText: "Hotel Fremont Hospitality Experience Sector 80 Mohali",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
+  {
+    key: "about.image_secondary",
+    label: "Warm Hospitality & Reception Lobby",
+    section: "about",
+    location: "About Hotel Section - Secondary Accent Visual",
+    recommendedSize: "1200×800 px",
+    aspectRatio: "3:2 Standard",
+    currentUrl: "/assets/placeholder.svg",
+    altText: "Hotel Fremont Front Desk & Reception",
+    focalPoint: "50% 50%",
+    isCustomR2: false,
+    isRequired: false,
+  },
   {
     key: "branding.logo",
     label: "Official Hotel Logo",
     section: "branding",
-    location: "Header, Navbar, Preloader, Footer, Modals",
+    location: "Header, Navbar, Footer, Booking Modals",
     recommendedSize: "800×120 px",
     aspectRatio: "Wide (approx 7:1)",
     currentUrl: "/assets/logo.png",
@@ -94,9 +224,9 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
   },
   {
     key: "branding.icon",
-    label: "Browser Favicon & Touch Icon",
+    label: "Browser Favicon & App Icon",
     section: "branding",
-    location: "Browser tab icon, bookmark bar",
+    location: "Browser tab icon and bookmark bar",
     recommendedSize: "512×512 px",
     aspectRatio: "1:1 Square",
     currentUrl: "/assets/f-icon.png",
@@ -107,129 +237,40 @@ const INITIAL_SLOTS: ImageSlotUI[] = [
   },
   {
     key: "seo.og_image",
-    label: "OpenGraph / Social Media Share Card",
+    label: "Social Share Card (OpenGraph)",
     section: "seo",
-    location: "WhatsApp, iMessage, Twitter, Facebook preview",
+    location: "WhatsApp, iMessage, Google and Social Previews",
     recommendedSize: "1200×630 px",
     aspectRatio: "1.91:1 Landscape",
     currentUrl: "/assets/logo.png",
-    altText: "Hotel Fremont Social Preview Card",
+    altText: "Hotel Fremont Social Share Card",
     focalPoint: "50% 50%",
     isCustomR2: false,
     isRequired: true,
-  },
-  {
-    key: "exterior",
-    label: "Hotel Fremont Facade & Exterior",
-    section: "property",
-    location: "Hero Section, About Intro, and Property Gallery",
-    recommendedSize: "1920×1080 px",
-    aspectRatio: "16:9 Widescreen",
-    currentUrl: "/assets/hero/hero-lobby.webp",
-    altText: "Hotel Fremont Exterior Facade",
-    focalPoint: "50% 50%",
-    isCustomR2: false,
-    isRequired: true,
-  },
-  {
-    key: "super-deluxe",
-    label: "Super Deluxe Room (Photo Slot)",
-    section: "rooms",
-    location: "Rooms Showcase Card, Room Detail Modal, and Gallery",
-    recommendedSize: "1600×1000 px",
-    aspectRatio: "16:10 Aspect",
-    currentUrl: "/assets/placeholder.svg",
-    altText: "Super Deluxe Room - Hotel Fremont",
-    focalPoint: "50% 50%",
-    isCustomR2: false,
-    isRequired: true,
-  },
-  {
-    key: "premium",
-    label: "Premium Room (Photo Slot)",
-    section: "rooms",
-    location: "Rooms Showcase Card, Room Detail Modal, and Gallery",
-    recommendedSize: "1600×1000 px",
-    aspectRatio: "16:10 Aspect",
-    currentUrl: "/assets/placeholder.svg",
-    altText: "Premium Room - Hotel Fremont",
-    focalPoint: "50% 50%",
-    isCustomR2: false,
-    isRequired: true,
-  },
-  {
-    key: "cloud-six-banquet",
-    label: "Cloud Six Banquet (Photo Slot)",
-    section: "events",
-    location: "Events & Banquets Showcase Card and Gallery",
-    recommendedSize: "1600×1100 px",
-    aspectRatio: "16:11 Aspect",
-    currentUrl: "/assets/placeholder.svg",
-    altText: "Cloud Six Banquet - Hotel Fremont",
-    focalPoint: "50% 50%",
-    isCustomR2: false,
-    isRequired: true,
-  },
-  {
-    key: "deluxe-room",
-    label: "Deluxe Room (Photo Slot)",
-    section: "rooms",
-    location: "Deluxe Room Card & Modal (Photo coming soon)",
-    recommendedSize: "1600×1000 px",
-    aspectRatio: "16:10 Aspect",
-    currentUrl: "/assets/placeholder.svg",
-    altText: "Deluxe Room - Hotel Fremont",
-    focalPoint: "50% 50%",
-    isCustomR2: false,
-    isRequired: false,
-  },
-  {
-    key: "restaurant",
-    label: "Hotel Fremont Restaurant (Ground Floor)",
-    section: "dining",
-    location: "In-House Restaurant Banner & Modal (Photo coming soon)",
-    recommendedSize: "1920×820 px",
-    aspectRatio: "21:9 Ultra-wide",
-    currentUrl: "/assets/placeholder.svg",
-    altText: "Hotel Fremont Restaurant Ground Floor",
-    focalPoint: "50% 50%",
-    isCustomR2: false,
-    isRequired: false,
-  },
-  {
-    key: "conference-hall",
-    label: "Conference Hall (40-50 Pax)",
-    section: "events",
-    location: "Conference Hall Card (Photo coming soon)",
-    recommendedSize: "1600×1100 px",
-    aspectRatio: "16:11 Aspect",
-    currentUrl: "/assets/placeholder.svg",
-    altText: "Conference Hall - Hotel Fremont",
-    focalPoint: "50% 50%",
-    isCustomR2: false,
-    isRequired: false,
   },
 ];
 
 const INITIAL_GALLERY: GalleryItemUI[] = [
-  { id: "g1", title: "Hotel Fremont Facade", category: "Architecture", url: "/assets/hero/hero-lobby.webp", displayOrder: 1, isActive: true },
-  { id: "g2", title: "Super Deluxe Room", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 2, isActive: true },
-  { id: "g3", title: "Premium Room", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 3, isActive: true },
-  { id: "g4", title: "Cloud Six Banquet", category: "Events", url: "/assets/placeholder.svg", displayOrder: 4, isActive: true },
+  { id: "g1", title: "Hotel Fremont Exterior Facade", category: "Architecture", url: "/assets/hero/hero-lobby.webp", displayOrder: 1, isActive: true },
+  { id: "g2", title: "Deluxe Room", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 2, isActive: true },
+  { id: "g3", title: "Super Deluxe Room", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 3, isActive: true },
+  { id: "g4", title: "Premium Room", category: "Suites", url: "/assets/placeholder.svg", displayOrder: 4, isActive: true },
+  { id: "g5", title: "Cloud Six Banquet", category: "Events", url: "/assets/placeholder.svg", displayOrder: 5, isActive: true },
+  { id: "g6", title: "In-House Restaurant", category: "Dining", url: "/assets/placeholder.svg", displayOrder: 6, isActive: true },
 ];
 
 const SECTIONS = [
   { id: "all", label: "All Slots", icon: Layers },
-  { id: "branding", label: "Branding & Logo", icon: Folder },
-  { id: "property", label: "Property & Facade", icon: ImageIcon },
-  { id: "rooms", label: "Rooms (3 Categories)", icon: Folder },
-  { id: "dining", label: "Restaurant & Dining", icon: Folder },
-  { id: "events", label: "Events & Banquets", icon: Folder },
-  { id: "gallery", label: "Property Gallery", icon: Sparkles },
-  { id: "orphans", label: "Orphan Finder", icon: AlertCircle },
+  { id: "exterior", label: "Hotel Exterior", icon: Building },
+  { id: "rooms", label: "Rooms (3 Classes)", icon: Folder },
+  { id: "dining", label: "Dining & Restaurant", icon: Utensils },
+  { id: "events", label: "Cloud Six & Banquets", icon: Folder },
+  { id: "about", label: "About Hotel", icon: ImageIcon },
+  { id: "branding", label: "Branding & SEO", icon: Folder },
+  { id: "gallery", label: "Visual Journal", icon: Sparkles },
+  { id: "orphans", label: "Orphan Detector", icon: AlertCircle },
 ];
 
-// Sortable Gallery Item Component
 function SortableGalleryCard({
   item,
   onDelete,
@@ -252,37 +293,37 @@ function SortableGalleryCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-[#151518] border border-white/10 rounded-xl overflow-hidden shadow group flex flex-col justify-between"
+      className="bg-white border border-[#EAE8E3] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group flex flex-col justify-between"
     >
-      <div className="relative aspect-[4/3] bg-black/60 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-[#F8F7F4] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.url}
           alt={item.title}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
         />
-        <div className="absolute top-2 left-2 flex items-center gap-1.5">
-          <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-white border border-white/10">
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+          <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-md text-[#24272B] border border-black/5 shadow-xs">
             {item.category}
           </span>
         </div>
         <button
           {...attributes}
           {...listeners}
-          className="absolute top-2 right-2 p-1.5 rounded-md bg-black/70 text-[#A8A59E] hover:text-white cursor-grab active:cursor-grabbing border border-white/10"
+          className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-white/90 backdrop-blur-md text-[#6B7280] hover:text-[#24272B] cursor-grab active:cursor-grabbing border border-black/5 shadow-xs"
           title="Drag to reorder"
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="p-3.5 space-y-2">
-        <h4 className="text-xs font-serif font-bold text-[#F7F3EC] truncate">{item.title}</h4>
-        <div className="flex items-center justify-between text-[11px] text-[#A8A59E] pt-2 border-t border-white/5">
-          <span>Order: #{item.displayOrder}</span>
+      <div className="p-4 space-y-2">
+        <h4 className="text-xs font-serif font-bold text-[#24272B] truncate">{item.title}</h4>
+        <div className="flex items-center justify-between text-[11px] text-[#6B7280] pt-2 border-t border-[#EAE8E3]">
+          <span className="font-mono font-medium">Order #{item.displayOrder}</span>
           <button
             onClick={() => onDelete(item.id)}
-            className="text-red-400 hover:text-red-300 transition p-1"
+            className="text-rose-600 hover:text-rose-700 transition p-1"
             title="Remove from gallery"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -299,7 +340,6 @@ function mergeSlotsWithInitial(
 ): ImageSlotUI[] {
   if (!initialMap) return baseSlots;
   return baseSlots.map((slot) => {
-    // Resolve both direct key and dot/dash alternate keys
     const altKey = slot.key.includes(".gallery-")
       ? slot.key.replace(".gallery-", ".gallery.")
       : slot.key.includes(".gallery.")
@@ -330,6 +370,7 @@ export interface ImageManagerProps {
 
 export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}) {
   const [activeSection, setActiveSection] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [slots, setSlots] = useState<ImageSlotUI[]>(() =>
     mergeSlotsWithInitial(INITIAL_SLOTS, initialSlotsMap)
   );
@@ -342,7 +383,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
   const [galleryItems, setGalleryItems] = useState<GalleryItemUI[]>(INITIAL_GALLERY);
 
-  // Active slot being replaced
+  // Modal states
   const [replacingSlot, setReplacingSlot] = useState<ImageSlotUI | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
@@ -375,7 +416,6 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Handle DND Reorder
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -389,14 +429,13 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     }
   };
 
-  // Handle File Selection & Pre-processing
   const handleSelectFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setSelectedFile(file);
     setIsProcessing(true);
-    setStatusMessage("Pre-processing: Resizing to max 2400px, stripping EXIF, optimizing WebP...");
+    setStatusMessage("Pre-processing: Resizing to max 2400px, stripping EXIF, converting to WebP...");
 
     try {
       const processed = await processImageBeforeUpload(file, {
@@ -416,7 +455,6 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     }
   };
 
-  // Execute Direct-to-R2 Upload
   const handleExecuteUpload = async () => {
     if (!replacingSlot || !selectedFile) return;
 
@@ -427,10 +465,8 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     let uploadSucceeded = false;
 
     try {
-      // 1. Pre-process file
       const processed = await processImageBeforeUpload(selectedFile);
 
-      // 2. Request Presigned URL (checks role & validates server-side)
       const presignRes = await requestPresignedUploadUrl({
         slotKey: replacingSlot.key,
         section: replacingSlot.section,
@@ -440,14 +476,12 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
       });
 
       if (!presignRes.success || !presignRes.uploadUrl || !presignRes.key) {
-        throw new Error(presignRes.error || "Failed to obtain upload authorization from server.");
+        throw new Error(presignRes.error || "Failed to obtain upload authorization.");
       }
 
       setUploadProgress(35);
-      setStatusMessage("Uploading directly to Cloudflare R2 bucket (bypassing Netlify payload limits)...");
+      setStatusMessage("Uploading directly to Cloudflare R2 bucket...");
 
-      // 3. Direct browser PUT to Cloudflare R2 with progress
-      // Only send Content-Type matching the presigned configuration, no extra headers
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", presignRes.uploadUrl!, true);
@@ -469,10 +503,9 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
         };
 
         xhr.onerror = () => {
-          // Cloudflare R2 suppresses CORS headers on 403 errors, causing browser to trigger onerror
           reject(
             new Error(
-              "Storage rejected the upload (likely 403 Access Denied or signature mismatch). Check R2 API token permissions."
+              "Storage rejected the upload (likely 403 or signature mismatch). Check R2 API token permissions."
             )
           );
         };
@@ -481,9 +514,8 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
       });
 
       setUploadProgress(88);
-      setStatusMessage("Confirming object and updating database slot pointer...");
+      setStatusMessage("Updating database slot pointer & triggering revalidation...");
 
-      // 4. Confirm upload on server
       const confirmRes = await confirmUploadAction({
         key: presignRes.key,
         slotKey: replacingSlot.key,
@@ -502,10 +534,9 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
       }
 
       setUploadProgress(100);
-      setStatusMessage("Image successfully updated on Cloudflare R2!");
+      setStatusMessage("Image successfully published to Hotel Fremont live site!");
       uploadSucceeded = true;
 
-      // Update local state with cache-busting timestamp
       const confirmedUrl = confirmRes.publicUrl
         ? `${confirmRes.publicUrl}?v=${Date.now()}`
         : presignRes.publicUrl!;
@@ -518,7 +549,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
         )
       );
 
-      showToast(`Slot '${replacingSlot.label}' updated successfully!`);
+      showToast(`'${replacingSlot.label}' updated live!`);
       setTimeout(() => {
         setReplacingSlot(null);
         setSelectedFile(null);
@@ -537,9 +568,8 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     }
   };
 
-  // Restore Default Slot
   const handleRestoreDefault = async (slot: ImageSlotUI) => {
-    if (!confirm(`Are you sure you want to restore '${slot.label}' to the factory default photography?`)) {
+    if (!confirm(`Are you sure you want to restore '${slot.label}' to the factory default?`)) {
       return;
     }
 
@@ -555,7 +585,6 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     }
   };
 
-  // Save Focal Point
   const handleSaveFocalPoint = async () => {
     if (!editingFocalSlot) return;
     await updateSlotMetaAction({
@@ -570,7 +599,6 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     showToast("Focal point alignment saved!");
   };
 
-  // Save Alt Text
   const handleSaveAltText = async () => {
     if (!editingAltSlot) return;
     await updateSlotMetaAction({
@@ -585,14 +613,13 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     showToast("Alt text saved!");
   };
 
-  // Check Orphans
   const handleCheckOrphans = async () => {
     setIsCheckingOrphans(true);
     const res = await getOrphanObjectsAction();
     setIsCheckingOrphans(false);
     if (res.success && res.orphanKeys) {
       setOrphanKeys(res.orphanKeys);
-      showToast(`Scan complete: Found ${res.orphanKeys.length} orphan files.`);
+      showToast(`Found ${res.orphanKeys.length} orphan files.`);
     } else {
       setErrorBanner(res.error || "Failed to inspect R2 bucket.");
     }
@@ -603,17 +630,27 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     showToast("CDN URL copied to clipboard!");
   };
 
-  // Filter slots
-  const filteredSlots = slots.filter((slot) => {
-    if (activeSection === "all") return true;
-    return slot.section === activeSection;
-  });
+  const filteredSlots = useMemo(() => {
+    return slots.filter((slot) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        slot.label.toLowerCase().includes(q) ||
+        slot.key.toLowerCase().includes(q) ||
+        slot.location.toLowerCase().includes(q);
+
+      if (!matchesSearch) return false;
+
+      if (activeSection === "all") return true;
+      return slot.section === activeSection;
+    });
+  }, [slots, activeSection, searchQuery]);
 
   return (
     <div className="space-y-6">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#1E1E22] border border-[#C9A96E]/50 text-[#F7F3EC] px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#24272B] text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs animate-in slide-in-from-bottom">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
@@ -621,40 +658,73 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
       {/* Error Alert */}
       {errorBanner && (
-        <div className="p-4 bg-red-950/40 border border-red-800/80 rounded-xl text-xs text-red-200 flex items-start justify-between gap-3">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-start justify-between gap-3">
           <div className="flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-red-300">Notice:</p>
+              <p className="font-semibold text-rose-900">Notice:</p>
               <p>{errorBanner}</p>
             </div>
           </div>
-          <button onClick={() => setErrorBanner(null)} className="text-[#A8A59E] hover:text-white">
+          <button onClick={() => setErrorBanner(null)} className="text-rose-500 hover:text-rose-700">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Navigation Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-white/5">
-        {SECTIONS.map((sec) => {
-          const Icon = sec.icon;
-          const isActive = activeSection === sec.id;
-          return (
-            <button
-              key={sec.id}
-              onClick={() => setActiveSection(sec.id)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs font-medium tracking-wide flex items-center gap-2 whitespace-nowrap transition cursor-pointer ${
-                isActive
-                  ? "bg-[#E02B1D] text-white shadow-md shadow-red-950/40"
-                  : "bg-[#151518] text-[#A8A59E] hover:text-white hover:bg-[#1E1E22] border border-white/5"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{sec.label}</span>
-            </button>
-          );
-        })}
+      {/* Toolbar: Search + Category Pills */}
+      <div className="bg-white border border-[#EAE8E3] rounded-2xl p-4 shadow-sm space-y-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search photo slot by name, room, or section..."
+              className="w-full pl-10 pr-4 py-2 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl text-xs text-[#24272B] placeholder-[#9CA3AF] focus:outline-none focus:border-[#742B40] transition"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#24272B]"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <div className="px-3 py-1.5 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3] font-mono text-[11px] text-[#6B7280]">
+              Storage: <span className="text-emerald-700 font-bold">hotel-fremont-media</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3] font-mono text-[11px] text-[#6B7280]">
+              CDN: <span className="text-[#742B40] font-bold">Cloudflare R2</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-t border-[#EAE8E3] pt-3">
+          {SECTIONS.map((sec) => {
+            const Icon = sec.icon;
+            const isActive = activeSection === sec.id;
+            return (
+              <button
+                key={sec.id}
+                onClick={() => setActiveSection(sec.id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide flex items-center gap-2 whitespace-nowrap transition cursor-pointer ${
+                  isActive
+                    ? "bg-[#742B40] text-white shadow-sm"
+                    : "bg-[#F8F7F4] text-[#6B7280] hover:text-[#24272B] hover:bg-[#FAF9F7] border border-[#EAE8E3]"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{sec.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* SECTION 1: Standard Image Slots View */}
@@ -663,37 +733,37 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
           {filteredSlots.map((slot) => (
             <div
               key={slot.key}
-              className="bg-[#151518] border border-white/10 hover:border-white/20 rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between transition group"
+              className="bg-white border border-[#EAE8E3] hover:border-[#742B40]/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-md flex flex-col justify-between transition group"
             >
               {/* Thumbnail Container */}
-              <div className="relative aspect-[16/10] bg-black/80 overflow-hidden">
+              <div className="relative aspect-[16/10] bg-[#F8F7F4] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={slot.currentUrl}
                   alt={slot.altText}
                   style={{ objectPosition: slot.focalPoint }}
-                  className="w-full h-full object-cover group-hover:scale-102 transition duration-500"
+                  className="w-full h-full object-cover group-hover:scale-103 transition duration-500"
                 />
 
                 {/* Badge Overlays */}
                 <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                  <span className="text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-[#F7F3EC] border border-white/10">
+                  <span className="text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-md text-[#24272B] border border-black/5 shadow-xs font-bold">
                     {slot.aspectRatio}
                   </span>
                   {slot.isCustomR2 ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                      Cloudflare R2
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
+                      Live R2
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 font-semibold">
-                      <AlertCircle className="w-2.5 h-2.5" /> Empty Slot
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1 font-bold">
+                      <AlertCircle className="w-2.5 h-2.5" /> Default / Placeholder
                     </span>
                   )}
                 </div>
 
                 {slot.isRequired && (
                   <div className="absolute top-2.5 right-2.5">
-                    <span className="text-[9px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded bg-[#E02B1D]/90 text-white font-semibold">
+                    <span className="text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#742B40] text-white font-bold">
                       Required
                     </span>
                   </div>
@@ -703,27 +773,27 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
               {/* Slot Details */}
               <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-serif font-bold text-[#F7F3EC] leading-snug">
+                  <h3 className="text-sm font-serif font-bold text-[#24272B] leading-snug">
                     {slot.label}
                   </h3>
-                  <p className="text-[11px] text-[#A8A59E] line-clamp-1">{slot.location}</p>
-                  <p className="text-[10px] text-[#C9A96E] font-mono">
+                  <p className="text-[11px] text-[#6B7280] line-clamp-1">{slot.location}</p>
+                  <p className="text-[10px] text-[#B69A68] font-mono font-semibold">
                     Target: {slot.recommendedSize}
                   </p>
                 </div>
 
-                {/* Alt text and alignment pill */}
-                <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#A8A59E]">
+                {/* Alt text and alignment info */}
+                <div className="pt-2 border-t border-[#EAE8E3] flex items-center justify-between text-[11px] text-[#6B7280]">
                   <span className="truncate max-w-[170px]" title={slot.altText}>
                     Alt: {slot.altText}
                   </span>
-                  <span className="font-mono text-[10px] text-stone-400">
+                  <span className="font-mono text-[10px] text-[#4B5563]">
                     Align: {slot.focalPoint}
                   </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#EAE8E3]">
                   <button
                     onClick={() => {
                       setReplacingSlot(slot);
@@ -731,14 +801,10 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                       setPreviewBlobUrl(null);
                       setErrorBanner(null);
                     }}
-                    className={`py-2 px-3 rounded-lg text-white text-xs font-semibold tracking-wide transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
-                      slot.isCustomR2
-                        ? "bg-[#E02B1D] hover:bg-[#c42215]"
-                        : "bg-amber-600/90 hover:bg-amber-600"
-                    }`}
+                    className="py-2 px-3 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>{slot.isCustomR2 ? "Change Image" : "Upload Image"}</span>
+                    <span>{slot.isCustomR2 ? "Replace Photo" : "Upload Photo"}</span>
                   </button>
 
                   <div className="flex items-center gap-1.5">
@@ -747,7 +813,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                         setEditingFocalSlot(slot);
                         setCurrentFocalPoint(slot.focalPoint);
                       }}
-                      className="flex-1 py-2 rounded-lg bg-[#1E1E22] hover:bg-[#25252a] text-[#A8A59E] hover:text-white border border-white/10 text-xs transition flex items-center justify-center"
+                      className="flex-1 py-2 rounded-xl bg-[#F8F7F4] hover:bg-[#FAF9F7] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3] text-xs transition flex items-center justify-center"
                       title="Adjust crop / focal point"
                     >
                       <Sliders className="w-3.5 h-3.5" />
@@ -758,7 +824,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                         setEditingAltSlot(slot);
                         setTempAltText(slot.altText);
                       }}
-                      className="flex-1 py-2 rounded-lg bg-[#1E1E22] hover:bg-[#25252a] text-[#A8A59E] hover:text-white border border-white/10 text-xs transition flex items-center justify-center"
+                      className="flex-1 py-2 rounded-xl bg-[#F8F7F4] hover:bg-[#FAF9F7] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3] text-xs transition flex items-center justify-center"
                       title="Edit SEO alt text"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -767,8 +833,8 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                     {slot.isCustomR2 && (
                       <button
                         onClick={() => handleRestoreDefault(slot)}
-                        className="py-2 px-2.5 rounded-lg bg-[#1E1E22] hover:bg-red-950/40 text-red-400 border border-white/10 text-xs transition"
-                        title="Remove image (Revert to empty placeholder)"
+                        className="py-2 px-2.5 rounded-xl bg-[#F8F7F4] hover:bg-rose-50 text-rose-600 border border-[#EAE8E3] text-xs transition"
+                        title="Remove image (Revert to default)"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -776,7 +842,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
                     <button
                       onClick={() => copyUrl(slot.currentUrl)}
-                      className="py-2 px-2.5 rounded-lg bg-[#1E1E22] hover:bg-[#25252a] text-[#A8A59E] hover:text-white border border-white/10 text-xs transition"
+                      className="py-2 px-2.5 rounded-xl bg-[#F8F7F4] hover:bg-[#FAF9F7] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3] text-xs transition"
                       title="Copy CDN URL"
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -792,18 +858,18 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
       {/* SECTION 2: Curated Gallery with DND Reorder */}
       {activeSection === "gallery" && (
         <div className="space-y-6">
-          <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 className="text-base font-serif font-bold text-[#F7F3EC]">
+              <h3 className="text-base font-serif font-bold text-[#24272B]">
                 Visual Journal Photo Gallery
               </h3>
-              <p className="text-xs text-[#A8A59E] mt-0.5">
-                Drag and drop cards using the grip icon to reorder how images display on the public site and in the lightbox.
+              <p className="text-xs text-[#6B7280] mt-0.5">
+                Drag and drop cards using the grip icon to reorder how images display on the public website and in the full-screen lightbox.
               </p>
             </div>
             <button
-              onClick={() => showToast("Multi-upload: Select files from your computer")}
-              className="py-2 px-4 rounded-xl bg-[#E02B1D] hover:bg-[#c42215] text-white text-xs font-semibold tracking-wide transition flex items-center gap-2 cursor-pointer shadow"
+              onClick={() => showToast("Select images from slots to pin to gallery")}
+              className="py-2 px-4 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-2 cursor-pointer shadow-sm"
             >
               <Plus className="w-4 h-4" />
               <span>Add Gallery Photos</span>
@@ -831,20 +897,20 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
       {/* SECTION 3: Orphan Finder */}
       {activeSection === "orphans" && (
-        <div className="bg-[#151518] border border-white/10 rounded-2xl p-6 space-y-6 shadow-md">
+        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 space-y-6 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 className="text-base font-serif font-bold text-[#F7F3EC]">
+              <h3 className="text-base font-serif font-bold text-[#24272B]">
                 Cloudflare R2 Orphan Detection
               </h3>
-              <p className="text-xs text-[#A8A59E] mt-0.5">
+              <p className="text-xs text-[#6B7280] mt-0.5">
                 Scans bucket <code>hotel-fremont-media</code> for unreferenced image objects and allows safe purging.
               </p>
             </div>
             <button
               onClick={handleCheckOrphans}
               disabled={isCheckingOrphans}
-              className="py-2 px-4 rounded-xl bg-[#1E1E22] hover:bg-[#25252a] text-[#C9A96E] border border-[#C9A96E]/30 text-xs font-semibold transition flex items-center gap-2 cursor-pointer"
+              className="py-2 px-4 rounded-xl bg-[#F8F7F4] hover:bg-[#FAF9F7] text-[#742B40] border border-[#EAE8E3] text-xs font-semibold transition flex items-center gap-2 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isCheckingOrphans ? "animate-spin" : ""}`} />
               <span>Scan R2 Bucket Now</span>
@@ -852,21 +918,21 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
           </div>
 
           {orphanKeys.length === 0 ? (
-            <div className="p-8 text-center text-xs text-[#A8A59E] border border-dashed border-white/10 rounded-xl">
+            <div className="p-8 text-center text-xs text-[#6B7280] border border-dashed border-[#EAE8E3] rounded-2xl bg-[#FAF9F7]">
               No unreferenced orphan objects detected in bucket. Storage is synchronized cleanly.
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs text-amber-400 font-semibold">
+              <p className="text-xs text-amber-700 font-semibold">
                 Detected {orphanKeys.length} unreferenced object(s) in Cloudflare R2:
               </p>
-              <div className="divide-y divide-white/5 border border-white/10 rounded-xl overflow-hidden bg-black/30">
+              <div className="divide-y divide-[#EAE8E3] border border-[#EAE8E3] rounded-2xl overflow-hidden bg-white">
                 {orphanKeys.map((key) => (
                   <div key={key} className="p-3 text-xs flex items-center justify-between font-mono">
-                    <span className="text-[#A8A59E] truncate">{key}</span>
+                    <span className="text-[#4B5563] truncate">{key}</span>
                     <button
                       onClick={() => showToast(`Orphan ${key} queued for purge.`)}
-                      className="text-red-400 hover:text-red-300 transition text-[11px] ml-4 shrink-0"
+                      className="text-rose-600 hover:text-rose-700 transition text-[11px] ml-4 shrink-0 font-sans font-semibold"
                     >
                       Purge from R2
                     </button>
@@ -880,32 +946,32 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
       {/* MODAL 1: Replace Image Slot (Direct R2 Upload) */}
       {replacingSlot && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#151518] border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 relative">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 relative animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EAE8E3]">
               <div>
-                <h3 className="text-sm font-serif font-bold text-[#F7F3EC]">
-                  Replace Image: {replacingSlot.label}
+                <h3 className="text-base font-serif font-bold text-[#24272B]">
+                  Replace Photo: {replacingSlot.label}
                 </h3>
-                <p className="text-xs text-[#A8A59E]">
+                <p className="text-xs text-[#6B7280]">
                   Target: {replacingSlot.recommendedSize} · {replacingSlot.aspectRatio}
                 </p>
               </div>
               <button
                 onClick={() => setReplacingSlot(null)}
-                className="p-1 rounded-lg text-[#A8A59E] hover:text-white"
+                className="p-1 rounded-lg text-[#6B7280] hover:text-[#24272B]"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Before vs After Side-by-Side Preview */}
+            {/* Side-by-Side Preview */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#A8A59E]">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#6B7280]">
                   Current Live Photo
                 </span>
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-black/50 border border-white/10">
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-[#F8F7F4] border border-[#EAE8E3]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={replacingSlot.currentUrl}
@@ -917,10 +983,10 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
               </div>
 
               <div className="space-y-1.5">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#C9A96E]">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#742B40] font-bold">
                   New Upload Preview
                 </span>
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-black/50 border border-dashed border-white/20 flex items-center justify-center">
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-[#F8F7F4] border border-dashed border-[#EAE8E3] flex items-center justify-center">
                   {previewBlobUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -929,7 +995,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-xs text-[#A8A59E]">Select an image below</span>
+                    <span className="text-xs text-[#9CA3AF]">Select an image below</span>
                   )}
                 </div>
               </div>
@@ -939,14 +1005,14 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
             <div className="space-y-2">
               <label
                 htmlFor="replace-file-picker"
-                className="w-full border border-dashed border-white/20 hover:border-[#C9A96E] rounded-xl p-5 text-center cursor-pointer transition bg-black/40 hover:bg-black/60 flex flex-col items-center justify-center gap-2"
+                className="w-full border-2 border-dashed border-[#EAE8E3] hover:border-[#742B40] rounded-2xl p-6 text-center cursor-pointer transition bg-[#FAF9F7] hover:bg-[#F8F7F4] flex flex-col items-center justify-center gap-2"
               >
-                <Upload className="w-5 h-5 text-[#C9A96E]" />
-                <span className="text-xs text-[#F7F3EC] font-medium">
+                <Upload className="w-6 h-6 text-[#742B40]" />
+                <span className="text-xs text-[#24272B] font-semibold">
                   {selectedFile ? selectedFile.name : "Click to select or drag and drop image file"}
                 </span>
-                <span className="text-[10px] text-[#A8A59E]">
-                  Automatically resized to max 2400px, EXIF/GPS stripped, converted to WebP
+                <span className="text-[11px] text-[#6B7280]">
+                  High-res original will be automatically optimized to WebP and resized to max 2400px
                 </span>
                 <input
                   id="replace-file-picker"
@@ -961,49 +1027,33 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
             {/* Status & Progress Bar */}
             {uploadProgress > 0 && (
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-[#A8A59E]">
+                <div className="flex items-center justify-between text-xs text-[#6B7280]">
                   <span>{statusMessage}</span>
-                  <span className="font-mono text-white">{uploadProgress}%</span>
+                  <span className="font-mono font-bold text-[#742B40]">{uploadProgress}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-black rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[#EAE8E3] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-[#E02B1D] to-[#C9A96E] transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-[#742B40] to-[#B69A68] transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
               </div>
             )}
 
-            {/* Error Alert inside Modal */}
+            {/* Error in modal */}
             {errorBanner && (
-              <div className="p-3.5 bg-red-950/60 border border-red-800/80 rounded-xl text-xs text-red-200 flex flex-col gap-2">
-                <div className="flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <div className="flex-1 whitespace-pre-wrap">
-                    <p className="font-semibold text-red-300">Upload Issue Detected:</p>
-                    <p className="mt-0.5 text-red-200 text-[11px] leading-relaxed">{errorBanner}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-red-900/40">
-                  <button
-                    type="button"
-                    onClick={handleExecuteUpload}
-                    disabled={isProcessing || !selectedFile}
-                    className="px-3 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-white font-semibold text-[11px] flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${isProcessing ? "animate-spin" : ""}`} />
-                    <span>Retry Upload</span>
-                  </button>
-                </div>
+              <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <p>{errorBanner}</p>
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EAE8E3]">
               <button
                 type="button"
                 onClick={() => setReplacingSlot(null)}
-                className="px-4 py-2 text-xs font-medium text-[#A8A59E] hover:text-white rounded-lg border border-white/10 transition cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-[#6B7280] hover:text-[#24272B] rounded-xl border border-[#EAE8E3] transition"
               >
                 Cancel
               </button>
@@ -1011,7 +1061,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                 type="button"
                 disabled={!selectedFile || isProcessing || uploadProgress > 0}
                 onClick={handleExecuteUpload}
-                className="px-5 py-2.5 text-xs font-semibold text-white bg-[#E02B1D] hover:bg-[#c42215] rounded-lg transition flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
+                className="px-5 py-2.5 text-xs font-semibold text-white bg-[#742B40] hover:bg-[#5b2232] rounded-xl transition flex items-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
               >
                 {uploadProgress > 0 ? (
                   <>
@@ -1021,7 +1071,7 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                 ) : (
                   <>
                     <Check className="w-3.5 h-3.5" />
-                    <span>Replace Live Image</span>
+                    <span>Publish to Live Site</span>
                   </>
                 )}
               </button>
@@ -1032,16 +1082,16 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
       {/* MODAL 2: Focal Point & Crop Alignment */}
       {editingFocalSlot && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#151518] border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-sm font-serif font-bold text-[#F7F3EC]">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <h3 className="text-base font-serif font-bold text-[#24272B]">
               Adjust Focal Alignment: {editingFocalSlot.label}
             </h3>
-            <p className="text-xs text-[#A8A59E]">
-              Controls how the image crops across mobile and desktop displays (CSS <code>object-position</code>).
+            <p className="text-xs text-[#6B7280]">
+              Controls which part of the photo remains centered on mobile screens vs widescreen monitors.
             </p>
 
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-white/10">
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-[#F8F7F4] border border-[#EAE8E3]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={editingFocalSlot.currentUrl}
@@ -1053,10 +1103,10 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
             {/* 9-Point Focal Grid */}
             <div className="space-y-2 pt-2">
-              <span className="text-[10px] font-mono uppercase text-[#A8A59E] block text-center">
+              <span className="text-[10px] font-mono uppercase text-[#6B7280] block text-center font-bold">
                 Select Alignment Anchor
               </span>
-              <div className="grid grid-cols-3 gap-2 max-w-[200px] mx-auto">
+              <div className="grid grid-cols-3 gap-2 max-w-[220px] mx-auto">
                 {[
                   { pos: "0% 0%", label: "Top-Left" },
                   { pos: "50% 0%", label: "Top" },
@@ -1072,10 +1122,10 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
                     key={pt.pos}
                     type="button"
                     onClick={() => setCurrentFocalPoint(pt.pos)}
-                    className={`py-2 text-[10px] font-mono rounded border transition cursor-pointer ${
+                    className={`py-2 text-[10px] font-mono rounded-xl border transition cursor-pointer ${
                       currentFocalPoint === pt.pos
-                        ? "bg-[#E02B1D] text-white border-[#E02B1D]"
-                        : "bg-[#0E0E10] text-[#A8A59E] border-white/10 hover:text-white"
+                        ? "bg-[#742B40] text-white border-[#742B40] font-bold shadow-xs"
+                        : "bg-[#F8F7F4] text-[#4B5563] border-[#EAE8E3] hover:text-[#24272B]"
                     }`}
                   >
                     {pt.label}
@@ -1084,16 +1134,16 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EAE8E3]">
               <button
                 onClick={() => setEditingFocalSlot(null)}
-                className="px-4 py-2 text-xs text-[#A8A59E] hover:text-white"
+                className="px-4 py-2 text-xs text-[#6B7280] hover:text-[#24272B]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveFocalPoint}
-                className="px-4 py-2 text-xs font-semibold text-white bg-[#E02B1D] hover:bg-[#c42215] rounded-lg transition"
+                className="px-4 py-2 text-xs font-semibold text-white bg-[#742B40] hover:bg-[#5b2232] rounded-xl transition"
               >
                 Save Alignment
               </button>
@@ -1104,33 +1154,33 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
 
       {/* MODAL 3: Edit Alt Text */}
       {editingAltSlot && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#151518] border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-sm font-serif font-bold text-[#F7F3EC]">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <h3 className="text-base font-serif font-bold text-[#24272B]">
               Edit Accessibility Alt Text
             </h3>
-            <p className="text-xs text-[#A8A59E]">
-              Descriptive text used by screen readers and search engines for SEO ranking.
+            <p className="text-xs text-[#6B7280]">
+              Descriptive text used by screen readers and Google image search for SEO.
             </p>
 
             <textarea
               value={tempAltText}
               onChange={(e) => setTempAltText(e.target.value)}
               rows={3}
-              className="w-full bg-[#0E0E10] border border-white/10 rounded-xl p-3 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-[#E02B1D] transition"
+              className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl p-3 text-xs text-[#24272B] placeholder-[#9CA3AF] focus:outline-none focus:border-[#742B40] transition"
               placeholder="Describe what appears in this photograph..."
             />
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 onClick={() => setEditingAltSlot(null)}
-                className="px-4 py-2 text-xs text-[#A8A59E] hover:text-white"
+                className="px-4 py-2 text-xs text-[#6B7280] hover:text-[#24272B]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveAltText}
-                className="px-4 py-2 text-xs font-semibold text-white bg-[#E02B1D] hover:bg-[#c42215] rounded-lg transition"
+                className="px-4 py-2 text-xs font-semibold text-white bg-[#742B40] hover:bg-[#5b2232] rounded-xl transition"
               >
                 Save Alt Text
               </button>
@@ -1141,4 +1191,3 @@ export default function ImageManager({ initialSlotsMap }: ImageManagerProps = {}
     </div>
   );
 }
-
