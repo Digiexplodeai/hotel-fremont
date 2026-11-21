@@ -73,12 +73,14 @@ export async function POST(req: NextRequest) {
       }
 
       const paidAt = new Date().toISOString();
+      const isAlreadyOperational = ["checked_in", "checked_out", "cancelled"].includes(booking.status);
+      const targetStatus = isAlreadyOperational ? booking.status : "paid";
 
-      // 3. Update booking to paid (and atomically flag confirmation_email_sent to avoid concurrent duplicates)
+      // 3. Update payment status (preserve operational status like checked_in, checked_out, or cancelled)
       const { error: updateErr } = await supabase
         .from("bookings")
         .update({
-          status: "paid",
+          status: targetStatus,
           amount_paid: booking.total_amount,
           razorpay_payment_id: paymentId || booking.razorpay_payment_id,
           payment_method: paymentMethod || booking.payment_method,

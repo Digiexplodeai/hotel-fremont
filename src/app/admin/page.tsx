@@ -72,7 +72,7 @@ export default async function AdminDashboardPage() {
     (r) =>
       r.check_in <= todayStr &&
       r.check_out > todayStr &&
-      (r.status === "confirmed" || r.status === "converted" || r.status === "paid") &&
+      (r.status === "confirmed" || r.status === "converted" || r.status === "paid" || r.status === "checked_in") &&
       !activeTonightRefs.has(r.reference_code || "")
   );
 

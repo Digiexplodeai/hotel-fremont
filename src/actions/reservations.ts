@@ -7,12 +7,22 @@ import { revalidatePath } from "next/cache";
 import { validateIndianPhone, HOTEL_CONFIG, DEFAULT_ROOM_TYPES } from "@/config/hotel";
 import { isRazorpayTestMode } from "@/lib/razorpay";
 import { getRoomAvailabilityAction } from "./roomTypes";
+import { recordAuditLog } from "./recordManagement";
+import { updateRoomStatusAction } from "./rooms";
+import {
+  resolveAuthoritativeStatus,
+  packOperationalMetadata,
+  validateBookingStatusTransition,
+  OperationalBookingStatus,
+} from "@/lib/bookingStatusLifecycle";
 
 export type ReservationStatus =
   | "new"
   | "contacted"
   | "in_discussion"
   | "confirmed"
+  | "checked_in"
+  | "checked_out"
   | "converted"
   | "cancelled"
   | "closed"
@@ -393,11 +403,22 @@ export async function getReservationsAction(): Promise<{
         const ref = row.reference_code || `FRM-${row.id.slice(0, 6).toUpperCase()}`;
         seenRefs.add(ref);
         const linkedBooking = bookingsByRef.get(ref);
+        const authStatus = resolveAuthoritativeStatus(row.status, row.special_request);
+        let finalStatus = authStatus.bookingStatus;
+        let cleanNotes = authStatus.cleanNotes;
+
+        if (linkedBooking) {
+          const linkedAuth = resolveAuthoritativeStatus(linkedBooking.status, linkedBooking.special_requests);
+          finalStatus = linkedAuth.bookingStatus;
+          cleanNotes = linkedAuth.cleanNotes || cleanNotes;
+        }
+
         const hasPayment = Boolean(
           linkedBooking?.razorpay_payment_id ||
           row.razorpay_payment_id ||
           linkedBooking?.status === "paid" ||
-          Number(linkedBooking?.amount_paid || row.amount_paid || 0) > 0
+          Number(linkedBooking?.amount_paid || row.amount_paid || 0) > 0 ||
+          authStatus.paymentStatus === "paid"
         );
 
         list.push({
@@ -414,9 +435,9 @@ export async function getReservationsAction(): Promise<{
           full_name: row.full_name,
           phone: row.phone,
           email: row.email || linkedBooking?.email || null,
-          special_request: row.special_request || linkedBooking?.special_requests || null,
+          special_request: cleanNotes || null,
           estimated_total: Number(linkedBooking?.total_amount || row.estimated_total || 0),
-          status: (linkedBooking?.status === "paid" ? "confirmed" : (linkedBooking?.status || row.status)) as ReservationStatus,
+          status: finalStatus as ReservationStatus,
           capacity_override: Boolean(row.capacity_override),
           channel: linkedBooking || row.channel === "razorpay" ? "razorpay" : (row.channel || "room_reservation"),
           amount_paid: Number(linkedBooking?.amount_paid || row.amount_paid || 0),
@@ -442,7 +463,14 @@ export async function getReservationsAction(): Promise<{
       for (const b of bookingsData) {
         if (!seenRefs.has(b.booking_ref)) {
           seenRefs.add(b.booking_ref);
-          const hasPayment = Boolean(b.razorpay_payment_id || b.status === "paid" || Number(b.amount_paid) > 0);
+          const bAuth = resolveAuthoritativeStatus(b.status, b.special_requests);
+          const hasPayment = Boolean(
+            b.razorpay_payment_id ||
+            b.status === "paid" ||
+            Number(b.amount_paid) > 0 ||
+            bAuth.paymentStatus === "paid"
+          );
+
           list.push({
             id: b.id,
             created_at: b.created_at,
@@ -457,9 +485,9 @@ export async function getReservationsAction(): Promise<{
             full_name: b.guest_name,
             phone: b.phone,
             email: b.email,
-            special_request: b.special_requests,
+            special_request: bAuth.cleanNotes || null,
             estimated_total: Number(b.total_amount || 0),
-            status: (b.status === "paid" ? "confirmed" : b.status) as ReservationStatus,
+            status: bAuth.bookingStatus as ReservationStatus,
             channel: "razorpay",
             amount_paid: Number(b.amount_paid || 0),
             razorpay_order_id: b.razorpay_order_id,
@@ -492,14 +520,14 @@ export async function getReservationsAction(): Promise<{
 }
 
 /**
- * Updates a reservation's status in public.reservations.
- * Strictly requires authenticated admin session.
- * Catches database OVERBOOKING_GUARD and returns structured requiresOverride flag.
+ * Updates a reservation's status with strict state-machine validation, dual-persistence,
+ * room status synchronization, and audit logging.
  */
 export async function updateReservationStatusAction(
   id: string,
   status: ReservationStatus,
-  override: boolean = false
+  override: boolean = false,
+  roomNumber?: string
 ): Promise<{
   success: boolean;
   requiresOverride?: boolean;
@@ -516,57 +544,154 @@ export async function updateReservationStatusAction(
       return { success: false, error: "Database connection unavailable." };
     }
 
-    const updatePayload: Record<string, any> = { status };
-    if (override) {
-      updatePayload.capacity_override = true;
-    }
-
-    const { error } = await supabase
+    // 1. Fetch current reservation / booking
+    const { data: currentRes } = await supabase
       .from("reservations")
-      .update(updatePayload)
-      .eq("id", id);
+      .select("*")
+      .or(`id.eq.${id},reference_code.eq.${id}`)
+      .maybeSingle();
 
-    if (error) {
-      if (error.message.includes("OVERBOOKING_GUARD")) {
-        return {
-          success: false,
-          requiresOverride: true,
-          error: "Inventory capacity exceeded for these dates. Management override required to confirm.",
-        };
+    const { data: currentBooking } = await supabase
+      .from("bookings")
+      .select("*")
+      .or(`id.eq.${id},booking_ref.eq.${id}`)
+      .maybeSingle();
+
+    if (!currentRes && !currentBooking) {
+      return { success: false, error: "Reservation record not found." };
+    }
+
+    const currentRawStatus = currentRes?.status || currentBooking?.status;
+    const currentRawNotes = currentRes?.special_request || currentBooking?.special_requests;
+    const currentAuth = resolveAuthoritativeStatus(currentRawStatus, currentRawNotes);
+    const targetStatus = status as OperationalBookingStatus;
+
+    // 2. Validate state machine transition
+    const transitionCheck = validateBookingStatusTransition(currentAuth.bookingStatus, targetStatus, override);
+    if (!transitionCheck.allowed) {
+      return { success: false, error: transitionCheck.reason || "Invalid status transition." };
+    }
+
+    const now = new Date().toISOString();
+    const assignedRoom = roomNumber || currentRes?.room_number || currentBooking?.room_number || currentAuth.roomNumber || null;
+
+    // 3. Prepare packed operational metadata
+    const packedNotes = packOperationalMetadata(currentRawNotes, {
+      status: targetStatus,
+      updatedBy: user.email,
+      roomNumber: assignedRoom,
+      checkedInAt: targetStatus === "checked_in" ? now : currentAuth.checkedInAt,
+      checkedOutAt: targetStatus === "checked_out" ? now : currentAuth.checkedOutAt,
+    });
+
+    // 4. Update public.reservations if row exists
+    if (currentRes) {
+      let updatePayload: Record<string, any> = {
+        status: targetStatus,
+        special_request: packedNotes,
+      };
+      if (override) updatePayload.capacity_override = true;
+      if (assignedRoom) updatePayload.room_number = assignedRoom;
+      if (targetStatus === "checked_in") updatePayload.checked_in_at = now;
+      if (targetStatus === "checked_out") updatePayload.checked_out_at = now;
+
+      const { error: resErr } = await supabase
+        .from("reservations")
+        .update(updatePayload)
+        .eq("id", currentRes.id);
+
+      if (resErr) {
+        if (resErr.message?.includes("OVERBOOKING_GUARD")) {
+          return {
+            success: false,
+            requiresOverride: true,
+            error: "Inventory capacity exceeded for these dates. Management override required to confirm.",
+          };
+        }
+        if (resErr.code === "23514" || resErr.message?.includes("reservations_status_check")) {
+          // Fallback for unmigrated schema
+          const fallbackStatus = targetStatus === "cancelled" ? "cancelled" : "confirmed";
+          const { error: fbErr } = await supabase
+            .from("reservations")
+            .update({
+              status: fallbackStatus,
+              special_request: packedNotes,
+            })
+            .eq("id", currentRes.id);
+
+          if (fbErr) {
+            return { success: false, error: fbErr.message };
+          }
+        } else {
+          return { success: false, error: resErr.message };
+        }
       }
-      return { success: false, error: error.message };
     }
 
-    // Sync with public.bookings table (for online Razorpay bookings)
-    const bookingStatusMap: Record<string, string> = {
-      cancelled: "cancelled",
-      refunded: "refunded",
-      confirmed: "paid",
-      converted: "paid",
-      paid: "paid",
-      closed: "cancelled",
-    };
-
-    const targetBookingStatus = bookingStatusMap[status] || status;
+    // 5. Update public.bookings if row exists
+    const bookingRef = currentRes?.reference_code || currentBooking?.booking_ref || id;
     try {
-      await supabase
+      let bUpdatePayload: Record<string, any> = {
+        status: targetStatus,
+        updated_at: now,
+        special_requests: packedNotes,
+      };
+      if (assignedRoom) bUpdatePayload.room_number = assignedRoom;
+      if (targetStatus === "checked_in") bUpdatePayload.checked_in_at = now;
+      if (targetStatus === "checked_out") bUpdatePayload.checked_out_at = now;
+
+      const { error: bErr } = await supabase
         .from("bookings")
-        .update({
-          status: targetBookingStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .or(`id.eq.${id},booking_ref.eq.${id}`);
-    } catch (bookingSyncErr) {
-      console.warn("[Reservation] Warning syncing with bookings:", bookingSyncErr);
+        .update(bUpdatePayload)
+        .or(`booking_ref.eq.${bookingRef},id.eq.${id}`);
+
+      if (bErr && (bErr.code === "23514" || bErr.message?.includes("bookings_status_check"))) {
+        // Fallback for unmigrated bookings table
+        const fallbackStatus = targetStatus === "cancelled" ? "cancelled" : (currentBooking?.amount_paid > 0 ? "paid" : "pending");
+        await supabase
+          .from("bookings")
+          .update({
+            status: fallbackStatus,
+            updated_at: now,
+            special_requests: packedNotes,
+          })
+          .or(`booking_ref.eq.${bookingRef},id.eq.${id}`);
+      }
+    } catch (bSyncErr) {
+      console.warn("[Reservation Status] Warning syncing to bookings:", bSyncErr);
     }
 
+    // 6. Update physical room status
+    if (assignedRoom) {
+      try {
+        if (targetStatus === "checked_in") {
+          await updateRoomStatusAction(assignedRoom, "occupied", `Occupied by ${currentRes?.full_name || currentBooking?.guest_name} (${bookingRef})`);
+        } else if (targetStatus === "checked_out") {
+          await updateRoomStatusAction(assignedRoom, "cleaning", `Departed at ${now}. Housekeeping cleaning required.`);
+        }
+      } catch (rErr) {
+        console.warn("[Reservation Status] Warning updating physical room status:", rErr);
+      }
+    }
+
+    // 7. Audit Log Entry
     try {
-      revalidatePath("/admin");
-      revalidatePath("/admin/rooms");
-      revalidatePath("/admin/enquiries");
-      revalidatePath("/admin/calendar");
-      revalidatePath("/", "layout");
+      await recordAuditLog({
+        action: `Reservation Status: ${targetStatus.toUpperCase()}`,
+        entityType: "reservation",
+        entityId: bookingRef,
+        adminEmail: user.email,
+        details: `Reservation ${bookingRef} status transitioned from ${currentAuth.bookingStatus} to ${targetStatus}${assignedRoom ? ` (Room: ${assignedRoom})` : ""}.`,
+        outcome: "success",
+      });
     } catch {}
+
+    revalidatePath("/admin/reservations");
+    revalidatePath("/admin/rooms");
+    revalidatePath("/admin/enquiries");
+    revalidatePath("/admin/calendar");
+    revalidatePath("/admin");
+    revalidatePath("/", "layout");
 
     return { success: true };
   } catch (err: unknown) {

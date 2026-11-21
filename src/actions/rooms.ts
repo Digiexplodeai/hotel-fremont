@@ -4,6 +4,14 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { roomCategories as defaultRoomCategories } from "@/data/rooms";
 import { revalidatePath } from "next/cache";
 import { isRazorpayTestMode } from "@/lib/razorpay";
+import { getCurrentUser } from "@/actions/auth";
+import { recordAuditLog } from "@/actions/recordManagement";
+import {
+  resolveAuthoritativeStatus,
+  packOperationalMetadata,
+  validateBookingStatusTransition,
+  OperationalBookingStatus,
+} from "@/lib/bookingStatusLifecycle";
 
 export type RoomStatus = "available" | "occupied" | "cleaning" | "maintenance" | "blocked";
 export type BookingStatus =
@@ -222,7 +230,14 @@ export async function getBookingsAction(): Promise<{
     const isTestEnv = isRazorpayTestMode();
 
     const mapped: BookingRecord[] = dbBookings.map((b) => {
-      const hasPayment = Boolean(b.razorpay_payment_id || b.razorpay_order_id || Number(b.amount_paid) > 0);
+      const authStatus = resolveAuthoritativeStatus(b.status, b.special_requests);
+      const hasPayment = Boolean(
+        b.razorpay_payment_id ||
+        b.razorpay_order_id ||
+        Number(b.amount_paid) > 0 ||
+        authStatus.paymentStatus === "paid"
+      );
+
       return {
         id: b.id,
         bookingCode: b.booking_ref || `FRM-${b.id.slice(0, 6).toUpperCase()}`,
@@ -231,16 +246,16 @@ export async function getBookingsAction(): Promise<{
         guestEmail: b.email,
         categorySlug: b.room_category,
         categoryName: categoryMap[b.room_category] || b.room_category,
-        roomNumber: b.room_number || undefined,
+        roomNumber: b.room_number || authStatus.roomNumber || undefined,
         checkIn: b.check_in,
         checkOut: b.check_out,
         guestsCount: b.guests || 1,
         totalAmount: Number(b.total_amount) || 0,
         advancePaid: Number(b.amount_paid) || 0,
         amountPaid: Number(b.amount_paid) || 0,
-        status: b.status as BookingStatus,
+        status: authStatus.bookingStatus as BookingStatus,
         source: "website",
-        notes: b.special_requests || "",
+        notes: authStatus.cleanNotes,
         createdAt: b.created_at,
         razorpayPaymentId: b.razorpay_payment_id || undefined,
         razorpayOrderId: b.razorpay_order_id || undefined,
@@ -265,38 +280,173 @@ export async function getBookingsAction(): Promise<{
 }
 
 /**
- * Update a booking status
+ * Update a booking status with strict state-machine validation and dual-persistence.
  */
 export async function updateBookingStatusAction(
   bookingId: string,
   newStatus: BookingStatus,
-  roomNumber?: string
+  roomNumber?: string,
+  override = false
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return { success: false, error: "Unauthorized: Admin session required." };
+    }
+
+    const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return { success: false, error: "Database connection unavailable." };
+    }
+
+    // 1. Fetch current booking from DB
+    const { data: currentBooking, error: fetchErr } = await supabase
+      .from("bookings")
+      .select("*")
+      .or(`id.eq.${bookingId},booking_ref.eq.${bookingId}`)
+      .maybeSingle();
+
+    if (fetchErr || !currentBooking) {
+      return { success: false, error: "Booking record not found." };
+    }
+
+    // 2. Validate State Machine Transition
+    const currentAuth = resolveAuthoritativeStatus(currentBooking.status, currentBooking.special_requests);
+    const targetStatus = newStatus as OperationalBookingStatus;
+    const transitionCheck = validateBookingStatusTransition(currentAuth.bookingStatus, targetStatus, override);
+
+    if (!transitionCheck.allowed) {
+      return { success: false, error: transitionCheck.reason || "Invalid status transition." };
+    }
+
+    const now = new Date().toISOString();
+    const assignedRoomNumber = roomNumber || currentBooking.room_number || currentAuth.roomNumber || null;
+
+    // 3. Prepare Packed Operational Metadata
+    const packedNotes = packOperationalMetadata(currentBooking.special_requests, {
+      status: targetStatus,
+      updatedBy: user.email,
+      roomNumber: assignedRoomNumber,
+      checkedInAt: targetStatus === "checked_in" ? now : currentAuth.checkedInAt,
+      checkedOutAt: targetStatus === "checked_out" ? now : currentAuth.checkedOutAt,
+    });
+
+    // 4. Primary: Direct DB Status Update
+    let updatePayload: Record<string, any> = {
+      status: targetStatus,
+      updated_at: now,
+      special_requests: packedNotes,
+    };
+    if (assignedRoomNumber) updatePayload.room_number = assignedRoomNumber;
+    if (targetStatus === "checked_in") updatePayload.checked_in_at = now;
+    if (targetStatus === "checked_out") updatePayload.checked_out_at = now;
+
+    let updateErr: any = null;
+    const { error: directErr } = await supabase
+      .from("bookings")
+      .update(updatePayload)
+      .eq("id", currentBooking.id);
+
+    if (directErr) {
+      // If DB has strict constraint not yet migrated to support checked_in/checked_out directly,
+      // fallback to DB-permitted status + embedded metadata
+      if (directErr.code === "23514" || directErr.message?.includes("bookings_status_check")) {
+        const fallbackDbStatus =
+          targetStatus === "cancelled"
+            ? "cancelled"
+            : targetStatus === "pending"
+            ? "pending"
+            : "paid"; // 'paid' is valid in existing DB check constraint
+
+        const fallbackPayload: Record<string, any> = {
+          status: fallbackDbStatus,
+          updated_at: now,
+          special_requests: packedNotes,
+        };
+        const { error: fbErr } = await supabase
+          .from("bookings")
+          .update(fallbackPayload)
+          .eq("id", currentBooking.id);
+
+        if (fbErr) {
+          return { success: false, error: fbErr.message };
+        }
+      } else {
+        return { success: false, error: directErr.message };
+      }
+    }
+
+    // 5. Sync to public.reservations (if row exists with this booking_ref)
+    try {
+      const resPayload: Record<string, any> = {
+        status: targetStatus === "cancelled" ? "cancelled" : targetStatus === "checked_in" ? "checked_in" : targetStatus === "checked_out" ? "checked_out" : "confirmed",
+        special_request: packedNotes,
+      };
+      const { error: resErr } = await supabase
+        .from("reservations")
+        .update(resPayload)
+        .or(`reference_code.eq.${currentBooking.booking_ref},id.eq.${currentBooking.id}`);
+
+      if (resErr && (resErr.code === "23514" || resErr.message?.includes("reservations_status_check"))) {
+        // Fallback for unmigrated reservations table
+        await supabase
+          .from("reservations")
+          .update({
+            status: targetStatus === "cancelled" ? "cancelled" : "confirmed",
+            special_request: packedNotes,
+          })
+          .or(`reference_code.eq.${currentBooking.booking_ref},id.eq.${currentBooking.id}`);
+      }
+    } catch (syncErr) {
+      console.warn("[Booking Status] Warning syncing to reservations table:", syncErr);
+    }
+
+    // 6. Update Physical Room Occupancy & Housekeeping
+    if (assignedRoomNumber) {
+      try {
+        if (targetStatus === "checked_in") {
+          await updateRoomStatusAction(assignedRoomNumber, "occupied", `Occupied by ${currentBooking.guest_name} (${currentBooking.booking_ref})`);
+        } else if (targetStatus === "checked_out") {
+          await updateRoomStatusAction(assignedRoomNumber, "cleaning", `Departed at ${now}. Housekeeping cleaning required.`);
+        }
+      } catch (roomErr) {
+        console.warn("[Booking Status] Warning updating physical room status:", roomErr);
+      }
+    }
+
+    // 7. Audit Log Entry
+    try {
+      await recordAuditLog({
+        action: `Booking Status: ${targetStatus.toUpperCase()}`,
+        entityType: "booking",
+        entityId: currentBooking.booking_ref || currentBooking.id,
+        adminEmail: user.email,
+        details: `Booking ${currentBooking.booking_ref} status transitioned from ${currentAuth.bookingStatus} to ${targetStatus}${assignedRoomNumber ? ` (Room: ${assignedRoomNumber})` : ""}.`,
+        outcome: "success",
+      });
+    } catch {}
+
+    // In-memory sync
     memoryBookings = memoryBookings.map((b) => {
-      if (b.id === bookingId) {
-        return { ...b, status: newStatus, roomNumber: roomNumber || b.roomNumber };
+      if (b.id === currentBooking.id || b.bookingCode === currentBooking.booking_ref) {
+        return {
+          ...b,
+          status: targetStatus as BookingStatus,
+          roomNumber: assignedRoomNumber || b.roomNumber,
+        };
       }
       return b;
     });
 
-    const supabase = await createServerSupabaseClient();
-    if (supabase) {
-      const updateData: Record<string, any> = {
-        status: newStatus,
-        updated_at: new Date().toISOString(),
-      };
-      if (roomNumber) {
-        updateData.room_number = roomNumber;
-      }
-      await supabase.from("bookings").update(updateData).eq("id", bookingId);
-    }
-
+    revalidatePath("/admin/reservations");
     revalidatePath("/admin/rooms");
+    revalidatePath("/admin/calendar");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
+
     return { success: true };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to update booking";
+    const message = err instanceof Error ? err.message : "Failed to update booking status.";
     return { success: false, error: message };
   }
 }

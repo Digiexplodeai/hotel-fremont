@@ -246,7 +246,7 @@ export async function getRoomAvailabilityAction(
     const { data: resData } = await client
       .from("reservations")
       .select("id, reference_code, room_type, room_type_code, rooms_requested, check_in, check_out, status")
-      .in("status", ["confirmed", "converted", "paid"])
+      .in("status", ["confirmed", "converted", "paid", "checked_in", "checked_out"])
       .lt("check_in", checkOut)
       .gt("check_out", checkIn);
 
@@ -254,7 +254,7 @@ export async function getRoomAvailabilityAction(
     const { data: bookData } = await client
       .from("bookings")
       .select("id, booking_ref, room_category, rooms_requested, rooms_count, check_in, check_out, status, expires_at")
-      .in("status", ["paid", "confirmed", "pending"])
+      .in("status", ["paid", "confirmed", "checked_in", "checked_out", "pending"])
       .lt("check_in", checkOut)
       .gt("check_out", checkIn);
 
@@ -665,11 +665,11 @@ export async function getAvailabilityCalendarAction(
     const minDateStr = startUtc.toISOString().slice(0, 10);
     const maxDateStr = endUtc.toISOString().slice(0, 10);
 
-    // 3. Fetch confirmed reservations overlapping this 60-day period
+    // 3. Fetch confirmed & operational reservations overlapping this 60-day period
     const { data: reservations, error: resError } = await supabase
       .from("reservations")
       .select("id, reference_code, full_name, phone, room_type, room_type_code, rooms_requested, check_in, check_out, status")
-      .in("status", ["confirmed", "converted", "paid"])
+      .in("status", ["confirmed", "converted", "paid", "checked_in", "checked_out"])
       .lt("check_in", maxDateStr)
       .gt("check_out", minDateStr);
 
@@ -677,11 +677,11 @@ export async function getAvailabilityCalendarAction(
       console.warn("[Calendar] Error loading reservations:", resError.message);
     }
 
-    // Also fetch paid bookings overlapping this period
+    // Also fetch paid & operational bookings overlapping this period
     const { data: bookingsData } = await supabase
       .from("bookings")
       .select("id, booking_ref, guest_name, phone, room_category, rooms_requested, rooms_count, check_in, check_out, status")
-      .in("status", ["paid", "confirmed"])
+      .in("status", ["paid", "confirmed", "checked_in", "checked_out"])
       .lt("check_in", maxDateStr)
       .gt("check_out", minDateStr);
 

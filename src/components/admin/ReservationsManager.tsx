@@ -86,6 +86,8 @@ export default function ReservationsManager({
       let bStatus: UnifiedBooking["bookingStatus"] = "confirmed";
       if (b.status === "cancelled") bStatus = "cancelled";
       else if (b.status === "pending") bStatus = "pending";
+      else if (b.status === "checked_in") bStatus = "checked_in";
+      else if (b.status === "checked_out") bStatus = "checked_out";
       else if (b.status === "paid" || b.status === "confirmed") bStatus = "confirmed";
 
       let pStatus: UnifiedBooking["paymentStatus"] = "pending";
@@ -101,6 +103,7 @@ export default function ReservationsManager({
         phone: b.guestPhone,
         email: b.guestEmail || undefined,
         roomCategory: b.categoryName || b.categorySlug,
+        roomNumber: b.roomNumber,
         checkIn: b.checkIn,
         checkOut: b.checkOut,
         nights: Math.max(1, Math.round((new Date(b.checkOut).getTime() - new Date(b.checkIn).getTime()) / 86400000)),
@@ -129,6 +132,9 @@ export default function ReservationsManager({
       let bStatus: UnifiedBooking["bookingStatus"] = "confirmed";
       if (r.status === "cancelled" || r.status === "closed") bStatus = "cancelled";
       else if (r.status === "new" || r.status === "in_discussion") bStatus = "pending";
+      else if (r.status === "checked_in") bStatus = "checked_in";
+      else if (r.status === "checked_out") bStatus = "checked_out";
+      else if (r.status === "confirmed" || r.status === "converted" || r.status === "paid") bStatus = "confirmed";
 
       let pStatus: UnifiedBooking["paymentStatus"] = "pending";
       if (r.status === "paid" || (r.amount_paid && r.amount_paid >= (r.estimated_total || 0))) {
@@ -143,6 +149,7 @@ export default function ReservationsManager({
         phone: r.phone,
         email: r.email,
         roomCategory: r.room_type,
+        roomNumber: (r as any).room_number || undefined,
         checkIn: r.check_in,
         checkOut: r.check_out,
         nights: r.nights || 1,
@@ -225,6 +232,19 @@ export default function ReservationsManager({
   };
 
   // Filtered rows
+  const [statusErrorMessage, setStatusErrorMessage] = useState<string | null>(null);
+  const [roomNumberInput, setRoomNumberInput] = useState<string>("");
+  const [showAdminOverride, setShowAdminOverride] = useState<boolean>(false);
+
+  // Sync roomNumberInput when selectedBooking changes
+  React.useEffect(() => {
+    if (selectedBooking) {
+      setRoomNumberInput(selectedBooking.roomNumber || "");
+      setStatusErrorMessage(null);
+      setShowAdminOverride(false);
+    }
+  }, [selectedBooking?.id]);
+
   const filteredRows = useMemo(() => {
     return bookings.filter((item) => {
       if (categoryFilter !== "all") {
@@ -254,28 +274,47 @@ export default function ReservationsManager({
     });
   }, [bookings, categoryFilter, statusFilter, paymentFilter, searchQuery]);
 
-  // Handle status update
-  const handleUpdateStatus = async (booking: UnifiedBooking, newStatus: UnifiedBooking["bookingStatus"]) => {
+  // Handle status update with strict state machine and error handling
+  const handleUpdateStatus = async (
+    booking: UnifiedBooking,
+    newStatus: UnifiedBooking["bookingStatus"],
+    roomNumber?: string,
+    override = false
+  ) => {
     setIsUpdatingStatus(true);
+    setStatusErrorMessage(null);
     try {
+      let res: { success: boolean; error?: string };
+      const targetRoom = roomNumber !== undefined ? roomNumber : (roomNumberInput.trim() || booking.roomNumber);
+
       if (booking.source === "online_booking") {
-        const bStatus: BookingStatus =
-          newStatus === "cancelled" ? "cancelled" : newStatus === "pending" ? "pending" : "confirmed";
-        await updateBookingStatusAction(booking.id, bStatus);
+        res = await updateBookingStatusAction(booking.id, newStatus as any, targetRoom, override);
       } else {
-        const rStatus: ReservationStatus =
-          newStatus === "cancelled" ? "cancelled" : newStatus === "pending" ? "new" : "confirmed";
-        await updateReservationStatusAction(booking.id, rStatus);
+        res = await updateReservationStatusAction(booking.id, newStatus as any, override, targetRoom);
       }
 
+      if (!res.success) {
+        const errMsg = res.error || "Failed to update reservation status.";
+        setStatusErrorMessage(errMsg);
+        return;
+      }
+
+      const finalRoom = targetRoom || booking.roomNumber;
       setBookings((prev) =>
-        prev.map((b) => (b.id === booking.id ? { ...b, bookingStatus: newStatus } : b))
+        prev.map((b) =>
+          b.id === booking.id ? { ...b, bookingStatus: newStatus, roomNumber: finalRoom } : b
+        )
       );
       if (selectedBooking && selectedBooking.id === booking.id) {
-        setSelectedBooking({ ...selectedBooking, bookingStatus: newStatus });
+        setSelectedBooking((prev) =>
+          prev ? { ...prev, bookingStatus: newStatus, roomNumber: finalRoom } : null
+        );
       }
-    } catch {
-      alert("Failed to update status");
+      setActionFeedback(`Status updated to ${newStatus.replace(/_/g, " ").toUpperCase()}`);
+      setTimeout(() => setActionFeedback(null), 4000);
+    } catch (err: any) {
+      const msg = err?.message || "Failed to update status";
+      setStatusErrorMessage(msg);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -582,30 +621,70 @@ export default function ReservationsManager({
                                   className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
                                 >
                                   <Eye className="w-3.5 h-3.5 text-[#B69A68]" />
-                                  <span>View Details</span>
+                                  <span>View Dossier</span>
                                 </button>
-                                <button
-                                  onClick={() => {
-                                    setActiveMenuId(null);
-                                    setSelectedBooking(booking);
-                                  }}
-                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
-                                >
-                                  <Edit3 className="w-3.5 h-3.5 text-[#742B40]" />
-                                  <span>Edit Status</span>
-                                </button>
-                                {booking.bookingStatus !== "cancelled" && (
+
+                                {/* Strict State-Machine Operations */}
+                                {booking.bookingStatus === "confirmed" && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        handleUpdateStatus(booking, "checked_in");
+                                      }}
+                                      className="w-full px-3 py-1.5 hover:bg-blue-50 text-blue-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                    >
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                                      <span>Mark Checked In</span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleCancelReservation(booking)}
+                                      className="w-full px-3 py-1.5 hover:bg-amber-50 text-amber-700 flex items-center gap-2 transition cursor-pointer"
+                                    >
+                                      <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                                      <span>Cancel Reservation</span>
+                                    </button>
+                                  </>
+                                )}
+
+                                {booking.bookingStatus === "checked_in" && (
                                   <button
-                                    onClick={() => handleCancelReservation(booking)}
-                                    className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      handleUpdateStatus(booking, "checked_out");
+                                    }}
+                                    className="w-full px-3 py-1.5 hover:bg-emerald-50 text-emerald-800 flex items-center gap-2 transition cursor-pointer font-medium"
                                   >
-                                    <XCircle className="w-3.5 h-3.5 text-amber-600" />
-                                    <span>Cancel Reservation</span>
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>Mark Checked Out</span>
                                   </button>
                                 )}
+
+                                {booking.bookingStatus === "pending" && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        handleUpdateStatus(booking, "confirmed");
+                                      }}
+                                      className="w-full px-3 py-1.5 hover:bg-emerald-50 text-emerald-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                    >
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span>Confirm Booking</span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleCancelReservation(booking)}
+                                      className="w-full px-3 py-1.5 hover:bg-amber-50 text-amber-700 flex items-center gap-2 transition cursor-pointer"
+                                    >
+                                      <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                                      <span>Cancel Reservation</span>
+                                    </button>
+                                  </>
+                                )}
+
                                 <button
                                   onClick={() => handleArchiveReservation(booking)}
-                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#6B7280] flex items-center gap-2 transition cursor-pointer"
                                 >
                                   <Archive className="w-3.5 h-3.5 text-[#6B7280]" />
                                   <span>Archive</span>
@@ -710,6 +789,12 @@ export default function ReservationsManager({
                     <span>Number of Guests:</span>
                     <span className="font-medium text-[#24272B]">{selectedBooking.guests} Guests</span>
                   </div>
+                  <div className="flex items-center justify-between text-[#6B7280] pt-1 border-t border-[#EAE8E3]">
+                    <span>Assigned Room:</span>
+                    <span className="font-semibold text-[#742B40] font-mono">
+                      {selectedBooking.roomNumber ? `Room ${selectedBooking.roomNumber}` : "Not Assigned"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Billing Card */}
@@ -735,9 +820,21 @@ export default function ReservationsManager({
                     <span className="font-serif">₹{selectedBooking.totalAmount.toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex items-center justify-between text-[#6B7280]">
-                    <span>Booking Status:</span>
-                    <span className="font-semibold uppercase text-[11px] text-[#24272B]">
-                      {selectedBooking.bookingStatus.toUpperCase()}
+                    <span>Operational Status:</span>
+                    <span
+                      className={`font-semibold uppercase text-[11px] px-2 py-0.5 rounded border ${
+                        selectedBooking.bookingStatus === "confirmed"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : selectedBooking.bookingStatus === "checked_in"
+                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                          : selectedBooking.bookingStatus === "checked_out"
+                          ? "bg-gray-100 text-gray-700 border-gray-300"
+                          : selectedBooking.bookingStatus === "pending"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-rose-50 text-rose-700 border-rose-200"
+                      }`}
+                    >
+                      {selectedBooking.bookingStatus.replace(/_/g, " ").toUpperCase()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[#6B7280]">
@@ -766,45 +863,199 @@ export default function ReservationsManager({
                   )}
                 </div>
 
-                {/* Booking Status Control */}
-                <div className="p-4 rounded-xl bg-white border border-[#EAE8E3] space-y-2">
-                  <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
-                    Update Operational Status
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
+                {/* Status Update Error Toast */}
+                {statusErrorMessage && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+                    <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <span className="font-bold block">Status Transition Blocked</span>
+                      <span>{statusErrorMessage}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Booking Status Control Section */}
+                <div className="p-4 rounded-xl bg-white border border-[#EAE8E3] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
+                      Operational Workflow Control
+                    </span>
+                    <span className="text-[10px] font-mono text-[#6B7280]">
+                      Current: {selectedBooking.bookingStatus.replace(/_/g, " ").toUpperCase()}
+                    </span>
+                  </div>
+
+                  {/* Context Guidance Message */}
+                  {selectedBooking.bookingStatus === "confirmed" && (
+                    <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-emerald-800 text-[11px] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Confirmed reservation. Assign a room and mark Checked In upon arrival.</span>
+                    </div>
+                  )}
+                  {selectedBooking.bookingStatus === "checked_in" && (
+                    <div className="p-2.5 rounded-lg bg-blue-50/70 border border-blue-200 text-blue-800 text-[11px] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                      <span>Guest is currently in-house. Mark Checked Out upon departure.</span>
+                    </div>
+                  )}
+                  {selectedBooking.bookingStatus === "checked_out" && (
+                    <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-700 text-[11px] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-gray-500 shrink-0" />
+                      <span>Stay completed and checked out. Room is released to housekeeping.</span>
+                    </div>
+                  )}
+                  {selectedBooking.bookingStatus === "cancelled" && (
+                    <div className="p-2.5 rounded-lg bg-rose-50/70 border border-rose-200 text-rose-800 text-[11px] flex items-center gap-2">
+                      <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>Reservation cancelled. Inventory returned to hotel pool.</span>
+                    </div>
+                  )}
+
+                  {/* Room Assignment Field (for check-in) */}
+                  {(selectedBooking.bookingStatus === "confirmed" || selectedBooking.bookingStatus === "pending") && (
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-[#24272B] block">
+                        Assign Room Number (e.g. 101, 204):
+                      </label>
+                      <input
+                        type="text"
+                        value={roomNumberInput}
+                        onChange={(e) => setRoomNumberInput(e.target.value)}
+                        placeholder="Enter room number"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#FAF9F7] border border-[#EAE8E3] text-xs font-mono text-[#24272B] focus:outline-none focus:border-[#742B40]"
+                      />
+                    </div>
+                  )}
+
+                  {/* Primary Operational Actions */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {/* Mark Checked In */}
                     <button
                       onClick={() => handleUpdateStatus(selectedBooking, "checked_in")}
-                      disabled={isUpdatingStatus || selectedBooking.bookingStatus === "checked_in"}
-                      className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold border border-blue-200 transition disabled:opacity-50 cursor-pointer"
+                      disabled={
+                        isUpdatingStatus ||
+                        selectedBooking.bookingStatus === "checked_in" ||
+                        selectedBooking.bookingStatus === "checked_out" ||
+                        selectedBooking.bookingStatus === "cancelled"
+                      }
+                      title={
+                        selectedBooking.bookingStatus === "checked_in"
+                          ? "Guest is already checked in"
+                          : selectedBooking.bookingStatus === "checked_out"
+                          ? "Cannot check in a completed stay"
+                          : selectedBooking.bookingStatus === "cancelled"
+                          ? "Cannot check in a cancelled booking"
+                          : "Mark guest as checked in"
+                      }
+                      className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold border border-blue-200 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
-                      Mark Checked In
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Mark Checked In</span>
                     </button>
+
+                    {/* Mark Checked Out */}
                     <button
                       onClick={() => handleUpdateStatus(selectedBooking, "checked_out")}
-                      disabled={isUpdatingStatus || selectedBooking.bookingStatus === "checked_out"}
-                      className="px-3 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold border border-gray-300 transition disabled:opacity-50 cursor-pointer"
+                      disabled={
+                        isUpdatingStatus ||
+                        selectedBooking.bookingStatus !== "checked_in"
+                      }
+                      title={
+                        selectedBooking.bookingStatus !== "checked_in"
+                          ? "Guest must be checked in before checkout"
+                          : "Mark stay completed and check out"
+                      }
+                      className="px-3 py-2 rounded-xl bg-gray-100 text-gray-800 hover:bg-gray-200 font-semibold border border-gray-300 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
-                      Mark Checked Out
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Mark Checked Out</span>
                     </button>
+
+                    {/* Confirm Booking */}
                     <button
                       onClick={() => handleUpdateStatus(selectedBooking, "confirmed")}
-                      disabled={isUpdatingStatus || selectedBooking.bookingStatus === "confirmed"}
-                      className="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold border border-emerald-200 transition disabled:opacity-50 cursor-pointer"
+                      disabled={
+                        isUpdatingStatus ||
+                        selectedBooking.bookingStatus !== "pending"
+                      }
+                      title={
+                        selectedBooking.bookingStatus === "confirmed"
+                          ? "Booking is already confirmed"
+                          : selectedBooking.bookingStatus !== "pending"
+                          ? "Cannot confirm active or closed stay"
+                          : "Confirm pending booking"
+                      }
+                      className="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold border border-emerald-200 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
-                      Confirm Booking
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Confirm Booking</span>
                     </button>
+
+                    {/* Cancel Booking */}
                     <button
                       onClick={() => {
-                        if (confirm("Are you sure you want to cancel this reservation?")) {
+                        if (confirm(`Are you sure you want to cancel reservation ${selectedBooking.ref}? Room availability will be released.`)) {
                           handleUpdateStatus(selectedBooking, "cancelled");
                         }
                       }}
-                      disabled={isUpdatingStatus || selectedBooking.bookingStatus === "cancelled"}
-                      className="px-3 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold border border-rose-200 transition disabled:opacity-50 cursor-pointer"
+                      disabled={
+                        isUpdatingStatus ||
+                        selectedBooking.bookingStatus === "checked_in" ||
+                        selectedBooking.bookingStatus === "checked_out" ||
+                        selectedBooking.bookingStatus === "cancelled"
+                      }
+                      title={
+                        selectedBooking.bookingStatus === "checked_in"
+                          ? "In-house stay. Use Mark Checked Out for early departure"
+                          : selectedBooking.bookingStatus === "checked_out"
+                          ? "Cannot cancel a completed stay"
+                          : selectedBooking.bookingStatus === "cancelled"
+                          ? "Booking is already cancelled"
+                          : "Cancel reservation"
+                      }
+                      className="px-3 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold border border-rose-200 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
-                      Cancel Booking
+                      <XCircle className="w-3.5 h-3.5" />
+                      <span>Cancel Booking</span>
                     </button>
                   </div>
+
+                  {/* Administrative Correction Override (For exceptional operational corrections) */}
+                  {(selectedBooking.bookingStatus === "checked_out" || selectedBooking.bookingStatus === "cancelled") && (
+                    <div className="pt-2 border-t border-[#EAE8E3]">
+                      <button
+                        type="button"
+                        onClick={() => setShowAdminOverride(!showAdminOverride)}
+                        className="text-[10px] text-[#9CA3AF] hover:text-[#742B40] underline block cursor-pointer"
+                      >
+                        {showAdminOverride ? "Hide Administrative Override" : "Need to correct an accidental entry? Admin Override"}
+                      </button>
+
+                      {showAdminOverride && (
+                        <div className="mt-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] space-y-2">
+                          <p className="font-semibold text-amber-950">
+                            Supervised Administrative Correction:
+                          </p>
+                          <p className="text-[10px] text-amber-800">
+                            Reverting a terminal state requires administrative authorization and audit logging.
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                if (confirm("Reopen this stay as Confirmed? Availability will be re-validated.")) {
+                                  handleUpdateStatus(selectedBooking, "confirmed", undefined, true);
+                                }
+                              }}
+                              disabled={isUpdatingStatus}
+                              className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] cursor-pointer"
+                            >
+                              Reopen as Confirmed
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

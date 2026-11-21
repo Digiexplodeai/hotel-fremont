@@ -109,6 +109,20 @@ const statusConfig: Record<
     border: "border-zinc-500/30",
     dot: "bg-zinc-400",
   },
+  checked_in: {
+    label: "Checked In",
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    border: "border-blue-500/30",
+    dot: "bg-blue-400 animate-pulse",
+  },
+  checked_out: {
+    label: "Checked Out",
+    bg: "bg-zinc-500/10",
+    text: "text-zinc-400",
+    border: "border-zinc-500/30",
+    dot: "bg-zinc-400",
+  },
   closed: {
     label: "Closed",
     bg: "bg-slate-500/10",
