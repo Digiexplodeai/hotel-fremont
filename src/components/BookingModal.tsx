@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -194,21 +194,57 @@ export default function BookingModal({
     }
   }, [initialData]);
 
+  const latestRequestIdRef = useRef<number>(0);
+
   // 2. Fetch Live Availability when checkIn or checkOut change
+  // Uses dedicated un-cached API route with fallback to Server Action
+  // Protects against race conditions where older async requests resolve out of order
   const refreshAvailability = useCallback(async (inDate: string, outDate: string) => {
     if (!inDate || !outDate || outDate <= inDate) return;
+    const requestId = ++latestRequestIdRef.current;
     setIsLoadingAvailability(true);
+
     try {
-      const res = await getRoomAvailabilityAction(inDate, outDate);
-      if (res.success && res.availability) {
+      let availList: RoomAvailabilityResult[] | null = null;
+
+      // 1. Fetch dynamic, un-cached availability API endpoint
+      try {
+        const res = await fetch(`/api/availability?checkIn=${inDate}&checkOut=${outDate}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.availability)) {
+            availList = json.availability;
+          }
+        }
+      } catch (fetchErr) {
+        console.warn("[BookingModal] API availability fetch failed, falling back to server action:", fetchErr);
+      }
+
+      // 2. Fallback to Server Action if API endpoint failed
+      if (!availList) {
+        const actionRes = await getRoomAvailabilityAction(inDate, outDate);
+        if (actionRes.success && actionRes.availability) {
+          availList = actionRes.availability;
+        }
+      }
+
+      // Guard: Ignore response if user has picked newer dates in the meantime
+      if (requestId !== latestRequestIdRef.current) return;
+
+      if (availList) {
         const map: Record<string, RoomAvailabilityResult> = {};
-        res.availability.forEach((item) => {
+        availList.forEach((item) => {
           map[item.code] = item;
         });
         setAvailability(map);
       }
     } finally {
-      setIsLoadingAvailability(false);
+      if (requestId === latestRequestIdRef.current) {
+        setIsLoadingAvailability(false);
+      }
     }
   }, []);
 
@@ -732,8 +768,8 @@ export default function BookingModal({
                           setCheckIn(val);
                           setErrorMessage(null);
                           if (checkOut <= val) {
-                            const nextD = new Date(val);
-                            nextD.setDate(nextD.getDate() + 1);
+                            const [y, m, d] = val.split("-").map(Number);
+                            const nextD = new Date(Date.UTC(y, m - 1, d + 1));
                             setCheckOut(nextD.toISOString().slice(0, 10));
                           }
                         }}

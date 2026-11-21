@@ -162,9 +162,10 @@ export async function getRoomAvailabilityAction(
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    if (!supabaseUrl || !anonKey) {
+    if (!supabaseUrl || (!serviceKey && !anonKey)) {
       const fullList: RoomAvailabilityResult[] = [];
       baselineInventory.forEach((item) => {
         fullList.push({ ...item, rooms_left: item.total_rooms });
@@ -177,7 +178,61 @@ export async function getRoomAvailabilityAction(
       return { success: true, availability: fullList };
     }
 
-    const client = createSupabaseClient(supabaseUrl, anonKey);
+    const client = createSupabaseClient(supabaseUrl, serviceKey || anonKey!);
+
+    // 1. Authoritative: Execute Supabase RPC get_room_availability (SECURITY DEFINER)
+    const { data: rpcData, error: rpcError } = await client.rpc("get_room_availability", {
+      p_check_in: checkIn,
+      p_check_out: checkOut,
+    });
+
+    if (!rpcError && rpcData && Array.isArray(rpcData) && rpcData.length > 0) {
+      const availabilityMap = new Map<string, RoomAvailabilityResult>();
+
+      for (const row of rpcData) {
+        const code = String(row.code);
+        const name = String(row.name);
+        const price_per_night = Number(row.price_per_night || 2299);
+        const max_guests = Number(row.max_guests || 2);
+
+        let physicalKeys = 9;
+        if (code === "deluxe-room" || code === "deluxe") physicalKeys = 9;
+        else if (code === "super-deluxe" || code === "super-deluxe-room") physicalKeys = 10;
+        else if (code === "premium" || code === "premium-room") physicalKeys = 2;
+        else physicalKeys = Number(row.total_rooms || 1);
+
+        const rawLeft = Number(row.rooms_left !== undefined ? row.rooms_left : physicalKeys);
+        const rooms_left = Math.max(0, Math.min(physicalKeys, rawLeft));
+
+        const item: RoomAvailabilityResult = {
+          code,
+          name,
+          price_per_night,
+          total_rooms: physicalKeys,
+          rooms_left,
+          max_guests,
+        };
+
+        availabilityMap.set(code, item);
+
+        if (code === "super-deluxe") {
+          availabilityMap.set("super-deluxe-room", { ...item, code: "super-deluxe-room" });
+        } else if (code === "super-deluxe-room") {
+          availabilityMap.set("super-deluxe", { ...item, code: "super-deluxe" });
+        } else if (code === "premium") {
+          availabilityMap.set("premium-room", { ...item, code: "premium-room" });
+        } else if (code === "premium-room") {
+          availabilityMap.set("premium", { ...item, code: "premium" });
+        }
+      }
+
+      return {
+        success: true,
+        availability: Array.from(availabilityMap.values()),
+      };
+    }
+
+    // 2. Fallback: Direct table calculation if RPC is unavailable
     const nowIso = new Date().toISOString();
 
     // 1. Fetch active room types from database

@@ -293,6 +293,8 @@ export async function submitReservationAction(input: SubmitReservationInput): Pr
           revalidatePath("/admin");
           revalidatePath("/admin/rooms");
           revalidatePath("/admin/enquiries");
+          revalidatePath("/admin/calendar");
+          revalidatePath("/", "layout");
         } catch {}
 
         return {
@@ -312,6 +314,8 @@ export async function submitReservationAction(input: SubmitReservationInput): Pr
       revalidatePath("/admin");
       revalidatePath("/admin/rooms");
       revalidatePath("/admin/enquiries");
+      revalidatePath("/admin/calendar");
+      revalidatePath("/", "layout");
     } catch {}
 
     return {
@@ -560,6 +564,8 @@ export async function updateReservationStatusAction(
       revalidatePath("/admin");
       revalidatePath("/admin/rooms");
       revalidatePath("/admin/enquiries");
+      revalidatePath("/admin/calendar");
+      revalidatePath("/", "layout");
     } catch {}
 
     return { success: true };
@@ -625,6 +631,8 @@ export async function deleteReservationAction(id: string): Promise<{
       revalidatePath("/admin");
       revalidatePath("/admin/rooms");
       revalidatePath("/admin/enquiries");
+      revalidatePath("/admin/calendar");
+      revalidatePath("/", "layout");
     } catch {}
 
     return { success: true };

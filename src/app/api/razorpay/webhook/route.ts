@@ -157,6 +157,8 @@ export async function POST(req: NextRequest) {
         revalidatePath("/admin/payments");
         revalidatePath("/admin/rooms");
         revalidatePath("/admin/calendar");
+        revalidatePath("/", "layout");
+        revalidatePath("/");
       } catch {}
 
       // 5. Send Resend Confirmation Emails to both Customer and Admin(s)

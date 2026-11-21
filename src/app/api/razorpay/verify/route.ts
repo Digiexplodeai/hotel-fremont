@@ -194,13 +194,15 @@ export async function POST(req: NextRequest) {
       console.warn("[Payment Verify] Reservations sync warning:", resErr);
     }
 
-    // 6. Revalidate admin dashboard and front desk cache
+    // 6. Revalidate admin dashboard, calendar and public website cache
     try {
       revalidatePath("/admin");
       revalidatePath("/admin/reservations");
       revalidatePath("/admin/payments");
       revalidatePath("/admin/rooms");
       revalidatePath("/admin/calendar");
+      revalidatePath("/", "layout");
+      revalidatePath("/");
     } catch {}
 
     return NextResponse.json({
