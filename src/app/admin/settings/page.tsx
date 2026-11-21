@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   },
 };
 
+import TestDataCleanup from "@/components/admin/TestDataCleanup";
+
 export default async function AdminSettingsPage() {
   const user = await getCurrentUser();
 
@@ -96,6 +98,9 @@ export default async function AdminSettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* Razorpay Test Mode & Test Data Cleanup */}
+        <TestDataCleanup />
 
         {/* Operating Hours & Timings */}
         <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 shadow-sm space-y-5">

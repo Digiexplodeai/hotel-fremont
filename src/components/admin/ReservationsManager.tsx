@@ -13,6 +13,11 @@ import {
   updateReservationStatusAction,
 } from "@/actions/reservations";
 import {
+  deleteReservationAction,
+  archiveReservationAction,
+} from "@/actions/recordManagement";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import {
   Search,
   Filter,
   Calendar,
@@ -31,6 +36,11 @@ import {
   BedDouble,
   ChevronRight,
   ExternalLink,
+  MoreVertical,
+  Trash2,
+  Archive,
+  XCircle,
+  Edit3,
 } from "lucide-react";
 
 export interface UnifiedBooking {
@@ -164,6 +174,55 @@ export default function ReservationsManager({
   const [selectedBooking, setSelectedBooking] = useState<UnifiedBooking | null>(null);
   const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Three-dot action menu & deletion state
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [deleteModalBooking, setDeleteModalBooking] = useState<UnifiedBooking | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+
+  // Close menu on click outside
+  React.useEffect(() => {
+    const handleWindowClick = () => setActiveMenuId(null);
+    window.addEventListener("click", handleWindowClick);
+    return () => window.removeEventListener("click", handleWindowClick);
+  }, []);
+
+  const handleCancelReservation = async (booking: UnifiedBooking) => {
+    setActiveMenuId(null);
+    if (!confirm(`Are you sure you want to cancel reservation ${booking.ref}? Room availability will be released.`)) {
+      return;
+    }
+    await handleUpdateStatus(booking, "cancelled");
+    setActionFeedback(`Reservation ${booking.ref} cancelled successfully.`);
+    setTimeout(() => setActionFeedback(null), 4000);
+  };
+
+  const handleArchiveReservation = async (booking: UnifiedBooking) => {
+    setActiveMenuId(null);
+    const res = await archiveReservationAction(booking.id, "Archived from reservations manager");
+    if (res.success) {
+      setBookings((prev) => prev.filter((b) => b.id !== booking.id));
+      setActionFeedback(`Reservation ${booking.ref} archived.`);
+      setTimeout(() => setActionFeedback(null), 4000);
+    } else {
+      alert(res.error || "Failed to archive reservation.");
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModalBooking) return;
+    const res = await deleteReservationAction(
+      deleteModalBooking.id,
+      "Permanently deleted test reservation via admin panel"
+    );
+    if (res.success) {
+      setBookings((prev) => prev.filter((b) => b.id !== deleteModalBooking.id && b.ref !== deleteModalBooking.ref));
+      setActionFeedback(`Record ${deleteModalBooking.ref} permanently deleted.`);
+      setTimeout(() => setActionFeedback(null), 4000);
+    } else {
+      throw new Error(res.error || "Failed to delete record.");
+    }
+  };
 
   // Filtered rows
   const filteredRows = useMemo(() => {
@@ -313,6 +372,13 @@ export default function ReservationsManager({
 
   return (
     <div className="space-y-6">
+      {actionFeedback && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{actionFeedback}</span>
+        </div>
+      )}
+
       {/* Search & Filter Toolbar */}
       <div className="bg-white border border-[#EAE8E3] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Search */}
@@ -475,20 +541,89 @@ export default function ReservationsManager({
                         className="py-3.5 px-4 text-right"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1.5 relative">
                           <button
                             onClick={() => handlePrintVoucher(booking)}
-                            className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#742B40] hover:bg-white border border-transparent hover:border-[#EAE8E3] transition"
+                            className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#742B40] hover:bg-white border border-transparent hover:border-[#EAE8E3] transition cursor-pointer"
                             title="Print Voucher"
                           >
                             <Printer className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setSelectedBooking(booking)}
-                            className="px-2.5 py-1 rounded-lg bg-[#F8F7F4] hover:bg-[#EAE8E3] text-[#24272B] font-medium text-[11px] border border-[#EAE8E3] transition"
+                            className="px-2.5 py-1 rounded-lg bg-[#F8F7F4] hover:bg-[#EAE8E3] text-[#24272B] font-medium text-[11px] border border-[#EAE8E3] transition cursor-pointer"
                           >
                             Details
                           </button>
+
+                          {/* Three-dot action menu */}
+                          <div className="relative">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(activeMenuId === booking.id ? null : booking.id);
+                              }}
+                              className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4] border border-transparent hover:border-[#EAE8E3] transition cursor-pointer"
+                              title="More Options"
+                            >
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </button>
+
+                            {activeMenuId === booking.id && (
+                              <div
+                                className="absolute right-0 top-full mt-1 w-48 bg-white border border-[#EAE8E3] rounded-xl shadow-xl py-1 z-30 text-left text-xs animate-in fade-in duration-150"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setSelectedBooking(booking);
+                                  }}
+                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-[#B69A68]" />
+                                  <span>View Details</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setSelectedBooking(booking);
+                                  }}
+                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5 text-[#742B40]" />
+                                  <span>Edit Status</span>
+                                </button>
+                                {booking.bookingStatus !== "cancelled" && (
+                                  <button
+                                    onClick={() => handleCancelReservation(booking)}
+                                    className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                  >
+                                    <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                                    <span>Cancel Reservation</span>
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleArchiveReservation(booking)}
+                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                >
+                                  <Archive className="w-3.5 h-3.5 text-[#6B7280]" />
+                                  <span>Archive</span>
+                                </button>
+                                <div className="border-t border-[#EAE8E3] my-1" />
+                                <button
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setDeleteModalBooking(booking);
+                                  }}
+                                  className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Delete Test Record</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -693,6 +828,30 @@ export default function ReservationsManager({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={Boolean(deleteModalBooking)}
+        onClose={() => setDeleteModalBooking(null)}
+        onConfirm={handleConfirmDelete}
+        title={`Delete Reservation ${deleteModalBooking?.ref}?`}
+        description="This will permanently delete this test reservation record from the database. Room availability will be refreshed."
+        impactDetails={
+          deleteModalBooking
+            ? [
+                { label: "Booking Reference", value: deleteModalBooking.ref },
+                { label: "Guest Name", value: deleteModalBooking.guestName },
+                { label: "Room Category", value: deleteModalBooking.roomCategory },
+                { label: "Total Amount", value: `₹${deleteModalBooking.totalAmount.toLocaleString("en-IN")}` },
+                { label: "Payment Status", value: deleteModalBooking.paymentStatus.toUpperCase() },
+                { label: "Environment", value: deleteModalBooking.paymentEnvironment || "TEST MODE" },
+              ]
+            : []
+        }
+        requireTypeDelete={true}
+        requiredConfirmationText="DELETE"
+        confirmButtonText="Delete Permanently"
+      />
     </div>
   );
 }

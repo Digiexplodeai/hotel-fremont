@@ -21,7 +21,18 @@ import {
   Tag,
   ShieldCheck,
   CheckCircle2,
+  MoreVertical,
+  Trash2,
+  Archive,
+  Edit3,
+  AlertTriangle,
+  UserX,
 } from "lucide-react";
+import {
+  deleteGuestDataAction,
+  archiveGuestAction,
+} from "@/actions/recordManagement";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 export interface GuestProfile {
   id: string;
@@ -55,6 +66,78 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "repeat" | "high_spend">("all");
   const [selectedGuest, setSelectedGuest] = useState<GuestProfile | null>(null);
+
+  // Action menu & deletion state
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [deleteModalGuest, setDeleteModalGuest] = useState<GuestProfile | null>(null);
+  const [activeStayWarning, setActiveStayWarning] = useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [deletedGuestKeys, setDeletedGuestKeys] = useState<string[]>([]);
+
+  // Close menu on click outside
+  React.useEffect(() => {
+    const handleWindowClick = () => setActiveMenuId(null);
+    window.addEventListener("click", handleWindowClick);
+    return () => window.removeEventListener("click", handleWindowClick);
+  }, []);
+
+  const handleInitiateDeleteGuest = (guest: GuestProfile) => {
+    setActiveMenuId(null);
+    setActiveStayWarning(null);
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const activeStay = guest.records.find(
+      (r) => r.checkOut >= todayStr && (r.status === "confirmed" || r.status === "paid")
+    );
+
+    if (activeStay) {
+      setActiveStayWarning(
+        `Cannot delete ${guest.name}: Guest has an active or upcoming stay (${activeStay.roomType}, Booking ${activeStay.reference} until ${activeStay.checkOut}). Please complete checkout or cancel the stay first.`
+      );
+      return;
+    }
+
+    setDeleteModalGuest(guest);
+  };
+
+  const handleArchiveGuest = async (guest: GuestProfile) => {
+    setActiveMenuId(null);
+    const res = await archiveGuestAction(
+      { phone: guest.phone, email: guest.email || undefined, name: guest.name },
+      "Archived from guest directory"
+    );
+    if (res.success) {
+      const cleanPhone = guest.phone ? guest.phone.replace(/\D/g, "").slice(-10) : "";
+      const key = cleanPhone || guest.email?.toLowerCase() || guest.name.toLowerCase();
+      setDeletedGuestKeys((prev) => [...prev, key]);
+      setActionFeedback(`Guest ${guest.name} archived.`);
+      setTimeout(() => setActionFeedback(null), 4000);
+    } else {
+      alert(res.error || "Failed to archive guest.");
+    }
+  };
+
+  const handleConfirmDeleteGuest = async () => {
+    if (!deleteModalGuest) return;
+    const res = await deleteGuestDataAction(
+      {
+        phone: deleteModalGuest.phone,
+        email: deleteModalGuest.email || undefined,
+        name: deleteModalGuest.name,
+      },
+      { reason: "Permanently deleted customer data from guest directory" }
+    );
+
+    if (res.success) {
+      const cleanPhone = deleteModalGuest.phone ? deleteModalGuest.phone.replace(/\D/g, "").slice(-10) : "";
+      const key = cleanPhone || deleteModalGuest.email?.toLowerCase() || deleteModalGuest.name.toLowerCase();
+      setDeletedGuestKeys((prev) => [...prev, key]);
+      setActionFeedback(`Customer data for ${deleteModalGuest.name} permanently deleted.`);
+      setTimeout(() => setActionFeedback(null), 4000);
+    } else {
+      throw new Error(res.error || "Failed to delete customer data.");
+    }
+  };
 
   // Aggregate unique guests
   const guestProfiles = useMemo(() => {
@@ -156,10 +239,11 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
       }
     });
 
-    return Array.from(map.values()).sort(
-      (a, b) => new Date(b.lastStay).getTime() - new Date(a.lastStay).getTime()
-    );
-  }, [bookings, reservations]);
+    return Array.from(map.entries())
+      .filter(([key]) => !deletedGuestKeys.includes(key))
+      .map(([, val]) => val)
+      .sort((a, b) => new Date(b.lastStay).getTime() - new Date(a.lastStay).getTime());
+  }, [bookings, reservations, deletedGuestKeys]);
 
   // Filtered guest list
   const filteredGuests = useMemo(() => {
@@ -191,6 +275,27 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
 
   return (
     <div className="space-y-6">
+      {/* Feedback & Warnings */}
+      {activeStayWarning && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5 animate-in fade-in">
+          <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-semibold block mb-0.5">Active Reservation Conflict</span>
+            <span>{activeStayWarning}</span>
+          </div>
+          <button onClick={() => setActiveStayWarning(null)} className="text-amber-700 hover:text-amber-900 cursor-pointer">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {actionFeedback && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{actionFeedback}</span>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm">
@@ -393,7 +498,7 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                       </td>
 
                       <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1.5 relative">
                           {cleanPhone && (
                             <a
                               href={`https://wa.me/91${cleanPhone}?text=Hello%20${encodeURIComponent(guest.name)},%20greetings%20from%20Hotel%20Fremont%20Mohali.`}
@@ -416,11 +521,68 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                           )}
                           <button
                             onClick={() => setSelectedGuest(guest)}
-                            className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#742B40] hover:bg-[#F8F7F4] transition"
+                            className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#742B40] hover:bg-[#F8F7F4] transition cursor-pointer"
                             title="View Guest History"
                           >
                             <ChevronRight className="w-4 h-4" />
                           </button>
+
+                          {/* Three-dot action menu */}
+                          <div className="relative">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(activeMenuId === guest.id ? null : guest.id);
+                              }}
+                              className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4] border border-transparent hover:border-[#EAE8E3] transition cursor-pointer"
+                              title="Customer Controls"
+                            >
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </button>
+
+                            {activeMenuId === guest.id && (
+                              <div
+                                className="absolute right-0 top-full mt-1 w-52 bg-white border border-[#EAE8E3] rounded-xl shadow-xl py-1 z-30 text-left text-xs animate-in fade-in duration-150"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setSelectedGuest(guest);
+                                  }}
+                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                >
+                                  <Users className="w-3.5 h-3.5 text-[#B69A68]" />
+                                  <span>View Guest Profile</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setSelectedGuest(guest);
+                                  }}
+                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                >
+                                  <History className="w-3.5 h-3.5 text-[#742B40]" />
+                                  <span>View Stay History</span>
+                                </button>
+                                <button
+                                  onClick={() => handleArchiveGuest(guest)}
+                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                >
+                                  <Archive className="w-3.5 h-3.5 text-[#6B7280]" />
+                                  <span>Archive Guest</span>
+                                </button>
+                                <div className="border-t border-[#EAE8E3] my-1" />
+                                <button
+                                  onClick={() => handleInitiateDeleteGuest(guest)}
+                                  className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Delete Customer Data</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -600,6 +762,29 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
           </div>
         </div>
       )}
+
+      {/* Delete Customer Data Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={Boolean(deleteModalGuest)}
+        onClose={() => setDeleteModalGuest(null)}
+        onConfirm={handleConfirmDeleteGuest}
+        title={`Delete Customer Data · ${deleteModalGuest?.name}?`}
+        description="This will permanently delete or anonymize this customer's personal data from the guest directory. Their past stay count and transaction references will be preserved for financial auditing."
+        impactDetails={
+          deleteModalGuest
+            ? [
+                { label: "Customer Name", value: deleteModalGuest.name },
+                { label: "Phone Number", value: deleteModalGuest.phone || "—" },
+                { label: "Email Address", value: deleteModalGuest.email || "—" },
+                { label: "Total Past Stays", value: `${deleteModalGuest.totalStays} Stays` },
+                { label: "Lifetime Spend", value: formatINR(deleteModalGuest.totalSpend) },
+              ]
+            : []
+        }
+        requireTypeDelete={true}
+        requiredConfirmationText="DELETE"
+        confirmButtonText="Delete Customer Data"
+      />
     </div>
   );
 }

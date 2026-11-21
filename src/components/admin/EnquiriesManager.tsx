@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   EnquiryRecord,
   EnquiryStatus,
@@ -8,6 +8,12 @@ import {
   updateEnquiryStatusAction,
   addEnquiryNoteAction,
 } from "@/actions/enquiries";
+import {
+  deleteEnquiryAction,
+  bulkDeleteEnquiriesAction,
+  bulkArchiveEnquiriesAction,
+} from "@/actions/recordManagement";
+import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
 import {
   MessageSquare,
   Search,
@@ -30,6 +36,13 @@ import {
   Plus,
   StickyNote,
   X,
+  MoreVertical,
+  Archive,
+  Trash2,
+  Eye,
+  CheckSquare,
+  Square,
+  ShieldAlert,
 } from "lucide-react";
 
 interface EnquiriesManagerProps {
@@ -140,6 +153,21 @@ export default function EnquiriesManager({
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedEnquiry, setSelectedEnquiry] = useState<EnquiryRecord | null>(null);
 
+  // Multi-selection state
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  // Three-dot action menu & feedback
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+
+  // Deletion modals state
+  const [deleteModalEnquiry, setDeleteModalEnquiry] = useState<EnquiryRecord | null>(null);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [isBulkArchiving, setIsBulkArchiving] = useState(false);
+
+  // Details drawer modal
+  const [detailModalEnquiry, setDetailModalEnquiry] = useState<EnquiryRecord | null>(null);
+
   // Note modal state
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [noteTargetId, setNoteTargetId] = useState<string | null>(null);
@@ -149,6 +177,13 @@ export default function EnquiriesManager({
 
   // Status updating state
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Close three-dot action menu on click outside
+  useEffect(() => {
+    const handleWindowClick = () => setActiveMenuId(null);
+    window.addEventListener("click", handleWindowClick);
+    return () => window.removeEventListener("click", handleWindowClick);
+  }, []);
 
   // Filter logic
   const filteredEnquiries = useMemo(() => {
@@ -161,7 +196,7 @@ export default function EnquiriesManager({
       } else if (activeTab === "restaurant") {
         if (e.type !== "dining" && e.type !== "dining_aura") return false;
       } else if (activeTab === "conference") {
-        const desc = (e.notes || "" + (e.roomType || "")).toLowerCase();
+        const desc = ((e.notes || "") + (e.roomType || "")).toLowerCase();
         if (!desc.includes("conference") && e.type !== "event_banquet") return false;
       }
 
@@ -191,9 +226,32 @@ export default function EnquiriesManager({
       rooms: enquiries.filter((e) => e.type === "book_now" || e.type === "rate_check").length,
       banquet: enquiries.filter((e) => e.type === "event_banquet").length,
       restaurant: enquiries.filter((e) => e.type === "dining" || e.type === "dining_aura").length,
-      conference: enquiries.filter((e) => (e.notes || "" + (e.roomType || "")).toLowerCase().includes("conference")).length,
+      conference: enquiries.filter((e) => ((e.notes || "") + (e.roomType || "")).toLowerCase().includes("conference")).length,
     };
   }, [enquiries]);
+
+  // Selection helpers
+  const isAllFilteredSelected = useMemo(() => {
+    if (filteredEnquiries.length === 0) return false;
+    return filteredEnquiries.every((e) => selectedIds.includes(e.id));
+  }, [filteredEnquiries, selectedIds]);
+
+  const toggleSelectAll = () => {
+    if (isAllFilteredSelected) {
+      const filteredIds = new Set(filteredEnquiries.map((e) => e.id));
+      setSelectedIds((prev) => prev.filter((id) => !filteredIds.has(id)));
+    } else {
+      const set = new Set([...selectedIds, ...filteredEnquiries.map((e) => e.id)]);
+      setSelectedIds(Array.from(set));
+    }
+  };
+
+  const toggleSelectOne = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   // Handle status update
   const handleStatusChange = async (id: string, newStatus: EnquiryStatus) => {
@@ -214,6 +272,90 @@ export default function EnquiriesManager({
       alert("Error updating status");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  // Single Archive handler
+  const handleArchiveSingle = async (enquiry: EnquiryRecord) => {
+    setActiveMenuId(null);
+    setUpdatingId(enquiry.id);
+    try {
+      const res = await updateEnquiryStatusAction(enquiry.id, "closed");
+      if (res.success) {
+        setEnquiries((prev) =>
+          prev.map((e) => (e.id === enquiry.id ? { ...e, status: "closed" } : e))
+        );
+        setActionFeedback(`Enquiry from ${enquiry.name} archived.`);
+        setTimeout(() => setActionFeedback(null), 4000);
+      } else {
+        alert(res.error || "Failed to archive enquiry");
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  // Single Delete handler (confirmed via modal)
+  const handleConfirmSingleDelete = async () => {
+    if (!deleteModalEnquiry) return;
+    const target = deleteModalEnquiry;
+    try {
+      const res = await deleteEnquiryAction(target.id, "Deleted from CRM enquiries inbox");
+      if (res.success) {
+        setEnquiries((prev) => prev.filter((e) => e.id !== target.id));
+        setSelectedIds((prev) => prev.filter((id) => id !== target.id));
+        setDeleteModalEnquiry(null);
+        setActionFeedback(`Enquiry from ${target.name} permanently deleted.`);
+        setTimeout(() => setActionFeedback(null), 4000);
+      } else {
+        alert(res.error || "Failed to delete enquiry.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Error deleting enquiry.");
+    }
+  };
+
+  // Bulk Archive handler
+  const handleBulkArchive = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Archive ${selectedIds.length} selected enquiries as closed/resolved?`)) {
+      return;
+    }
+    setIsBulkArchiving(true);
+    try {
+      const res = await bulkArchiveEnquiriesAction(selectedIds, "Bulk archived from CRM inbox");
+      if (res.success) {
+        const archivedSet = new Set(selectedIds);
+        setEnquiries((prev) =>
+          prev.map((e) => (archivedSet.has(e.id) ? { ...e, status: "closed" } : e))
+        );
+        setActionFeedback(`${res.archivedCount} enquiries archived successfully.`);
+        setSelectedIds([]);
+        setTimeout(() => setActionFeedback(null), 4000);
+      } else {
+        alert(res.error || "Failed to bulk archive enquiries.");
+      }
+    } finally {
+      setIsBulkArchiving(false);
+    }
+  };
+
+  // Bulk Delete handler (confirmed via modal)
+  const handleConfirmBulkDelete = async () => {
+    try {
+      const res = await bulkDeleteEnquiriesAction(selectedIds, "Bulk deleted from CRM enquiries inbox");
+      if (res.success) {
+        const deletedSet = new Set(selectedIds);
+        setEnquiries((prev) => prev.filter((e) => !deletedSet.has(e.id)));
+        setActionFeedback(`${res.deletedCount} selected enquiries permanently deleted.`);
+        setSelectedIds([]);
+        setIsBulkDeleteOpen(false);
+        setTimeout(() => setActionFeedback(null), 4000);
+      } else {
+        alert(res.error || "Failed to bulk delete enquiries.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Error executing bulk deletion.");
     }
   };
 
@@ -265,6 +407,22 @@ export default function EnquiriesManager({
 
   return (
     <div className="space-y-6">
+      {/* Feedback Banner */}
+      {actionFeedback && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center justify-between shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{actionFeedback}</span>
+          </div>
+          <button
+            onClick={() => setActionFeedback(null)}
+            className="text-emerald-700 hover:text-emerald-950 font-bold ml-2"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Top Filter & Search Bar */}
       <div className="bg-white border border-[#EAE8E3] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Navigation Tabs */}
@@ -373,8 +531,71 @@ export default function EnquiriesManager({
         </div>
       </div>
 
+      {/* Bulk Action Toolbar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-[#742B40]/10 border border-[#742B40]/30 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <span className="px-2.5 py-1 rounded-full bg-[#742B40] text-white text-xs font-bold font-mono">
+              {selectedIds.length}
+            </span>
+            <span className="text-xs font-semibold text-[#24272B]">
+              leads selected for batch processing
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <button
+              onClick={handleBulkArchive}
+              disabled={isBulkArchiving}
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] font-medium transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Archive className="w-3.5 h-3.5 text-[#B69A68]" />
+              <span>{isBulkArchiving ? "Archiving..." : "Bulk Archive"}</span>
+            </button>
+
+            <button
+              onClick={() => setIsBulkDeleteOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Bulk Delete ({selectedIds.length})</span>
+            </button>
+
+            <button
+              onClick={() => setSelectedIds([])}
+              className="px-2.5 py-1.5 text-xs text-[#6B7280] hover:text-[#24272B] cursor-pointer"
+            >
+              Clear Selection
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Enquiries CRM Table / List */}
       <div className="bg-white border border-[#EAE8E3] rounded-2xl shadow-sm overflow-hidden">
+        {/* Table Header with Select-All Checkbox */}
+        <div className="p-3.5 bg-[#FAF9F7] border-b border-[#EAE8E3] flex items-center justify-between text-xs text-[#6B7280] font-medium">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2 cursor-pointer hover:text-[#24272B]"
+              title={isAllFilteredSelected ? "Deselect All" : "Select All"}
+            >
+              {isAllFilteredSelected ? (
+                <CheckSquare className="w-4 h-4 text-[#742B40]" />
+              ) : (
+                <Square className="w-4 h-4 text-[#9CA3AF]" />
+              )}
+              <span className="text-[11px] font-semibold uppercase tracking-wider">
+                Select All ({filteredEnquiries.length})
+              </span>
+            </button>
+          </div>
+          <span className="text-[11px] text-[#9CA3AF]">
+            Showing {filteredEnquiries.length} of {enquiries.length} leads
+          </span>
+        </div>
+
         {filteredEnquiries.length > 0 ? (
           <div className="divide-y divide-[#EAE8E3]">
             {filteredEnquiries.map((enquiry) => {
@@ -382,14 +603,30 @@ export default function EnquiriesManager({
               const status = statusBadges[enquiry.status] || statusBadges.new;
               const Icon = badge.icon;
               const isUpdating = updatingId === enquiry.id;
+              const isSelected = selectedIds.includes(enquiry.id);
+              const isMenuOpen = activeMenuId === enquiry.id;
 
               return (
                 <div
                   key={enquiry.id}
-                  className="p-4 sm:p-5 hover:bg-[#FAF9F7] transition flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  className={`p-4 sm:p-5 transition flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
+                    isSelected ? "bg-[#742B40]/5" : "hover:bg-[#FAF9F7]"
+                  }`}
                 >
-                  {/* Left Column: Guest Info & Type */}
+                  {/* Left Column: Selection Checkbox & Guest Info */}
                   <div className="flex items-start gap-3.5">
+                    {/* Row Checkbox */}
+                    <button
+                      onClick={(e) => toggleSelectOne(enquiry.id, e)}
+                      className="mt-2.5 shrink-0 cursor-pointer text-[#9CA3AF] hover:text-[#742B40]"
+                    >
+                      {isSelected ? (
+                        <CheckSquare className="w-4 h-4 text-[#742B40]" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                    </button>
+
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${badge.bg} ${badge.text}`}
                     >
@@ -446,8 +683,8 @@ export default function EnquiriesManager({
                     </div>
                   </div>
 
-                  {/* Right Column: Status & Follow-up Actions */}
-                  <div className="flex flex-wrap items-center justify-between lg:justify-end gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#EAE8E3]">
+                  {/* Right Column: Status, WhatsApp, Note & Three-Dot Menu */}
+                  <div className="flex flex-wrap items-center justify-between lg:justify-end gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#EAE8E3]">
                     {/* Status Dropdown */}
                     <div className="flex items-center gap-1.5">
                       <select
@@ -488,6 +725,59 @@ export default function EnquiriesManager({
                       <StickyNote className="w-3.5 h-3.5 text-[#B69A68]" />
                       <span>Add Note</span>
                     </button>
+
+                    {/* Three-Dot Action Menu */}
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveMenuId(isMenuOpen ? null : enquiry.id);
+                        }}
+                        className="p-1.5 rounded-lg border border-[#EAE8E3] hover:bg-[#F8F7F4] text-[#6B7280] transition cursor-pointer"
+                        title="Actions"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+
+                      {isMenuOpen && (
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute right-0 top-8 z-30 w-48 rounded-xl bg-white border border-[#EAE8E3] shadow-lg py-1 text-xs text-[#24272B] animate-in fade-in"
+                        >
+                          <button
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              setDetailModalEnquiry(enquiry);
+                            }}
+                            className="w-full text-left px-3.5 py-2 hover:bg-[#F8F7F4] flex items-center gap-2 cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-[#B69A68]" />
+                            <span>View Full Details</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleArchiveSingle(enquiry)}
+                            className="w-full text-left px-3.5 py-2 hover:bg-[#F8F7F4] flex items-center gap-2 cursor-pointer"
+                          >
+                            <Archive className="w-3.5 h-3.5 text-[#6B7280]" />
+                            <span>Archive Lead</span>
+                          </button>
+
+                          <div className="border-t border-[#EAE8E3] my-1" />
+
+                          <button
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              setDeleteModalEnquiry(enquiry);
+                            }}
+                            className="w-full text-left px-3.5 py-2 hover:bg-rose-50 text-rose-600 flex items-center gap-2 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete Lead</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -505,6 +795,95 @@ export default function EnquiriesManager({
           </div>
         )}
       </div>
+
+      {/* Modal: View Full Details */}
+      {detailModalEnquiry && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 max-w-lg w-full shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
+              <div>
+                <h3 className="text-base font-serif font-bold text-[#24272B]">
+                  Lead Details · {detailModalEnquiry.name}
+                </h3>
+                <span className="text-[11px] text-[#9CA3AF] font-mono">
+                  Reference: {detailModalEnquiry.referenceCode || detailModalEnquiry.id}
+                </span>
+              </div>
+              <button
+                onClick={() => setDetailModalEnquiry(null)}
+                className="text-[#9CA3AF] hover:text-[#24272B]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3 p-3 bg-[#F8F7F4] rounded-xl border border-[#EAE8E3]">
+                <div>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Phone</span>
+                  <span className="font-mono text-[#24272B] font-medium">{detailModalEnquiry.phone}</span>
+                </div>
+                <div>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Email</span>
+                  <span className="text-[#24272B]">{detailModalEnquiry.email || "Not provided"}</span>
+                </div>
+                <div>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Lead Type</span>
+                  <span className="font-medium text-[#742B40]">
+                    {typeBadges[detailModalEnquiry.type]?.label || detailModalEnquiry.type}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Current Status</span>
+                  <span className="font-medium text-[#24272B] capitalize">{detailModalEnquiry.status}</span>
+                </div>
+              </div>
+
+              {detailModalEnquiry.dates && (
+                <div>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold mb-1">
+                    Requested Dates
+                  </span>
+                  <p className="p-2.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] font-mono text-[#24272B]">
+                    {detailModalEnquiry.dates}
+                  </p>
+                </div>
+              )}
+
+              {detailModalEnquiry.notes && (
+                <div>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold mb-1">
+                    Customer Message &amp; Notes
+                  </span>
+                  <div className="p-3 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] whitespace-pre-wrap leading-relaxed">
+                    {detailModalEnquiry.notes}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-[#EAE8E3]">
+              <button
+                onClick={() => {
+                  setDeleteModalEnquiry(detailModalEnquiry);
+                  setDetailModalEnquiry(null);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold text-xs transition flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete This Lead</span>
+              </button>
+
+              <button
+                onClick={() => setDetailModalEnquiry(null)}
+                className="px-4 py-2 rounded-xl bg-[#742B40] text-white font-semibold text-xs hover:bg-[#5E2233]"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Add Internal Note */}
       {noteModalOpen && (
@@ -565,6 +944,43 @@ export default function EnquiriesManager({
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal: Single Enquiry Deletion */}
+      <DeleteConfirmationModal
+        isOpen={Boolean(deleteModalEnquiry)}
+        title={`Delete Enquiry from ${deleteModalEnquiry?.name}?`}
+        description="This will permanently delete this customer lead record from the database."
+        impactDetails={
+          deleteModalEnquiry
+            ? [
+                { label: "Guest Name", value: deleteModalEnquiry.name },
+                { label: "Phone", value: deleteModalEnquiry.phone },
+                { label: "Type", value: typeBadges[deleteModalEnquiry.type]?.label || deleteModalEnquiry.type },
+                { label: "Status", value: deleteModalEnquiry.status },
+              ]
+            : []
+        }
+        requireTypeDelete={true}
+        requiredConfirmationText="DELETE"
+        onClose={() => setDeleteModalEnquiry(null)}
+        onConfirm={handleConfirmSingleDelete}
+      />
+
+      {/* Confirmation Modal: Bulk Enquiry Deletion */}
+      <DeleteConfirmationModal
+        isOpen={isBulkDeleteOpen}
+        title={`Bulk Delete ${selectedIds.length} Selected Enquiries?`}
+        description="This will permanently delete all selected lead records from the CRM inbox."
+        impactDetails={[
+          { label: "Selected Records", value: selectedIds.length },
+          { label: "Category", value: activeTab.toUpperCase() },
+          { label: "Action", value: "Permanent Database Deletion" },
+        ]}
+        requireTypeDelete={true}
+        requiredConfirmationText="DELETE"
+        onClose={() => setIsBulkDeleteOpen(false)}
+        onConfirm={handleConfirmBulkDelete}
+      />
     </div>
   );
 }
