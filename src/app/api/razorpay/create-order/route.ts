@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       guests = 2,
       mealPlan = "without_breakfast",
       occupancy = "double",
+      roomOccupancies,
       specialRequests,
       agreedToPolicy,
     } = body;
@@ -258,7 +259,8 @@ export async function POST(req: NextRequest) {
       parsedRooms,
       mealPlan as MealPlan,
       occupancy as Occupancy,
-      roomTypes
+      roomTypes,
+      Array.isArray(roomOccupancies) ? roomOccupancies : undefined
     );
 
     // 6. Generate secure identifiers
@@ -269,23 +271,28 @@ export async function POST(req: NextRequest) {
 
     // 7. Create Razorpay order
     const { keyId } = getRazorpayCredentials();
+    const orderNotes: Record<string, string> = {
+      bookingRef,
+      guestName: guestName.trim(),
+      phone: phoneValidation.cleanPhone,
+      email: email.trim().toLowerCase(),
+      roomCategory: room.code,
+      checkIn,
+      checkOut,
+      roomsRequested: String(parsedRooms),
+      guests: String(parsedGuests),
+      mealPlan: price.mealPlan,
+      occupancy: price.occupancy,
+    };
+    if (Array.isArray(roomOccupancies) && roomOccupancies.length > 0) {
+      orderNotes.roomOccupancies = JSON.stringify(roomOccupancies);
+    }
+
     const order = await createRazorpayOrder({
       amountPaise: price.amountInPaise,
       currency: PAYMENT_CONFIG.CURRENCY,
       receipt: bookingRef,
-      notes: {
-        bookingRef,
-        guestName: guestName.trim(),
-        phone: phoneValidation.cleanPhone,
-        email: email.trim().toLowerCase(),
-        roomCategory: room.code,
-        checkIn,
-        checkOut,
-        roomsRequested: String(parsedRooms),
-        guests: String(parsedGuests),
-        mealPlan: price.mealPlan,
-        occupancy: price.occupancy,
-      },
+      notes: orderNotes,
     });
 
     // 8. Store pending booking in Supabase

@@ -25,6 +25,12 @@ export const PAYMENT_CONFIG = {
 export type MealPlan = "with_breakfast" | "without_breakfast" | "cp" | "ep";
 export type Occupancy = "single" | "double" | 1 | 2;
 
+export interface RoomOccupancyDetail {
+  roomIndex: number;
+  occupancy: "single" | "double";
+  ratePerNight: number;
+}
+
 export interface PriceBreakdown {
   nights: number;
   ratePerNight: number;
@@ -40,13 +46,15 @@ export interface PriceBreakdown {
   roomTypeCode: string;
   mealPlan: "with_breakfast" | "without_breakfast";
   occupancy: "single" | "double";
+  roomOccupancies?: ("single" | "double")[];
+  roomDetails?: RoomOccupancyDetail[];
 }
 
 /**
  * Calculates booking amounts strictly on the server based on:
  * - Room Category
  * - Meal Plan (With Breakfast / Without Breakfast)
- * - Occupancy (Single / Double)
+ * - Occupancy (Single / Double) - supports uniform or per-room mixed occupancy
  * - Nights & Rooms
  * - GST Threshold Rule (<= 7500 -> 5%, > 7500 -> 18%)
  * Never trusts prices or subtotals sent by the client.
@@ -58,7 +66,8 @@ export function calculateServerBookingPrice(
   roomsRequested = 1,
   mealPlanInput: MealPlan = "without_breakfast",
   occupancyInput: Occupancy = "double",
-  roomTypesOverride?: RoomTypeConfig[]
+  roomTypesOverride?: RoomTypeConfig[],
+  roomOccupancies?: (Occupancy | string)[]
 ): PriceBreakdown {
   const roomTypes = roomTypesOverride || DEFAULT_ROOM_TYPES;
   const room =
@@ -84,42 +93,67 @@ export function calculateServerBookingPrice(
     ? "with_breakfast"
     : "without_breakfast";
 
-  // Normalize occupancy
-  const isSingle = occupancyInput === "single" || occupancyInput === 1;
-  const normalizedOccupancy: "single" | "double" = isSingle ? "single" : "double";
+  // Helper to get rate for a single room given its occupancy
+  const getRoomRate = (occ: Occupancy | string): { rate: number; normalizedOcc: "single" | "double" } => {
+    const isSingle = occ === "single" || occ === 1;
+    const normalizedOcc: "single" | "double" = isSingle ? "single" : "double";
 
-  // Determine rate per room per night from the 4 rate plans
-  let ratePerNight = room.pricePerNight;
-  if (isBreakfast) {
-    if (isSingle) {
-      ratePerNight = room.rateCpSingle ?? room.pricePerNight;
+    let rate = room.pricePerNight;
+    if (isBreakfast) {
+      if (isSingle) {
+        rate = room.rateCpSingle ?? room.pricePerNight;
+      } else {
+        rate = room.rateCpDouble ?? room.pricePerNight;
+      }
     } else {
-      ratePerNight = room.rateCpDouble ?? room.pricePerNight;
+      if (isSingle) {
+        rate = room.rateEpSingle ?? room.pricePerNight;
+      } else {
+        rate = room.rateEpDouble ?? room.pricePerNight;
+      }
     }
-  } else {
-    if (isSingle) {
-      ratePerNight = room.rateEpSingle ?? room.pricePerNight;
-    } else {
-      ratePerNight = room.rateEpDouble ?? room.pricePerNight;
+
+    if (!rate || rate <= 0) {
+      rate = room.pricePerNight || 2299;
     }
+
+    return { rate, normalizedOcc };
+  };
+
+  // If per-room occupancy array is provided, calculate each room individually
+  const hasPerRoomOccupancies = Array.isArray(roomOccupancies) && roomOccupancies.length > 0;
+  const roomDetails: RoomOccupancyDetail[] = [];
+  const normalizedOccupanciesList: ("single" | "double")[] = [];
+  let sumRoomRates = 0;
+
+  for (let i = 0; i < cleanRooms; i++) {
+    const occForThisRoom = hasPerRoomOccupancies && roomOccupancies[i]
+      ? roomOccupancies[i]
+      : occupancyInput;
+    const { rate, normalizedOcc } = getRoomRate(occForThisRoom);
+    roomDetails.push({
+      roomIndex: i + 1,
+      occupancy: normalizedOcc,
+      ratePerNight: rate,
+    });
+    normalizedOccupanciesList.push(normalizedOcc);
+    sumRoomRates += rate;
   }
 
-  // Fallback sanity check if 4-rate fields weren't filled in override
-  if (!ratePerNight || ratePerNight <= 0) {
-    ratePerNight = room.pricePerNight || 2299;
-  }
-
-  const baseAmount = nights * ratePerNight * cleanRooms;
+  const baseAmount = sumRoomRates * nights;
+  const primaryOccupancy = normalizedOccupanciesList[0] || (occupancyInput === "single" || occupancyInput === 1 ? "single" : "double");
+  const averageRatePerNight = Math.round(sumRoomRates / cleanRooms);
 
   // Apply GST threshold rule: base tariff per room per night <= 7500 -> 5%, > 7500 -> 18%
-  const gstPercent = ratePerNight <= PAYMENT_CONFIG.GST_THRESHOLD ? 5 : 18;
+  const maxRoomRate = Math.max(...roomDetails.map((r) => r.ratePerNight));
+  const gstPercent = maxRoomRate <= PAYMENT_CONFIG.GST_THRESHOLD ? 5 : 18;
   const gstAmount = Math.round(baseAmount * (gstPercent / 100));
   const totalAmount = baseAmount + gstAmount;
   const amountInPaise = Math.round(totalAmount * 100);
 
   return {
     nights,
-    ratePerNight,
+    ratePerNight: averageRatePerNight,
     roomsRequested: cleanRooms,
     subtotal: baseAmount,
     baseAmount,
@@ -131,6 +165,8 @@ export function calculateServerBookingPrice(
     roomTypeName: room.name,
     roomTypeCode: room.code,
     mealPlan: normalizedMealPlan,
-    occupancy: normalizedOccupancy,
+    occupancy: primaryOccupancy,
+    roomOccupancies: normalizedOccupanciesList,
+    roomDetails,
   };
 }

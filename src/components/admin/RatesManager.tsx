@@ -175,14 +175,14 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
                         <span className="text-sm font-bold font-mono text-[#24272B]">
                           {formatINR(epSingle)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 12% GST</span>
+                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
                       </div>
                       <div className="p-2.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3]">
                         <span className="text-[10px] text-[#6B7280] block">Double Guests</span>
                         <span className="text-sm font-bold font-mono text-[#24272B]">
                           {formatINR(epDouble)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 12% GST</span>
+                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
                       </div>
                     </div>
                   </div>
@@ -198,14 +198,14 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
                         <span className="text-sm font-bold font-mono text-[#742B40]">
                           {formatINR(cpSingle)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 12% GST</span>
+                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
                       </div>
                       <div className="p-2.5 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
                         <span className="text-[10px] text-[#6B7280] block">Double Guests</span>
                         <span className="text-sm font-bold font-mono text-[#742B40]">
                           {formatINR(cpDouble)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 12% GST</span>
+                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
                       </div>
                     </div>
                   </div>

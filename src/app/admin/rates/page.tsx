@@ -29,7 +29,7 @@ export default async function AdminRatesPage() {
     <AdminLayoutShell
       userEmail={user.email}
       title="Room Rates & Meal Plans"
-      subtitle="Hotel Fremont · Deluxe, Super Deluxe, Premium · Single/Double Occupancy · EP & CP Plans · 12% GST"
+      subtitle="Hotel Fremont · Deluxe, Super Deluxe, Premium · Single/Double Occupancy · EP & CP Plans · 5% GST (Tariff up to ₹7,500/night)"
     >
       <RatesManager initialRoomTypes={roomTypesRes.roomTypes || []} />
     </AdminLayoutShell>
