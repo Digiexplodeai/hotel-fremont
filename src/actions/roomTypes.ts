@@ -103,8 +103,32 @@ export async function getRoomTypesAction(includeInactive: boolean = false): Prom
 }
 
 /**
+ * Helper to get array of YYYY-MM-DD night dates for [checkIn, checkOut) using pure UTC
+ */
+function getStayNightsList(checkIn: string, checkOut: string): string[] {
+  if (!checkIn || !checkOut || checkOut <= checkIn) return [];
+  const [inY, inM, inD] = checkIn.split("-").map(Number);
+  const [outY, outM, outD] = checkOut.split("-").map(Number);
+  const dIn = new Date(Date.UTC(inY, inM - 1, inD));
+  const dOut = new Date(Date.UTC(outY, outM - 1, outD));
+  const diffDays = Math.round((dOut.getTime() - dIn.getTime()) / (1000 * 3600 * 24));
+  const nights: string[] = [];
+  for (let i = 0; i < diffDays; i++) {
+    const cur = new Date(dIn);
+    cur.setUTCDate(cur.getUTCDate() + i);
+    nights.push(cur.toISOString().slice(0, 10));
+  }
+  return nights;
+}
+
+/**
  * Public action: Check availability across [checkIn, checkOut) for all room types.
- * Calls RPC `get_room_availability`. Exposes zero private guest data.
+ * Authoritative, date-specific calculation:
+ * - Verified physical inventory: Deluxe (9), Super Deluxe (10), Premium (2).
+ * - Half-open stay date interval [checkIn, checkOut).
+ * - Excludes cancelled, closed, failed, and expired temporary holds.
+ * - Deduplicates between online bookings and front-desk reservations.
+ * - Strictly bounds availability between 0 and verified physical inventory.
  */
 export async function getRoomAvailabilityAction(
   checkIn: string,
@@ -115,60 +139,173 @@ export async function getRoomAvailabilityAction(
   error?: string;
 }> {
   try {
+    const nights = getStayNightsList(checkIn, checkOut);
+
+    // Baseline verified physical inventory
+    const baselineInventory = [
+      { code: "deluxe-room", name: "Deluxe Room", price_per_night: 2299, total_rooms: 9, max_guests: 2 },
+      { code: "super-deluxe", name: "Super Deluxe Room", price_per_night: 3299, total_rooms: 10, max_guests: 2 },
+      { code: "premium", name: "Premium Room", price_per_night: 4299, total_rooms: 2, max_guests: 2 },
+    ];
+
+    if (nights.length === 0) {
+      const fullList: RoomAvailabilityResult[] = [];
+      baselineInventory.forEach((item) => {
+        fullList.push({ ...item, rooms_left: item.total_rooms });
+        if (item.code === "super-deluxe") {
+          fullList.push({ ...item, code: "super-deluxe-room", rooms_left: item.total_rooms });
+        } else if (item.code === "premium") {
+          fullList.push({ ...item, code: "premium-room", rooms_left: item.total_rooms });
+        }
+      });
+      return { success: true, availability: fullList };
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !anonKey) {
-      return {
-        success: true,
-        availability: DEFAULT_ROOM_TYPES.map((rt) => ({
-          code: rt.code,
-          name: rt.name,
-          price_per_night: rt.pricePerNight,
-          total_rooms: rt.totalRooms,
-          rooms_left: rt.totalRooms,
-          max_guests: rt.maxGuests,
-        })),
-      };
+      const fullList: RoomAvailabilityResult[] = [];
+      baselineInventory.forEach((item) => {
+        fullList.push({ ...item, rooms_left: item.total_rooms });
+        if (item.code === "super-deluxe") {
+          fullList.push({ ...item, code: "super-deluxe-room", rooms_left: item.total_rooms });
+        } else if (item.code === "premium") {
+          fullList.push({ ...item, code: "premium-room", rooms_left: item.total_rooms });
+        }
+      });
+      return { success: true, availability: fullList };
     }
 
     const client = createSupabaseClient(supabaseUrl, anonKey);
+    const nowIso = new Date().toISOString();
 
-    const { data, error } = await client.rpc("get_room_availability", {
-      p_check_in: checkIn,
-      p_check_out: checkOut,
+    // 1. Fetch active room types from database
+    const { data: rtData } = await client
+      .from("room_types")
+      .select("code, name, price_per_night, total_rooms, rooms_total, max_guests")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    // 2. Fetch reservations overlapping [checkIn, checkOut)
+    const { data: resData } = await client
+      .from("reservations")
+      .select("id, reference_code, room_type, room_type_code, rooms_requested, check_in, check_out, status")
+      .in("status", ["confirmed", "converted", "paid"])
+      .lt("check_in", checkOut)
+      .gt("check_out", checkIn);
+
+    // 3. Fetch bookings overlapping [checkIn, checkOut)
+    const { data: bookData } = await client
+      .from("bookings")
+      .select("id, booking_ref, room_category, rooms_requested, rooms_count, check_in, check_out, status, expires_at")
+      .in("status", ["paid", "confirmed", "pending"])
+      .lt("check_in", checkOut)
+      .gt("check_out", checkIn);
+
+    const reservationsList = resData || [];
+    const countedRefs = new Set(reservationsList.map((r) => r.reference_code).filter(Boolean));
+
+    // Deduplicate: Exclude expired pending holds and bookings already counted in reservations
+    const validBookings = (bookData || []).filter((b) => {
+      if (b.status === "pending") {
+        if (!b.expires_at || b.expires_at <= nowIso) return false;
+      }
+      if (b.booking_ref && countedRefs.has(b.booking_ref)) {
+        return false;
+      }
+      return true;
     });
 
-    if (error) {
-      console.warn("[Availability] RPC get_room_availability fallback:", error.message);
-      const { data: rtData } = await client
-        .from("room_types")
-        .select("code, name, price_per_night, total_rooms, rooms_total, max_guests")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
+    const matchesCategory = (categoryCode: string, targetCode: string, targetName: string) => {
+      const c = (categoryCode || "").toLowerCase();
+      const tc = targetCode.toLowerCase();
+      const tn = targetName.toLowerCase();
 
-      const fallbackList = (rtData && rtData.length > 0 ? rtData : DEFAULT_ROOM_TYPES).map((r: any) => ({
-        code: r.code,
-        name: r.name,
-        price_per_night: Number(r.price_per_night || r.pricePerNight || 2299),
-        total_rooms: Number(r.rooms_total || r.total_rooms || r.totalRooms || 1),
-        rooms_left: Number(r.rooms_total || r.total_rooms || r.totalRooms || 1),
-        max_guests: Number(r.max_guests || r.maxGuests || 2),
-      }));
+      if (tc === "deluxe-room" || tc === "deluxe") {
+        return c === "deluxe-room" || c === "deluxe" || c.includes("deluxe room");
+      }
+      if (tc === "super-deluxe" || tc === "super-deluxe-room") {
+        return c === "super-deluxe" || c === "super-deluxe-room" || c.includes("super deluxe");
+      }
+      if (tc === "premium" || tc === "premium-room") {
+        return c === "premium" || c === "premium-room" || c.includes("premium room");
+      }
+      return c === tc || c === tn;
+    };
 
-      return { success: true, availability: fallbackList };
+    const evaluatedCategories = (rtData && rtData.length > 0 ? rtData : baselineInventory).map((row: any) => {
+      const code = row.code;
+      const name = row.name;
+      const price_per_night = Number(row.price_per_night || 2299);
+      const max_guests = Number(row.max_guests || 2);
+
+      // Enforce verified physical inventory: Deluxe=9, Super Deluxe=10, Premium=2
+      let physicalKeys = 9;
+      if (code === "deluxe-room" || code === "deluxe") physicalKeys = 9;
+      else if (code === "super-deluxe" || code === "super-deluxe-room") physicalKeys = 10;
+      else if (code === "premium" || code === "premium-room") physicalKeys = 2;
+      else physicalKeys = Number(row.rooms_total || row.total_rooms || 1);
+
+      // Nightly peak usage across all nights of the requested stay
+      let peakBooked = 0;
+      for (const night of nights) {
+        let nightBooked = 0;
+
+        for (const res of reservationsList) {
+          const resCat = res.room_type_code || res.room_type || "";
+          if (matchesCategory(resCat, code, name)) {
+            if (res.check_in <= night && res.check_out > night) {
+              nightBooked += Number(res.rooms_requested || 1);
+            }
+          }
+        }
+
+        for (const b of validBookings) {
+          const bookCat = b.room_category || "";
+          if (matchesCategory(bookCat, code, name)) {
+            if (b.check_in <= night && b.check_out > night) {
+              nightBooked += Number(b.rooms_count || b.rooms_requested || 1);
+            }
+          }
+        }
+
+        if (nightBooked > peakBooked) {
+          peakBooked = nightBooked;
+        }
+      }
+
+      const rooms_left = Math.max(0, Math.min(physicalKeys, physicalKeys - peakBooked));
+
+      return {
+        code,
+        name,
+        price_per_night,
+        total_rooms: physicalKeys,
+        rooms_left,
+        max_guests,
+      };
+    });
+
+    // Provide both canonical and aliased keys so every frontend lookup succeeds
+    const availabilityMap = new Map<string, RoomAvailabilityResult>();
+    for (const item of evaluatedCategories) {
+      availabilityMap.set(item.code, item);
+      if (item.code === "super-deluxe") {
+        availabilityMap.set("super-deluxe-room", { ...item, code: "super-deluxe-room" });
+      } else if (item.code === "super-deluxe-room") {
+        availabilityMap.set("super-deluxe", { ...item, code: "super-deluxe" });
+      } else if (item.code === "premium") {
+        availabilityMap.set("premium-room", { ...item, code: "premium-room" });
+      } else if (item.code === "premium-room") {
+        availabilityMap.set("premium", { ...item, code: "premium" });
+      }
     }
 
-    const availability: RoomAvailabilityResult[] = (data || []).map((row: any) => ({
-      code: row.code,
-      name: row.name,
-      price_per_night: Number(row.price_per_night),
-      total_rooms: Number(row.total_rooms),
-      rooms_left: Number(row.rooms_left),
-      max_guests: Number(row.max_guests),
-    }));
-
-    return { success: true, availability };
+    return {
+      success: true,
+      availability: Array.from(availabilityMap.values()),
+    };
   } catch (err: any) {
     return {
       success: false,
@@ -441,34 +578,43 @@ export async function getAvailabilityCalendarAction(
       .select("*")
       .order("sort_order", { ascending: true });
 
-    const roomTypes: RoomTypeConfig[] = (rtData && rtData.length > 0 ? rtData : DEFAULT_ROOM_TYPES).map((r: any) => ({
-      code: r.code,
-      name: r.name,
-      pricePerNight: Number(r.price_per_night || r.pricePerNight || 2299),
-      totalRooms: Number(r.rooms_total || r.total_rooms || r.totalRooms || 1),
-      roomsTotal: Number(r.rooms_total || r.total_rooms || r.totalRooms || 1),
-      maxGuests: Number(r.max_guests || r.maxGuests || 2),
-      isActive: Boolean(r.is_active !== false),
-      sortOrder: Number(r.sort_order || 0),
-    }));
+    const roomTypes: RoomTypeConfig[] = (rtData && rtData.length > 0 ? rtData : DEFAULT_ROOM_TYPES).map((r: any) => {
+      let physicalRooms = 9;
+      const c = (r.code || "").toLowerCase();
+      if (c === "deluxe-room" || c === "deluxe") physicalRooms = 9;
+      else if (c === "super-deluxe" || c === "super-deluxe-room") physicalRooms = 10;
+      else if (c === "premium" || c === "premium-room") physicalRooms = 2;
+      else physicalRooms = Number(r.rooms_total || r.total_rooms || 1);
+
+      return {
+        code: r.code,
+        name: r.name,
+        pricePerNight: Number(r.price_per_night || r.pricePerNight || 2299),
+        totalRooms: physicalRooms,
+        roomsTotal: physicalRooms,
+        maxGuests: Number(r.max_guests || r.maxGuests || 2),
+        isActive: Boolean(r.is_active !== false),
+        sortOrder: Number(r.sort_order || 0),
+      };
+    });
 
     const totalKeys = roomTypes.reduce((acc, rt) => acc + (rt.isActive ? rt.totalRooms : 0), 0) || 21;
 
-    // 2. Determine date range
-    const start = startDateStr ? new Date(startDateStr) : new Date();
-    start.setHours(0, 0, 0, 0);
+    // 2. Determine date range using pure UTC to avoid local timezone drift
+    const [startY, startM, startD] = (startDateStr ? startDateStr.slice(0, 10) : new Date().toISOString().slice(0, 10))
+      .split("-")
+      .map(Number);
+    const startUtc = new Date(Date.UTC(startY, startM - 1, startD));
+    const endUtc = new Date(Date.UTC(startY, startM - 1, startD + daysCount));
 
-    const end = new Date(start);
-    end.setDate(end.getDate() + daysCount);
-
-    const minDateStr = start.toISOString().slice(0, 10);
-    const maxDateStr = end.toISOString().slice(0, 10);
+    const minDateStr = startUtc.toISOString().slice(0, 10);
+    const maxDateStr = endUtc.toISOString().slice(0, 10);
 
     // 3. Fetch confirmed reservations overlapping this 60-day period
     const { data: reservations, error: resError } = await supabase
       .from("reservations")
       .select("id, reference_code, full_name, phone, room_type, room_type_code, rooms_requested, check_in, check_out, status")
-      .in("status", ["confirmed", "converted"])
+      .in("status", ["confirmed", "converted", "paid"])
       .lt("check_in", maxDateStr)
       .gt("check_out", minDateStr);
 
@@ -480,21 +626,42 @@ export async function getAvailabilityCalendarAction(
     const { data: bookingsData } = await supabase
       .from("bookings")
       .select("id, booking_ref, guest_name, phone, room_category, rooms_requested, rooms_count, check_in, check_out, status")
-      .eq("status", "paid")
+      .in("status", ["paid", "confirmed"])
       .lt("check_in", maxDateStr)
       .gt("check_out", minDateStr);
 
     const activeReservations = reservations || [];
-    const activeBookings = bookingsData || [];
+    const countedRefs = new Set(activeReservations.map((r) => r.reference_code).filter(Boolean));
+
+    // Deduplicate bookings against reservations
+    const activeBookings = (bookingsData || []).filter((b) => {
+      if (b.booking_ref && countedRefs.has(b.booking_ref)) return false;
+      return true;
+    });
+
+    // Category code resolver to handle aliases smoothly
+    const resolveCategoryCode = (rawCode: string, rawName: string): string => {
+      const rc = (rawCode || "").toLowerCase();
+      const rn = (rawName || "").toLowerCase();
+      if (rc === "deluxe-room" || rc === "deluxe" || rn.includes("deluxe room")) {
+        return roomTypes.find((rt) => rt.code === "deluxe-room" || rt.code === "deluxe")?.code || "deluxe-room";
+      }
+      if (rc === "super-deluxe" || rc === "super-deluxe-room" || rn.includes("super deluxe")) {
+        return roomTypes.find((rt) => rt.code === "super-deluxe" || rt.code === "super-deluxe-room")?.code || "super-deluxe";
+      }
+      if (rc === "premium" || rc === "premium-room" || rn.includes("premium room")) {
+        return roomTypes.find((rt) => rt.code === "premium" || rt.code === "premium-room")?.code || "premium";
+      }
+      return rawCode || roomTypes[0]?.code || "deluxe-room";
+    };
 
     // 4. Build day-by-day matrix
     const calendar: CalendarDaySummary[] = [];
     const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     for (let i = 0; i < daysCount; i++) {
-      const current = new Date(start);
-      current.setDate(current.getDate() + i);
-      const dateStr = current.toISOString().slice(0, 10);
+      const curUtc = new Date(Date.UTC(startY, startM - 1, startD + i));
+      const dateStr = curUtc.toISOString().slice(0, 10);
 
       const byRoomType: Record<string, { booked: number; total: number; roomsLeft: number }> = {};
       roomTypes.forEach((rt) => {
@@ -510,10 +677,7 @@ export async function getAvailabilityCalendarAction(
 
       for (const res of activeReservations) {
         if (res.check_in <= dateStr && res.check_out > dateStr) {
-          const roomCode = res.room_type_code || (
-            roomTypes.find((rt) => rt.name.toLowerCase() === res.room_type?.toLowerCase())?.code || "deluxe-room"
-          );
-
+          const roomCode = resolveCategoryCode(res.room_type_code, res.room_type);
           const roomsCount = Number(res.rooms_requested) || 1;
           totalOccupiedTonight += roomsCount;
 
@@ -538,7 +702,7 @@ export async function getAvailabilityCalendarAction(
 
       for (const b of activeBookings) {
         if (b.check_in <= dateStr && b.check_out > dateStr) {
-          const roomCode = b.room_category || "deluxe-room";
+          const roomCode = resolveCategoryCode(b.room_category, b.room_category);
           const roomsCount = Number(b.rooms_count || b.rooms_requested || 1);
           totalOccupiedTonight += roomsCount;
 
@@ -565,8 +729,8 @@ export async function getAvailabilityCalendarAction(
 
       calendar.push({
         date: dateStr,
-        dayOfWeek: daysOfWeek[current.getDay()],
-        dayOfMonth: current.getDate(),
+        dayOfWeek: daysOfWeek[curUtc.getUTCDay()],
+        dayOfMonth: curUtc.getUTCDate(),
         totalOccupied: totalOccupiedTonight,
         totalInventory: totalKeys,
         occupancyPercentage,

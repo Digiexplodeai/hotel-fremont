@@ -84,6 +84,29 @@ function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
+// Helper to resolve room availability across category aliases
+function getCategoryAvailability(availMap: Record<string, RoomAvailabilityResult>, code: string): RoomAvailabilityResult | undefined {
+  if (!availMap) return undefined;
+  if (availMap[code]) return availMap[code];
+  const c = (code || "").toLowerCase();
+  if (c === "super-deluxe-room" && availMap["super-deluxe"]) return availMap["super-deluxe"];
+  if (c === "super-deluxe" && availMap["super-deluxe-room"]) return availMap["super-deluxe-room"];
+  if (c === "premium-room" && availMap["premium"]) return availMap["premium"];
+  if (c === "premium" && availMap["premium-room"]) return availMap["premium-room"];
+  if (c === "deluxe-room" && availMap["deluxe"]) return availMap["deluxe"];
+  if (c === "deluxe" && availMap["deluxe-room"]) return availMap["deluxe-room"];
+  return undefined;
+}
+
+// Helper to strictly enforce verified physical room inventory caps (21 total keys)
+function getCategoryTotalKeys(rt: RoomTypeConfig): number {
+  const c = (rt.code || "").toLowerCase();
+  if (c === "deluxe-room" || c === "deluxe") return 9;
+  if (c === "super-deluxe-room" || c === "super-deluxe") return 10;
+  if (c === "premium-room" || c === "premium") return 2;
+  return Number(rt.roomsTotal || rt.totalRooms || 1);
+}
+
 export default function BookingModal({
   isOpen,
   onClose,
@@ -219,16 +242,20 @@ export default function BookingModal({
   }, [roomTypes, selectedCode]);
 
   // Inventory limits for active room
-  const currentRoomAvail = availability[activeRoom.code];
-  const categoryTotal = activeRoom.roomsTotal || activeRoom.totalRooms || 21;
-  const roomsLeft = currentRoomAvail !== undefined ? currentRoomAvail.rooms_left : categoryTotal;
+  const categoryTotal = getCategoryTotalKeys(activeRoom);
+  const currentRoomAvail = getCategoryAvailability(availability, activeRoom.code);
+  const roomsLeft = currentRoomAvail !== undefined
+    ? Math.max(0, Math.min(categoryTotal, currentRoomAvail.rooms_left))
+    : categoryTotal;
   const isCurrentRoomSoldOut = currentRoomAvail ? roomsLeft <= 0 : false;
 
   const isEntireHotelSoldOut = useMemo(() => {
     if (Object.keys(availability).length === 0) return false;
     return roomTypes.every((rt) => {
-      const av = availability[rt.code];
-      return av ? av.rooms_left <= 0 : false;
+      const av = getCategoryAvailability(availability, rt.code);
+      const catCap = getCategoryTotalKeys(rt);
+      const left = av !== undefined ? Math.max(0, Math.min(catCap, av.rooms_left)) : catCap;
+      return left <= 0;
     });
   }, [availability, roomTypes]);
 
@@ -755,12 +782,12 @@ export default function BookingModal({
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {roomTypes.map((rt) => {
-                      const av = availability[rt.code];
-                      const totalKeys = rt.roomsTotal || rt.totalRooms || (rt.code === "deluxe-room" ? 9 : rt.code === "super-deluxe-room" ? 10 : 2);
-                      const left = av ? av.rooms_left : totalKeys;
-                      const isSoldOut = av ? left <= 0 : false;
+                      const av = getCategoryAvailability(availability, rt.code);
+                      const totalKeys = getCategoryTotalKeys(rt);
+                      const left = av !== undefined ? Math.max(0, Math.min(totalKeys, av.rooms_left)) : totalKeys;
+                      const isSoldOut = left <= 0;
                       const isSelected = selectedCode === rt.code;
-                      const startingRate = rt.rateEpSingle || rt.pricePerNight || (rt.code === "deluxe-room" ? 2299 : rt.code === "super-deluxe-room" ? 3299 : 4299);
+                      const startingRate = rt.rateEpSingle || rt.pricePerNight || (rt.code === "deluxe-room" ? 2299 : rt.code.includes("super-deluxe") ? 3299 : 4299);
 
                       return (
                         <div

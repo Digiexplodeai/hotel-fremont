@@ -229,7 +229,7 @@ export default function ReservationsManager({
     return bookings.filter((item) => {
       if (categoryFilter !== "all") {
         const cat = item.roomCategory.toLowerCase();
-        if (categoryFilter === "deluxe" && !cat.includes("deluxe")) return false;
+        if (categoryFilter === "deluxe" && (cat.includes("super") || !cat.includes("deluxe"))) return false;
         if (categoryFilter === "super-deluxe" && !cat.includes("super")) return false;
         if (categoryFilter === "premium" && !cat.includes("premium")) return false;
       }

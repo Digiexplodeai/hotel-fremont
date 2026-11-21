@@ -6,6 +6,7 @@ import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
 import { validateIndianPhone, HOTEL_CONFIG, DEFAULT_ROOM_TYPES } from "@/config/hotel";
 import { isRazorpayTestMode } from "@/lib/razorpay";
+import { getRoomAvailabilityAction } from "./roomTypes";
 
 export type ReservationStatus =
   | "new"
@@ -239,14 +240,15 @@ export async function submitReservationAction(input: SubmitReservationInput): Pr
           };
         }
 
-        // Validate real inventory availability
-        const { data: availData } = await dbClient.rpc("get_room_availability", {
-          p_check_in: input.checkIn,
-          p_check_out: input.checkOut,
-        });
-
-        if (availData && Array.isArray(availData)) {
-          const matchAvail = availData.find((a: any) => a.code === roomTypeCode);
+        // Validate real inventory availability using authoritative action
+        const availRes = await getRoomAvailabilityAction(input.checkIn, input.checkOut);
+        if (availRes.success && availRes.availability) {
+          const matchAvail = availRes.availability.find(
+            (a) =>
+              a.code.toLowerCase() === roomTypeCode.toLowerCase() ||
+              (roomTypeCode.includes("super-deluxe") && a.code.includes("super-deluxe")) ||
+              (roomTypeCode.includes("premium") && a.code.includes("premium"))
+          );
           if (matchAvail && matchAvail.rooms_left < roomsRequested) {
             return {
               success: false,

@@ -163,7 +163,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const totalCategoryRooms = room.roomsTotal || room.totalRooms || 21;
+    // Enforce verified physical inventory caps: Deluxe (9), Super Deluxe (10), Premium (2)
+    let totalCategoryRooms = 9;
+    const rc = room.code.toLowerCase();
+    if (rc === "deluxe-room" || rc === "deluxe") totalCategoryRooms = 9;
+    else if (rc === "super-deluxe" || rc === "super-deluxe-room") totalCategoryRooms = 10;
+    else if (rc === "premium" || rc === "premium-room") totalCategoryRooms = 2;
+    else totalCategoryRooms = room.roomsTotal || room.totalRooms || 1;
+
     const parsedRooms = Math.max(1, parseInt(String(roomsRequested), 10) || 1);
     if (parsedRooms > totalCategoryRooms) {
       return NextResponse.json(
@@ -200,7 +207,7 @@ export async function POST(req: NextRequest) {
       // Check overlapping active bookings (paid or unexpired pending)
       const { data: overlappingBookings } = await supabase
         .from("bookings")
-        .select("rooms_requested, rooms_count, check_in, check_out, status, expires_at")
+        .select("booking_ref, rooms_requested, rooms_count, check_in, check_out, status, expires_at")
         .or(`room_category.eq.${room.code},room_category.eq.${room.slug || room.code}`)
         .in("status", ["paid", "pending"])
         .lt("check_in", checkOut)
@@ -209,30 +216,56 @@ export async function POST(req: NextRequest) {
       // Check overlapping confirmed reservations in the existing system
       const { data: overlappingReservations } = await supabase
         .from("reservations")
-        .select("rooms_requested, check_in, check_out")
+        .select("reference_code, rooms_requested, check_in, check_out")
         .or(`room_type_code.eq.${room.code},room_type.ilike.%${room.name}%`)
-        .in("status", ["confirmed", "converted"])
+        .in("status", ["confirmed", "converted", "paid"])
         .lt("check_in", checkOut)
         .gt("check_out", checkIn);
 
+      const activeReservations = overlappingReservations || [];
+      const countedRefs = new Set(activeReservations.map((r) => r.reference_code).filter(Boolean));
+
       const activeBookings = (overlappingBookings || []).filter((b) => {
-        if (b.status === "paid") return true;
-        if (b.status === "pending" && b.expires_at && new Date(b.expires_at) > new Date()) return true;
+        if (b.status === "paid") {
+          if (b.booking_ref && countedRefs.has(b.booking_ref)) return false;
+          return true;
+        }
+        if (b.status === "pending" && b.expires_at && new Date(b.expires_at) > new Date()) {
+          if (b.booking_ref && countedRefs.has(b.booking_ref)) return false;
+          return true;
+        }
         return false;
       });
 
-      // Calculate max occupied rooms on any night during stay
+      // Calculate max occupied rooms on any night during stay using pure UTC
+      const [inY, inM, inD] = checkIn.split("-").map(Number);
+      const [outY, outM, outD] = checkOut.split("-").map(Number);
+      const dInUtc = new Date(Date.UTC(inY, inM - 1, inD));
+      const dOutUtc = new Date(Date.UTC(outY, outM - 1, outD));
+      const stayDays = Math.round((dOutUtc.getTime() - dInUtc.getTime()) / (1000 * 3600 * 24));
+
       const occupancyByDate: Record<string, number> = {};
+      for (let i = 0; i < stayDays; i++) {
+        const cur = new Date(dInUtc);
+        cur.setUTCDate(cur.getUTCDate() + i);
+        const nightStr = cur.toISOString().slice(0, 10);
+        occupancyByDate[nightStr] = 0;
+      }
 
-      for (const item of [...activeBookings, ...(overlappingReservations || [])]) {
-        const itemStart = new Date(item.check_in);
-        const itemEnd = new Date(item.check_out);
-        const bookedCount = Number((item as any).rooms_count || item.rooms_requested || 1);
+      for (const res of activeReservations) {
+        const count = Number(res.rooms_requested || 1);
+        for (const night of Object.keys(occupancyByDate)) {
+          if (res.check_in <= night && res.check_out > night) {
+            occupancyByDate[night] = (occupancyByDate[night] || 0) + count;
+          }
+        }
+      }
 
-        for (let d = new Date(itemStart); d < itemEnd; d.setDate(d.getDate() + 1)) {
-          const dKey = d.toISOString().slice(0, 10);
-          if (dKey >= checkIn && dKey < checkOut) {
-            occupancyByDate[dKey] = (occupancyByDate[dKey] || 0) + bookedCount;
+      for (const b of activeBookings) {
+        const count = Number(b.rooms_count || b.rooms_requested || 1);
+        for (const night of Object.keys(occupancyByDate)) {
+          if (b.check_in <= night && b.check_out > night) {
+            occupancyByDate[night] = (occupancyByDate[night] || 0) + count;
           }
         }
       }

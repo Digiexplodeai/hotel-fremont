@@ -56,9 +56,33 @@ export default async function AdminDashboardPage() {
   const reservations = reservationsRes.reservations || [];
 
   const totalKeys = 21;
-  const occupiedCount = rooms.filter((r) => r.status === "occupied").length;
-  const availableCount = Math.max(0, totalKeys - occupiedCount);
   const todayStr = new Date().toISOString().slice(0, 10);
+
+  // Active in-house stays TONIGHT (check_in <= todayStr && check_out > todayStr)
+  // Future bookings for tomorrow or next month must NEVER count towards today's occupancy
+  const activeTonightBookings = bookings.filter(
+    (b) =>
+      b.checkIn <= todayStr &&
+      b.checkOut > todayStr &&
+      (b.status === "paid" || b.status === "confirmed" || b.status === "checked_in")
+  );
+  const activeTonightRefs = new Set(activeTonightBookings.map((b) => b.bookingCode).filter(Boolean));
+
+  const activeTonightReservations = reservations.filter(
+    (r) =>
+      r.check_in <= todayStr &&
+      r.check_out > todayStr &&
+      (r.status === "confirmed" || r.status === "converted" || r.status === "paid") &&
+      !activeTonightRefs.has(r.reference_code || "")
+  );
+
+  const activeInHouseRoomsCount =
+    activeTonightBookings.reduce((sum, b) => sum + (b.roomsRequested || 1), 0) +
+    activeTonightReservations.reduce((sum, r) => sum + (r.rooms_requested || 1), 0);
+
+  const physicalOccupiedCount = rooms.filter((r) => r.status === "occupied").length;
+  const occupiedCount = Math.min(totalKeys, Math.max(physicalOccupiedCount, activeInHouseRoomsCount));
+  const availableCount = Math.max(0, totalKeys - occupiedCount);
 
   // Today's arrivals (deduplicated between online bookings and reservations)
   const arrivalsFromBookings = bookings.filter((b) => b.checkIn === todayStr);

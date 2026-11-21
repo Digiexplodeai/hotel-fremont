@@ -189,15 +189,21 @@ export default function RoomCalendar({ initialCalendar }: RoomCalendarProps) {
                   <div className="pt-2 border-t border-[#EAE8E3] text-[10px] font-mono space-y-0.5 text-[#6B7280]">
                     <div className="flex justify-between">
                       <span>Deluxe:</span>
-                      <span className="font-semibold text-[#24272B]">{day.byRoomType["deluxe-room"]?.booked || 0}/9</span>
+                      <span className="font-semibold text-[#24272B]">
+                        {(day.byRoomType["deluxe-room"]?.booked ?? day.byRoomType["deluxe"]?.booked) || 0}/9
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>S. Deluxe:</span>
-                      <span className="font-semibold text-[#24272B]">{day.byRoomType["super-deluxe"]?.booked || 0}/10</span>
+                      <span className="font-semibold text-[#24272B]">
+                        {(day.byRoomType["super-deluxe"]?.booked ?? day.byRoomType["super-deluxe-room"]?.booked) || 0}/10
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Premium:</span>
-                      <span className="font-semibold text-[#24272B]">{day.byRoomType["premium"]?.booked || 0}/2</span>
+                      <span className="font-semibold text-[#24272B]">
+                        {(day.byRoomType["premium"]?.booked ?? day.byRoomType["premium-room"]?.booked) || 0}/2
+                      </span>
                     </div>
                   </div>
                 ) : (
