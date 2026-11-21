@@ -24,6 +24,13 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       smoothWheel: true,
       wheelMultiplier: 1.0,
       touchMultiplier: 1.5,
+      // Crucial: Allow native mouse-wheel and touch scrolling in all modals and scroll containers
+      prevent: (node) => {
+        return (
+          node.hasAttribute?.("data-lenis-prevent") ||
+          Boolean(node.closest?.("[data-lenis-prevent], [role='dialog'], .overflow-y-auto, [data-scroll-container]"))
+        );
+      },
     });
     lenisRef.current = lenis;
     if (typeof window !== "undefined") {

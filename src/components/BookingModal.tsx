@@ -195,6 +195,23 @@ export default function BookingModal({
   }, [initialData]);
 
   const latestRequestIdRef = useRef<number>(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Reset scroll position to top when transitioning between steps
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [currentStep]);
+
+  // Ensure mouse wheel scrolling works anywhere inside the modal window,
+  // including when hovering over the non-scrollable header, badges, or step pills
+  const handleModalWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current.contains(e.target as Node)) {
+      scrollContainerRef.current.scrollTop += e.deltaY;
+    }
+  };
 
   // 2. Fetch Live Availability when checkIn or checkOut change
   // Uses dedicated un-cached API route with fallback to Server Action
@@ -557,7 +574,10 @@ export default function BookingModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div
+        data-lenis-prevent
+        className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-hidden overscroll-contain"
+      >
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -569,11 +589,16 @@ export default function BookingModal({
 
         {/* Modal Window */}
         <motion.div
+          data-lenis-prevent
+          role="dialog"
+          aria-modal="true"
+          onWheel={handleModalWheel}
           initial={{ opacity: 0, scale: 0.96, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 16 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="relative w-full max-w-3xl bg-[#151518] border border-white/10 rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.85)] p-5 sm:p-8 z-10 my-auto text-[#F7F3EC] max-h-[92vh] flex flex-col overflow-hidden"
+          className="relative w-full max-w-3xl bg-[#151518] border border-white/10 rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.85)] p-5 sm:p-8 z-10 my-auto text-[#F7F3EC] max-h-[92vh] flex flex-col overflow-hidden overscroll-contain"
+          style={{ overscrollBehavior: "contain" }}
         >
           {/* Close Button */}
           <button
@@ -729,7 +754,18 @@ export default function BookingModal({
           )}
 
           {/* Scrollable Step Content Body */}
-          <div className="flex-1 overflow-y-auto pr-1 space-y-5">
+          <div
+            ref={scrollContainerRef}
+            data-lenis-prevent
+            data-lenis-prevent-wheel
+            data-lenis-prevent-touch
+            tabIndex={0}
+            className="flex-1 overflow-y-auto min-h-0 pr-1 sm:pr-2 space-y-5 overscroll-contain focus:outline-none"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              overscrollBehavior: "contain",
+            }}
+          >
             {/* ================= STEP 1: SELECT YOUR STAY ================= */}
             {currentStep === 1 && (
               <motion.div
