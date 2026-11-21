@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyRazorpayWebhookSignature } from "@/lib/razorpay";
+import { verifyRazorpayWebhookSignature, isRazorpayTestMode } from "@/lib/razorpay";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { sendBookingConfirmationEmails } from "@/lib/email";
 import { DEFAULT_ROOM_TYPES } from "@/config/hotel";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: NextRequest) {
   try {
@@ -120,16 +121,27 @@ export async function POST(req: NextRequest) {
             check_out: booking.check_out,
             guests: booking.guests || 1,
             estimated_total: booking.total_amount,
+            amount_paid: booking.total_amount,
             status: "confirmed",
             channel: "razorpay",
             special_request: booking.special_requests,
+            razorpay_order_id: orderId,
+            razorpay_payment_id: paymentId,
+            payment_method: paymentMethod,
+            paid_at: paidAt,
           });
         } else {
           await supabase
             .from("reservations")
             .update({
               status: "confirmed",
+              channel: "razorpay",
               estimated_total: booking.total_amount,
+              amount_paid: booking.total_amount,
+              razorpay_order_id: orderId,
+              razorpay_payment_id: paymentId,
+              payment_method: paymentMethod,
+              paid_at: paidAt,
               updated_at: paidAt,
             })
             .eq("id", existingRes.id);
@@ -137,6 +149,15 @@ export async function POST(req: NextRequest) {
       } catch (syncErr) {
         console.warn("[Razorpay Webhook] Reservation sync warning:", syncErr);
       }
+
+      // Revalidate admin dashboard and front desk cache
+      try {
+        revalidatePath("/admin");
+        revalidatePath("/admin/reservations");
+        revalidatePath("/admin/payments");
+        revalidatePath("/admin/rooms");
+        revalidatePath("/admin/calendar");
+      } catch {}
 
       // 5. Send Resend Confirmation Emails to both Customer and Admin(s)
       try {

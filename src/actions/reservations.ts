@@ -5,6 +5,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
 import { validateIndianPhone, HOTEL_CONFIG, DEFAULT_ROOM_TYPES } from "@/config/hotel";
+import { isRazorpayTestMode } from "@/lib/razorpay";
 
 export type ReservationStatus =
   | "new"
@@ -44,6 +45,8 @@ export interface ReservationRecord {
   razorpay_payment_id?: string | null;
   payment_method?: string | null;
   paid_at?: string | null;
+  payment_environment?: "TEST" | "LIVE";
+  payment_gateway?: string;
 }
 
 export interface SubmitReservationInput {
@@ -374,6 +377,7 @@ export async function getReservationsAction(): Promise<{
       }
     }
 
+    const isTestMode = isRazorpayTestMode();
     const seenRefs = new Set<string>();
     const list: ReservationRecord[] = [];
 
@@ -383,6 +387,12 @@ export async function getReservationsAction(): Promise<{
         const ref = row.reference_code || `FRM-${row.id.slice(0, 6).toUpperCase()}`;
         seenRefs.add(ref);
         const linkedBooking = bookingsByRef.get(ref);
+        const hasPayment = Boolean(
+          linkedBooking?.razorpay_payment_id ||
+          row.razorpay_payment_id ||
+          linkedBooking?.status === "paid" ||
+          Number(linkedBooking?.amount_paid || row.amount_paid || 0) > 0
+        );
 
         list.push({
           id: row.id,
@@ -400,14 +410,16 @@ export async function getReservationsAction(): Promise<{
           email: row.email || linkedBooking?.email || null,
           special_request: row.special_request || linkedBooking?.special_requests || null,
           estimated_total: Number(linkedBooking?.total_amount || row.estimated_total || 0),
-          status: (linkedBooking?.status || row.status) as ReservationStatus,
+          status: (linkedBooking?.status === "paid" ? "confirmed" : (linkedBooking?.status || row.status)) as ReservationStatus,
           capacity_override: Boolean(row.capacity_override),
-          channel: linkedBooking ? "razorpay" : (row.channel || "room_reservation"),
-          amount_paid: Number(linkedBooking?.amount_paid || 0),
-          razorpay_order_id: linkedBooking?.razorpay_order_id || null,
-          razorpay_payment_id: linkedBooking?.razorpay_payment_id || null,
-          payment_method: linkedBooking?.payment_method || null,
-          paid_at: linkedBooking?.paid_at || null,
+          channel: linkedBooking || row.channel === "razorpay" ? "razorpay" : (row.channel || "room_reservation"),
+          amount_paid: Number(linkedBooking?.amount_paid || row.amount_paid || 0),
+          razorpay_order_id: linkedBooking?.razorpay_order_id || row.razorpay_order_id || null,
+          razorpay_payment_id: linkedBooking?.razorpay_payment_id || row.razorpay_payment_id || null,
+          payment_method: linkedBooking?.payment_method || row.payment_method || null,
+          paid_at: linkedBooking?.paid_at || row.paid_at || null,
+          payment_environment: hasPayment ? (isTestMode ? "TEST" : "LIVE") : undefined,
+          payment_gateway: hasPayment ? "Razorpay" : undefined,
         });
       }
     }
@@ -424,6 +436,7 @@ export async function getReservationsAction(): Promise<{
       for (const b of bookingsData) {
         if (!seenRefs.has(b.booking_ref)) {
           seenRefs.add(b.booking_ref);
+          const hasPayment = Boolean(b.razorpay_payment_id || b.status === "paid" || Number(b.amount_paid) > 0);
           list.push({
             id: b.id,
             created_at: b.created_at,
@@ -440,13 +453,15 @@ export async function getReservationsAction(): Promise<{
             email: b.email,
             special_request: b.special_requests,
             estimated_total: Number(b.total_amount || 0),
-            status: b.status as ReservationStatus,
+            status: (b.status === "paid" ? "confirmed" : b.status) as ReservationStatus,
             channel: "razorpay",
             amount_paid: Number(b.amount_paid || 0),
             razorpay_order_id: b.razorpay_order_id,
             razorpay_payment_id: b.razorpay_payment_id,
             payment_method: b.payment_method,
             paid_at: b.paid_at,
+            payment_environment: hasPayment ? (isTestMode ? "TEST" : "LIVE") : undefined,
+            payment_gateway: hasPayment ? "Razorpay" : undefined,
           });
         }
       }

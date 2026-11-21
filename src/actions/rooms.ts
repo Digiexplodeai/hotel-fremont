@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { roomCategories as defaultRoomCategories } from "@/data/rooms";
 import { revalidatePath } from "next/cache";
+import { isRazorpayTestMode } from "@/lib/razorpay";
 
 export type RoomStatus = "available" | "occupied" | "cleaning" | "maintenance" | "blocked";
 export type BookingStatus =
@@ -63,6 +64,8 @@ export interface BookingRecord {
   baseAmount?: number;
   gstPercent?: number;
   gstAmount?: number;
+  paymentEnvironment?: "TEST" | "LIVE";
+  paymentGateway?: string;
 }
 
 // Exactly 21 Physical Rooms Inventory across 3 categories
@@ -216,37 +219,44 @@ export async function getBookingsAction(): Promise<{
       "royal-fremont": "Premium Room",
     };
 
-    const mapped: BookingRecord[] = dbBookings.map((b) => ({
-      id: b.id,
-      bookingCode: b.booking_ref || `FRM-${b.id.slice(0, 6).toUpperCase()}`,
-      guestName: b.guest_name,
-      guestPhone: b.phone,
-      guestEmail: b.email,
-      categorySlug: b.room_category,
-      categoryName: categoryMap[b.room_category] || b.room_category,
-      roomNumber: b.room_number || undefined,
-      checkIn: b.check_in,
-      checkOut: b.check_out,
-      guestsCount: b.guests || 1,
-      totalAmount: Number(b.total_amount) || 0,
-      advancePaid: Number(b.amount_paid) || 0,
-      amountPaid: Number(b.amount_paid) || 0,
-      status: b.status as BookingStatus,
-      source: "website",
-      notes: b.special_requests || "",
-      createdAt: b.created_at,
-      razorpayPaymentId: b.razorpay_payment_id || undefined,
-      razorpayOrderId: b.razorpay_order_id || undefined,
-      paymentMethod: b.payment_method || undefined,
-      paidAt: b.paid_at || undefined,
-      roomsRequested: b.rooms_requested || b.rooms_count || 1,
-      mealPlan: b.meal_plan || "without_breakfast",
-      occupancy: b.occupancy || "double",
-      ratePerNight: b.rate_per_night ? Number(b.rate_per_night) : undefined,
-      baseAmount: b.base_amount ? Number(b.base_amount) : undefined,
-      gstPercent: b.gst_percent ? Number(b.gst_percent) : undefined,
-      gstAmount: b.gst_amount ? Number(b.gst_amount) : undefined,
-    }));
+    const isTestEnv = isRazorpayTestMode();
+
+    const mapped: BookingRecord[] = dbBookings.map((b) => {
+      const hasPayment = Boolean(b.razorpay_payment_id || b.razorpay_order_id || Number(b.amount_paid) > 0);
+      return {
+        id: b.id,
+        bookingCode: b.booking_ref || `FRM-${b.id.slice(0, 6).toUpperCase()}`,
+        guestName: b.guest_name,
+        guestPhone: b.phone,
+        guestEmail: b.email,
+        categorySlug: b.room_category,
+        categoryName: categoryMap[b.room_category] || b.room_category,
+        roomNumber: b.room_number || undefined,
+        checkIn: b.check_in,
+        checkOut: b.check_out,
+        guestsCount: b.guests || 1,
+        totalAmount: Number(b.total_amount) || 0,
+        advancePaid: Number(b.amount_paid) || 0,
+        amountPaid: Number(b.amount_paid) || 0,
+        status: b.status as BookingStatus,
+        source: "website",
+        notes: b.special_requests || "",
+        createdAt: b.created_at,
+        razorpayPaymentId: b.razorpay_payment_id || undefined,
+        razorpayOrderId: b.razorpay_order_id || undefined,
+        paymentMethod: b.payment_method || undefined,
+        paidAt: b.paid_at || undefined,
+        roomsRequested: b.rooms_requested || b.rooms_count || 1,
+        mealPlan: b.meal_plan || "without_breakfast",
+        occupancy: b.occupancy || "double",
+        ratePerNight: b.rate_per_night ? Number(b.rate_per_night) : undefined,
+        baseAmount: b.base_amount ? Number(b.base_amount) : undefined,
+        gstPercent: b.gst_percent ? Number(b.gst_percent) : undefined,
+        gstAmount: b.gst_amount ? Number(b.gst_amount) : undefined,
+        paymentEnvironment: hasPayment ? (isTestEnv ? "TEST" : "LIVE") : undefined,
+        paymentGateway: b.razorpay_payment_id || b.razorpay_order_id ? "Razorpay" : undefined,
+      };
+    });
 
     return { success: true, bookings: mapped, isDatabase: true };
   } catch {

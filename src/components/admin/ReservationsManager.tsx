@@ -51,6 +51,9 @@ export interface UnifiedBooking {
   paymentStatus: "paid" | "pending" | "refunded" | "failed";
   paymentMethod?: string;
   razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  paymentEnvironment?: "TEST" | "LIVE";
+  paymentGateway?: string;
   notes?: string;
   createdAt: string;
 }
@@ -73,9 +76,10 @@ export default function ReservationsManager({
       let bStatus: UnifiedBooking["bookingStatus"] = "confirmed";
       if (b.status === "cancelled") bStatus = "cancelled";
       else if (b.status === "pending") bStatus = "pending";
+      else if (b.status === "paid" || b.status === "confirmed") bStatus = "confirmed";
 
       let pStatus: UnifiedBooking["paymentStatus"] = "pending";
-      if (b.status === "paid") pStatus = "paid";
+      if (b.status === "paid" || (b.amountPaid && b.amountPaid > 0)) pStatus = "paid";
       else if (b.status === "refunded") pStatus = "refunded";
       else if (b.status === "failed") pStatus = "failed";
 
@@ -96,20 +100,35 @@ export default function ReservationsManager({
         paymentStatus: pStatus,
         paymentMethod: b.paymentMethod,
         razorpayPaymentId: b.razorpayPaymentId,
+        razorpayOrderId: b.razorpayOrderId,
+        paymentEnvironment: b.paymentEnvironment || (b.razorpayPaymentId ? "TEST" : undefined),
+        paymentGateway: b.paymentGateway || (b.razorpayPaymentId ? "Razorpay" : undefined),
         createdAt: b.createdAt,
       });
     });
 
-    // 2. Direct Front-Desk Reservations
+    // 2. Direct Front-Desk Reservations (Deduplicated with existing online bookings)
     initialReservations.forEach((r) => {
+      const ref = r.reference_code || `FRM-${r.id.slice(0, 6).toUpperCase()}`;
+
+      // STRICT DEDUPLICATION: If this reference already exists in list (from bookings table), DO NOT duplicate!
+      if (list.some((existing) => existing.ref === ref)) {
+        return;
+      }
+
       let bStatus: UnifiedBooking["bookingStatus"] = "confirmed";
       if (r.status === "cancelled" || r.status === "closed") bStatus = "cancelled";
       else if (r.status === "new" || r.status === "in_discussion") bStatus = "pending";
 
+      let pStatus: UnifiedBooking["paymentStatus"] = "pending";
+      if (r.status === "paid" || (r.amount_paid && r.amount_paid >= (r.estimated_total || 0))) {
+        pStatus = "paid";
+      }
+
       list.push({
         id: r.id,
         source: "reservation",
-        ref: r.reference_code || `FRM-${r.id.slice(0, 6).toUpperCase()}`,
+        ref,
         guestName: r.full_name,
         phone: r.phone,
         email: r.email,
@@ -120,7 +139,12 @@ export default function ReservationsManager({
         guests: r.guests || 2,
         totalAmount: r.estimated_total || 0,
         bookingStatus: bStatus,
-        paymentStatus: "pending",
+        paymentStatus: pStatus,
+        paymentMethod: r.payment_method || undefined,
+        razorpayPaymentId: r.razorpay_payment_id || undefined,
+        razorpayOrderId: r.razorpay_order_id || undefined,
+        paymentEnvironment: r.payment_environment,
+        paymentGateway: r.payment_gateway || (r.channel === "razorpay" ? "Razorpay" : "Front Desk"),
         notes: r.special_request || undefined,
         createdAt: r.created_at,
       });
@@ -257,11 +281,24 @@ export default function ReservationsManager({
               <span>Room Tariff & Taxes:</span>
               <span>₹${booking.totalAmount.toLocaleString("en-IN")}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #742B40;">
-              <span>Payment Status:</span>
-              <span style="text-transform: uppercase;">${booking.paymentStatus === "paid" ? "Paid in Full" : "Pending at Hotel"}</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span>Booking Status:</span>
+              <span style="font-weight: bold; text-transform: uppercase;">${booking.bookingStatus.toUpperCase()}</span>
             </div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #742B40; margin-bottom: 5px;">
+              <span>Payment Status:</span>
+              <span style="text-transform: uppercase;">${booking.paymentStatus === "paid" ? "PAID" : "PENDING"}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span>Payment Gateway:</span>
+              <span>${booking.paymentGateway || (booking.razorpayPaymentId ? "Razorpay" : "Front Desk")}</span>
+            </div>
+            ${booking.paymentEnvironment ? `<div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span>Payment Environment:</span>
+              <span style="font-family: monospace; font-weight: bold; color: ${booking.paymentEnvironment === "TEST" ? "#B45309" : "#15803D"};">${booking.paymentEnvironment}</span>
+            </div>` : ""}
             ${booking.razorpayPaymentId ? `<div style="font-size: 11px; color: #6B7280; margin-top: 5px;">Razorpay Payment ID: ${booking.razorpayPaymentId}</div>` : ""}
+            ${booking.razorpayOrderId ? `<div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Razorpay Order ID: ${booking.razorpayOrderId}</div>` : ""}
           </div>
 
           <div class="footer">
@@ -409,21 +446,28 @@ export default function ReservationsManager({
 
                       {/* Payment Status Badge */}
                       <td className="py-3.5 px-4 text-center">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
-                            booking.paymentStatus === "paid"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : booking.paymentStatus === "refunded"
-                              ? "bg-purple-50 text-purple-700 border-purple-200"
-                              : booking.paymentStatus === "failed"
-                              ? "bg-rose-50 text-rose-700 border-rose-200"
-                              : "bg-amber-50 text-amber-700 border-amber-200"
-                          }`}
-                        >
-                          {booking.paymentStatus === "paid"
-                            ? "PAID ONLINE"
-                            : booking.paymentStatus.toUpperCase()}
-                        </span>
+                        <div className="flex flex-col items-center gap-1">
+                          <span
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                              booking.paymentStatus === "paid"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : booking.paymentStatus === "refunded"
+                                ? "bg-purple-50 text-purple-700 border-purple-200"
+                                : booking.paymentStatus === "failed"
+                                ? "bg-rose-50 text-rose-700 border-rose-200"
+                                : "bg-amber-50 text-amber-700 border-amber-200"
+                            }`}
+                          >
+                            {booking.paymentStatus === "paid"
+                              ? "PAID ONLINE"
+                              : booking.paymentStatus.toUpperCase()}
+                          </span>
+                          {booking.paymentEnvironment === "TEST" && (
+                            <span className="inline-block px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-300 text-[9px] font-mono font-bold tracking-wider">
+                              TEST MODE
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Actions */}
@@ -535,12 +579,31 @@ export default function ReservationsManager({
 
                 {/* Billing Card */}
                 <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3] space-y-2">
-                  <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
-                    Financial Summary
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
+                      Financial Summary
+                    </span>
+                    {selectedBooking.paymentEnvironment && (
+                      <span
+                        className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${
+                          selectedBooking.paymentEnvironment === "TEST"
+                            ? "bg-amber-50 text-amber-800 border-amber-300"
+                            : "bg-emerald-50 text-emerald-800 border-emerald-300"
+                        }`}
+                      >
+                        {selectedBooking.paymentEnvironment} ENVIRONMENT
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center justify-between text-base font-bold text-[#742B40]">
                     <span>Total Tariff &amp; Taxes:</span>
                     <span className="font-serif">₹{selectedBooking.totalAmount.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#6B7280]">
+                    <span>Booking Status:</span>
+                    <span className="font-semibold uppercase text-[11px] text-[#24272B]">
+                      {selectedBooking.bookingStatus.toUpperCase()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-[#6B7280]">
                     <span>Payment Status:</span>
@@ -549,12 +612,21 @@ export default function ReservationsManager({
                         selectedBooking.paymentStatus === "paid" ? "text-emerald-700" : "text-amber-700"
                       }`}
                     >
-                      {selectedBooking.paymentStatus === "paid" ? "Paid in Full" : "Pending Payment"}
+                      {selectedBooking.paymentStatus === "paid" ? "PAID" : "PENDING"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#6B7280]">
+                    <span>Payment Gateway:</span>
+                    <span className="font-medium text-[#24272B] text-[11px]">
+                      {selectedBooking.paymentGateway || (selectedBooking.razorpayPaymentId ? "Razorpay" : "Front Desk Cash")}
                     </span>
                   </div>
                   {selectedBooking.razorpayPaymentId && (
-                    <div className="text-[10px] text-[#6B7280] font-mono pt-1 border-t border-[#EAE8E3]">
-                      Razorpay ID: {selectedBooking.razorpayPaymentId}
+                    <div className="text-[10px] text-[#6B7280] font-mono pt-1 border-t border-[#EAE8E3] space-y-0.5">
+                      <div>Payment ID: {selectedBooking.razorpayPaymentId}</div>
+                      {selectedBooking.razorpayOrderId && (
+                        <div>Order ID: {selectedBooking.razorpayOrderId}</div>
+                      )}
                     </div>
                   )}
                 </div>

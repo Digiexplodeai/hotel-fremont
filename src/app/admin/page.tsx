@@ -60,22 +60,24 @@ export default async function AdminDashboardPage() {
   const availableCount = Math.max(0, totalKeys - occupiedCount);
   const todayStr = new Date().toISOString().slice(0, 10);
 
-  // Today's arrivals (from both reservations & bookings)
-  const arrivalsFromRes = reservations.filter((r) => r.check_in === todayStr);
+  // Today's arrivals (deduplicated between online bookings and reservations)
   const arrivalsFromBookings = bookings.filter((b) => b.checkIn === todayStr);
-  const todaysArrivals = [
-    ...arrivalsFromRes.map((r) => ({
-      id: r.id,
-      ref: r.reference_code || `RES-${r.id.slice(0, 6)}`,
-      name: r.full_name,
-      phone: r.phone,
-      roomType: r.room_type,
-      guests: r.guests,
-      status: r.status,
-      isPaid: false,
-      amount: r.estimated_total,
-    })),
-    ...arrivalsFromBookings.map((b) => ({
+  const arrivalsFromRes = reservations.filter((r) => r.check_in === todayStr);
+  const arrivalsList: {
+    id: string;
+    ref: string;
+    name: string;
+    phone: string;
+    roomType: string;
+    guests: number;
+    status: string;
+    isPaid: boolean;
+    amount: number;
+  }[] = [];
+
+  // 1. Online bookings take precedence
+  arrivalsFromBookings.forEach((b) => {
+    arrivalsList.push({
       id: b.id,
       ref: b.bookingCode,
       name: b.guestName,
@@ -83,30 +85,64 @@ export default async function AdminDashboardPage() {
       roomType: b.categoryName || b.categorySlug,
       guests: b.guestsCount || 1,
       status: b.status,
-      isPaid: b.status === "paid" || b.status === "confirmed",
+      isPaid: b.status === "paid" || b.status === "confirmed" || Boolean(b.amountPaid && b.amountPaid > 0),
       amount: b.totalAmount,
-    })),
-  ];
+    });
+  });
 
-  // Today's departures
-  const departuresFromRes = reservations.filter((r) => r.check_out === todayStr);
-  const departuresFromBookings = bookings.filter((b) => b.checkOut === todayStr);
-  const todaysDepartures = [
-    ...departuresFromRes.map((r) => ({
+  // 2. Add direct reservations (skip if reference code already present)
+  arrivalsFromRes.forEach((r) => {
+    const ref = r.reference_code || `RES-${r.id.slice(0, 6)}`;
+    if (arrivalsList.some((item) => item.ref === ref)) return;
+    arrivalsList.push({
       id: r.id,
-      ref: r.reference_code || `RES-${r.id.slice(0, 6)}`,
+      ref,
       name: r.full_name,
+      phone: r.phone,
       roomType: r.room_type,
+      guests: r.guests || 1,
       status: r.status,
-    })),
-    ...departuresFromBookings.map((b) => ({
+      isPaid: r.status === "paid" || r.channel === "razorpay" || Boolean(r.amount_paid && r.amount_paid > 0),
+      amount: r.estimated_total,
+    });
+  });
+
+  const todaysArrivals = arrivalsList;
+
+  // Today's departures (deduplicated)
+  const departuresFromBookings = bookings.filter((b) => b.checkOut === todayStr);
+  const departuresFromRes = reservations.filter((r) => r.check_out === todayStr);
+  const departuresList: {
+    id: string;
+    ref: string;
+    name: string;
+    roomType: string;
+    status: string;
+  }[] = [];
+
+  departuresFromBookings.forEach((b) => {
+    departuresList.push({
       id: b.id,
       ref: b.bookingCode,
       name: b.guestName,
       roomType: b.categoryName || b.categorySlug,
       status: b.status,
-    })),
-  ];
+    });
+  });
+
+  departuresFromRes.forEach((r) => {
+    const ref = r.reference_code || `RES-${r.id.slice(0, 6)}`;
+    if (departuresList.some((item) => item.ref === ref)) return;
+    departuresList.push({
+      id: r.id,
+      ref,
+      name: r.full_name,
+      roomType: r.room_type,
+      status: r.status,
+    });
+  });
+
+  const todaysDepartures = departuresList;
 
   // Secondary counts
   const pendingReservations = reservations.filter((r) => r.status === "new" || r.status === "in_discussion");

@@ -36,6 +36,7 @@ export interface PaymentTransaction {
   paidAt?: string;
   createdAt: string;
   roomCategory: string;
+  environment?: "TEST" | "LIVE";
 }
 
 interface PaymentsLedgerProps {
@@ -59,7 +60,7 @@ export default function PaymentsLedger({ bookings, reservations }: PaymentsLedge
         b.status === "confirmed" ||
         b.status === "checked_in" ||
         b.status === "checked_out" ||
-        (b.amountPaid && b.amountPaid > 0);
+        Boolean(b.amountPaid && b.amountPaid > 0);
 
       list.push({
         id: b.id,
@@ -76,6 +77,7 @@ export default function PaymentsLedger({ bookings, reservations }: PaymentsLedge
         paidAt: b.paidAt,
         createdAt: b.createdAt,
         roomCategory: b.categoryName || b.categorySlug,
+        environment: b.paymentEnvironment || (b.razorpayPaymentId ? "TEST" : undefined),
       });
     });
 
@@ -83,7 +85,7 @@ export default function PaymentsLedger({ bookings, reservations }: PaymentsLedge
     reservations.forEach((r) => {
       if (list.some((tx) => tx.referenceCode === r.reference_code)) return;
 
-      const isPaid = r.status === "paid" || (r.amount_paid && r.amount_paid > 0);
+      const isPaid = r.status === "paid" || Boolean(r.amount_paid && r.amount_paid > 0);
 
       list.push({
         id: r.id,
@@ -100,6 +102,7 @@ export default function PaymentsLedger({ bookings, reservations }: PaymentsLedge
         paidAt: r.paid_at || undefined,
         createdAt: r.created_at,
         roomCategory: r.room_type,
+        environment: r.payment_environment || (r.razorpay_payment_id ? "TEST" : undefined),
       });
     });
 
@@ -325,6 +328,11 @@ export default function PaymentsLedger({ bookings, reservations }: PaymentsLedge
                           <span className="w-2 h-2 rounded-full bg-emerald-500" />
                         )}
                         <span>{tx.gateway}</span>
+                        {tx.environment === "TEST" && (
+                          <span className="px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-300 text-[9px] font-mono font-bold tracking-wider">
+                            TEST
+                          </span>
+                        )}
                       </div>
                       <div className="text-[10px] text-[#6B7280] font-mono truncate max-w-[140px]">
                         {tx.paymentId || tx.method || "Direct"}
@@ -407,6 +415,18 @@ export default function PaymentsLedger({ bookings, reservations }: PaymentsLedge
             </div>
 
             <div className="space-y-2 text-xs">
+              <div className="flex items-center justify-between py-1.5 border-b border-[#EAE8E3]">
+                <span className="text-[#6B7280]">Payment Environment:</span>
+                <span className="font-mono font-bold px-2 py-0.5 rounded text-[10px] bg-amber-50 text-amber-800 border border-amber-300">
+                  {selectedTx.environment || (selectedTx.paymentId ? "TEST" : "DIRECT")} MODE
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-1.5 border-b border-[#EAE8E3]">
+                <span className="text-[#6B7280]">Payment Status:</span>
+                <span className="font-semibold uppercase text-emerald-700">
+                  {selectedTx.status === "paid" || selectedTx.status === "captured" ? "PAID" : selectedTx.status.toUpperCase()}
+                </span>
+              </div>
               <div className="flex items-center justify-between py-1.5 border-b border-[#EAE8E3]">
                 <span className="text-[#6B7280]">Guest:</span>
                 <span className="font-semibold text-[#24272B]">{selectedTx.guestName}</span>

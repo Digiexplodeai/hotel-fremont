@@ -523,9 +523,14 @@ export default function BookingModal({
 
           {/* Modal Header */}
           <div className="shrink-0 mb-4 pr-10">
-            <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold mb-1">
-              <Sparkles className="w-3 h-3 text-[#E02B1D]" />
-              <span>HOTEL FREMONT · AIRPORT ROAD, MOHALI</span>
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
+              <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold">
+                <Sparkles className="w-3 h-3 text-[#E02B1D]" />
+                <span>HOTEL FREMONT · AIRPORT ROAD, MOHALI</span>
+              </div>
+              <span className="inline-block px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold tracking-wider">
+                RAZORPAY TEST MODE
+              </span>
             </div>
             <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#F7F3EC]">
               Book Your Stay
@@ -1371,9 +1376,14 @@ export default function BookingModal({
                       {/* Total Amount Due */}
                       <div className="flex justify-between text-sm font-bold text-[#F7F3EC] pt-3 border-t border-white/10 items-baseline">
                         <div>
-                          <span className="font-serif block text-base">Total Payable Now</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-serif block text-base">Total Payable Now</span>
+                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] font-mono font-bold tracking-wider">
+                              TEST MODE
+                            </span>
+                          </div>
                           <span className="text-[10px] text-emerald-400 font-sans font-normal">
-                            100% Full Payment via Razorpay · No balance at hotel
+                            100% Full Payment via Razorpay · Simulated test checkout
                           </span>
                         </div>
                         <span className="font-serif text-[#E02B1D] font-mono text-xl">

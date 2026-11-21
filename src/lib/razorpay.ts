@@ -21,6 +21,12 @@ export interface RazorpayOrderResponse {
   created_at: number;
 }
 
+export function isRazorpayTestMode(): boolean {
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
+  if (keyId.startsWith("rzp_live_")) return false;
+  return true; // Default to test mode unless explicitly configured with live credentials
+}
+
 export function getRazorpayCredentials() {
   const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -31,7 +37,61 @@ export function getRazorpayCredentials() {
     );
   }
 
-  return { keyId, keySecret };
+  const isTestMode = isRazorpayTestMode();
+  return { keyId, keySecret, isTestMode };
+}
+
+/**
+ * Fetches verified payment entity directly from Razorpay API.
+ */
+export async function getRazorpayPayment(paymentId: string): Promise<any> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Basic ${authHeader}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => "");
+    throw new Error(`Failed to fetch payment details for ${paymentId}: ${response.status} ${errorBody}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * Captures an authorized Razorpay payment directly via API.
+ */
+export async function captureRazorpayPayment(
+  paymentId: string,
+  amountPaise: number,
+  currency = "INR"
+): Promise<any> {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/capture`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${authHeader}`,
+    },
+    body: JSON.stringify({
+      amount: amountPaise,
+      currency,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => "");
+    throw new Error(`Razorpay payment capture failed for ${paymentId}: ${response.status} ${errorBody}`);
+  }
+
+  return await response.json();
 }
 
 /**

@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyRazorpayPaymentSignature } from "@/lib/razorpay";
+import {
+  verifyRazorpayPaymentSignature,
+  getRazorpayPayment,
+  captureRazorpayPayment,
+  isRazorpayTestMode,
+} from "@/lib/razorpay";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { DEFAULT_ROOM_TYPES } from "@/config/hotel";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,7 +48,48 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Fetch booking from Supabase
+    // 2. Fetch live payment status from Razorpay API
+    let paymentDetails: any = null;
+    let paymentStatus = "captured";
+    let paymentMethod = "online";
+
+    try {
+      paymentDetails = await getRazorpayPayment(razorpay_payment_id);
+      if (paymentDetails) {
+        paymentStatus = paymentDetails.status; // 'authorized', 'captured', 'failed'
+        paymentMethod = paymentDetails.method || "online";
+
+        // Auto-capture if payment is authorized but not yet captured
+        if (paymentStatus === "authorized" && paymentDetails.amount) {
+          try {
+            const captureRes = await captureRazorpayPayment(
+              razorpay_payment_id,
+              paymentDetails.amount,
+              paymentDetails.currency || "INR"
+            );
+            if (captureRes && captureRes.status === "captured") {
+              paymentStatus = "captured";
+            }
+          } catch (captureErr) {
+            console.warn(`[Payment Verify] Auto-capture warning for ${razorpay_payment_id}:`, captureErr);
+          }
+        }
+
+        if (paymentStatus === "failed") {
+          return NextResponse.json(
+            { success: false, error: "Payment was marked failed by the gateway." },
+            { status: 400 }
+          );
+        }
+      }
+    } catch (apiErr) {
+      // If Razorpay API fetch fails temporarily, fallback to signature validity
+      console.warn(`[Payment Verify] Razorpay API status fetch warning:`, apiErr);
+    }
+
+    const isTestMode = isRazorpayTestMode();
+
+    // 3. Fetch booking from Supabase
     const supabase = createAdminSupabaseClient();
     if (!supabase) {
       console.warn("[Payment Verify] Supabase admin client unavailable. Acknowledging signature valid.");
@@ -50,6 +97,7 @@ export async function POST(req: NextRequest) {
         success: true,
         bookingRef: booking_ref,
         accessToken: access_token,
+        isTestMode,
       });
     }
 
@@ -71,26 +119,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Idempotency: If already paid, return success immediately
-    if (booking.status === "paid") {
-      return NextResponse.json({
-        success: true,
-        bookingRef: booking.booking_ref,
-        accessToken: booking.access_token,
-        alreadyProcessed: true,
-      });
-    }
-
-    // 4. Update booking to paid
-    const paidAt = new Date().toISOString();
+    // 4. Update booking to paid (idempotently update fields even if already paid)
+    const paidAt = booking.paid_at || new Date().toISOString();
     const { error: updateError } = await supabase
       .from("bookings")
       .update({
         status: "paid",
         amount_paid: booking.total_amount,
         razorpay_payment_id,
+        payment_method: paymentMethod,
         paid_at: paidAt,
-        updated_at: paidAt,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", booking.id);
 
@@ -126,17 +165,28 @@ export async function POST(req: NextRequest) {
           check_out: booking.check_out,
           guests: booking.guests || 1,
           estimated_total: booking.total_amount,
+          amount_paid: booking.total_amount,
           status: "confirmed",
           channel: "razorpay",
           special_request: booking.special_requests,
+          razorpay_order_id,
+          razorpay_payment_id,
+          payment_method: paymentMethod,
+          paid_at: paidAt,
         });
       } else {
         await supabase
           .from("reservations")
           .update({
             status: "confirmed",
+            channel: "razorpay",
             estimated_total: booking.total_amount,
-            updated_at: paidAt,
+            amount_paid: booking.total_amount,
+            razorpay_order_id,
+            razorpay_payment_id,
+            payment_method: paymentMethod,
+            paid_at: paidAt,
+            updated_at: new Date().toISOString(),
           })
           .eq("id", existingRes.id);
       }
@@ -144,10 +194,23 @@ export async function POST(req: NextRequest) {
       console.warn("[Payment Verify] Reservations sync warning:", resErr);
     }
 
+    // 6. Revalidate admin dashboard and front desk cache
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/reservations");
+      revalidatePath("/admin/payments");
+      revalidatePath("/admin/rooms");
+      revalidatePath("/admin/calendar");
+    } catch {}
+
     return NextResponse.json({
       success: true,
       bookingRef: booking.booking_ref,
       accessToken: booking.access_token,
+      isTestMode,
+      paymentStatus: "PAID",
+      bookingStatus: "CONFIRMED",
+      paymentGateway: "Razorpay",
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to verify payment.";
