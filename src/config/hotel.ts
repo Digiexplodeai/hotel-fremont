@@ -193,6 +193,141 @@ export function validateIndianPhone(phone: string): { isValid: boolean; cleanPho
 }
 
 /**
+ * Comprehensive contact phone validation for enquiries and bookings:
+ * - Validates 10-digit Indian mobile numbers (must start with 6, 7, 8, or 9).
+ * - Supports Indian numbers with leading +91, 91, or 0.
+ * - Supports international numbers with explicit leading '+' (8 to 15 digits according to ITU-T E.164).
+ * - Rejects ambiguous un-prefixed non-10 digit numbers (e.g. 12 digits without '+').
+ */
+export function validateContactPhone(phoneInput: string): {
+  isValid: boolean;
+  formattedPhone: string;
+  cleanDigits: string;
+  isIndian: boolean;
+  error?: string;
+} {
+  if (!phoneInput || typeof phoneInput !== "string") {
+    return { isValid: false, formattedPhone: "", cleanDigits: "", isIndian: false, error: "Phone number is required." };
+  }
+
+  const trimmed = phoneInput.trim();
+  const hasPlus = trimmed.startsWith("+");
+  const digits = trimmed.replace(/\D/g, "");
+
+  // 1. Explicit International Number with leading '+'
+  if (hasPlus) {
+    // If it has India's country code +91
+    if (digits.startsWith("91")) {
+      const national = digits.slice(2);
+      if (national.length === 10 && /^[6-9]/.test(national)) {
+        return {
+          isValid: true,
+          formattedPhone: `+91 ${national.slice(0, 5)} ${national.slice(5)}`,
+          cleanDigits: `91${national}`,
+          isIndian: true,
+        };
+      }
+      return {
+        isValid: false,
+        formattedPhone: trimmed,
+        cleanDigits: digits,
+        isIndian: true,
+        error: "Indian mobile numbers after +91 must be 10 digits starting with 6, 7, 8, or 9.",
+      };
+    }
+
+    // Other international countries: E.164 standard (8 to 15 digits total)
+    if (digits.length >= 8 && digits.length <= 15) {
+      return {
+        isValid: true,
+        formattedPhone: `+${digits}`,
+        cleanDigits: digits,
+        isIndian: false,
+      };
+    }
+    return {
+      isValid: false,
+      formattedPhone: trimmed,
+      cleanDigits: digits,
+      isIndian: false,
+      error: "International numbers must have between 8 and 15 digits including country code.",
+    };
+  }
+
+  // 2. Starts with 91 but no explicit '+'
+  if (digits.length === 12 && digits.startsWith("91")) {
+    const national = digits.slice(2);
+    if (/^[6-9]/.test(national)) {
+      return {
+        isValid: true,
+        formattedPhone: `+91 ${national.slice(0, 5)} ${national.slice(5)}`,
+        cleanDigits: digits,
+        isIndian: true,
+      };
+    }
+    return {
+      isValid: false,
+      formattedPhone: trimmed,
+      cleanDigits: digits,
+      isIndian: true,
+      error: "Indian mobile numbers after 91 must be 10 digits starting with 6, 7, 8, or 9.",
+    };
+  }
+
+  // 3. Leading 0 (Indian trunk code: 0XXXXXXXXXX)
+  if (digits.length === 11 && digits.startsWith("0")) {
+    const national = digits.slice(1);
+    if (/^[6-9]/.test(national)) {
+      return {
+        isValid: true,
+        formattedPhone: `+91 ${national.slice(0, 5)} ${national.slice(5)}`,
+        cleanDigits: `91${national}`,
+        isIndian: true,
+      };
+    }
+  }
+
+  // 4. Standard 10-digit Indian mobile
+  if (digits.length === 10) {
+    if (/^[6-9]/.test(digits)) {
+      return {
+        isValid: true,
+        formattedPhone: `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`,
+        cleanDigits: `91${digits}`,
+        isIndian: true,
+      };
+    }
+    return {
+      isValid: false,
+      formattedPhone: trimmed,
+      cleanDigits: digits,
+      isIndian: true,
+      error: "Indian mobile numbers must start with 6, 7, 8, or 9.",
+    };
+  }
+
+  // 5. Number is too short
+  if (digits.length < 10) {
+    return {
+      isValid: false,
+      formattedPhone: trimmed,
+      cleanDigits: digits,
+      isIndian: false,
+      error: "Phone number is too short. Please enter a 10-digit Indian mobile number or international number with '+' (e.g. +1...).",
+    };
+  }
+
+  // 6. Number is > 10 digits without '+'
+  return {
+    isValid: false,
+    formattedPhone: trimmed,
+    cleanDigits: digits,
+    isIndian: false,
+    error: "Please enter a 10-digit Indian mobile number, or include '+' with country code for international numbers (e.g. +1...).",
+  };
+}
+
+/**
  * Format currency with Indian grouping (e.g. ₹2,299)
  */
 export function formatINR(amount: number): string {

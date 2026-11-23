@@ -6,6 +6,7 @@ import { X, Calendar, Clock, Users, CheckCircle2, Phone, Sparkles } from "lucide
 import { siteConfig } from "@/data/content";
 import { submitPublicEnquiryAction } from "@/actions/enquiries";
 import { lockScroll, unlockScroll } from "@/lib/scroll";
+import { validateContactPhone } from "@/config/hotel";
 
 interface DiningModalProps {
   isOpen: boolean;
@@ -27,6 +28,8 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,6 +40,8 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
       lockScroll();
       setIsSubmitted(false);
       setErrorMessage(null);
+      setSubmittedRef(null);
+      setWhatsappUrl(null);
     } else {
       unlockScroll();
     }
@@ -53,17 +58,14 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
     if (formData.botField) return;
     if (isSubmitting) return;
 
-    // Client-side quick validation
-    const cleanDigits = formData.phone.replace(/\D/g, "");
-    if (!cleanDigits || cleanDigits.length < 8 || cleanDigits.length > 15) {
-      setErrorMessage("Please enter a valid contact phone number (8 to 15 digits).");
-      return;
-    }
-    if (cleanDigits.length === 10 && !/^[6-9]/.test(cleanDigits)) {
-      setErrorMessage("Indian mobile numbers must start with 6, 7, 8, or 9.");
+    // 1. Client-side Phone validation (Indian & International with country code)
+    const phoneCheck = validateContactPhone(formData.phone);
+    if (!phoneCheck.isValid) {
+      setErrorMessage(phoneCheck.error || "Please enter a valid 10-digit Indian mobile or international number with '+'.");
       return;
     }
 
+    // 2. Client-side Date validation
     if (formData.date) {
       const nowIST = new Date(Date.now() + 5.5 * 3600 * 1000);
       const todayStr = nowIST.toISOString().slice(0, 10);
@@ -97,12 +99,12 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
         return;
       }
 
-      setIsSubmitted(true);
-      setIsSubmitting(false);
-
-      const message = `*Table Enquiry - Hotel Fremont Dining Hall*%0A%0A*Name:* ${encodeURIComponent(
+      // Build WhatsApp message for optional customer follow-up
+      const message = `*Table Enquiry - Hotel Fremont Dining Hall*%0A%0A*Reference:* ${encodeURIComponent(
+        res.referenceCode || "N/A"
+      )}%0A*Name:* ${encodeURIComponent(
         formData.name
-      )}%0A*Phone:* ${encodeURIComponent(formData.phone)}%0A*Date:* ${encodeURIComponent(
+      )}%0A*Phone:* ${encodeURIComponent(phoneCheck.formattedPhone)}%0A*Date:* ${encodeURIComponent(
         formData.date
       )}%0A*Time:* ${encodeURIComponent(formData.time)}%0A*Party Size:* ${encodeURIComponent(
         formData.guests
@@ -111,9 +113,11 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
       )}`;
 
       const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
-      setTimeout(() => {
-        window.open(waUrl, "_blank");
-      }, 800);
+
+      setSubmittedRef(res.referenceCode || null);
+      setWhatsappUrl(waUrl);
+      setIsSubmitted(true);
+      setIsSubmitting(false);
     } catch {
       setErrorMessage("Unable to submit your enquiry right now. Please try again.");
       setIsSubmitting(false);
@@ -279,22 +283,72 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
               </form>
             </div>
           ) : (
-            <div className="text-center py-6">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4 text-emerald-400">
+            <div className="py-6 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h4 className="text-2xl font-serif font-bold text-[#F7F3EC] mb-2">
-                Enquiry Submitted
-              </h4>
-              <p className="text-xs text-[#A8A59E] mb-6 leading-relaxed max-w-sm mx-auto">
+
+              <div>
+                <h4 className="text-2xl font-serif font-bold text-[#F7F3EC] mb-1">
+                  Table Enquiry Confirmed
+                </h4>
+                <p className="text-xs text-[#A8A59E] font-light">
+                  Your table enquiry has been logged with Hotel Fremont Dining Hall.
+                </p>
+              </div>
+
+              {/* Reference Code Badge */}
+              <div className="p-3 bg-[#0E0E10] border border-[#C9A96E]/30 rounded-xl max-w-xs mx-auto text-center shadow-inner">
+                <span className="text-[10px] uppercase tracking-widest text-[#C9A96E] block mb-1 font-mono font-medium">
+                  Enquiry Reference Code
+                </span>
+                <span className="font-mono text-base font-bold text-[#F7F3EC] tracking-wider select-all">
+                  {submittedRef || "FRM-ENQ-CONFIRMED"}
+                </span>
+              </div>
+
+              <div className="bg-[#0E0E10]/60 border border-white/5 rounded-xl p-3 max-w-sm mx-auto text-xs text-[#A8A59E] text-left space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-[#6B7280]">Guest:</span>
+                  <span className="text-[#F7F3EC] font-medium">{formData.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B7280]">Schedule:</span>
+                  <span className="text-[#F7F3EC] font-mono">{formData.date} at {formData.time}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B7280]">Party Size:</span>
+                  <span className="text-[#F7F3EC] font-medium">{formData.guests} Guests ({formData.seating})</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-[#A8A59E] max-w-sm mx-auto font-light leading-relaxed">
                 Thank you! Your enquiry has been submitted successfully. Our team will contact you shortly.
               </p>
-              <button
-                onClick={onClose}
-                className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-sans uppercase tracking-wider text-white transition cursor-pointer"
-              >
-                Close
-              </button>
+
+              {/* Action Buttons: WhatsApp Optional Follow-up & Close */}
+              <div className="space-y-2.5 pt-2 max-w-sm mx-auto">
+                {whatsappUrl && (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-sans uppercase tracking-[0.14em] font-semibold transition flex items-center justify-center space-x-2 shadow-md cursor-pointer"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span>Continue on WhatsApp (Optional)</span>
+                  </a>
+                )}
+                <p className="text-[10px] text-[#A8A59E] leading-normal">
+                  Connect directly with our dining desk on WhatsApp for instant assistance.
+                </p>
+                <button
+                  onClick={onClose}
+                  className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-sans uppercase tracking-wider text-white transition cursor-pointer"
+                >
+                  Close Window
+                </button>
+              </div>
             </div>
           )}
         </motion.div>

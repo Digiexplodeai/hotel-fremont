@@ -4,6 +4,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
+import { validateContactPhone } from "@/config/hotel";
 
 export type EnquiryType = "rate_check" | "book_now" | "dining_aura" | "dining" | "event_banquet" | "conference" | "contact";
 export type EnquiryStatus = "new" | "contacted" | "in_discussion" | "converted" | "closed";
@@ -42,16 +43,19 @@ export interface SubmitEnquiryInput {
   honeypot?: string;
 }
 
-// In-memory rate limiting and anti-spam deduplication store (server-side runtime)
+// In-memory rate limiting store (server-side runtime)
 const enquiryRateLimitMap = new Map<
   string,
-  { count: number; resetAt: number; lastHash: string; lastSubmittedAt: number }
+  { count: number; resetAt: number }
 >();
 
-function checkRateLimitAndDuplicate(
-  key: string,
-  payloadHash: string
-): { allowed: boolean; isDuplicate?: boolean; error?: string } {
+// In-memory idempotency cache (15-minute window)
+const enquiryIdempotencyCache = new Map<
+  string,
+  { enquiryId: string; referenceCode: string; timestamp: number }
+>();
+
+function checkRateLimit(key: string): { allowed: boolean; error?: string } {
   const now = Date.now();
 
   // Occasional garbage collection
@@ -67,19 +71,8 @@ function checkRateLimitAndDuplicate(
     enquiryRateLimitMap.set(key, {
       count: 1,
       resetAt: now + 60 * 1000, // 1 minute window
-      lastHash: payloadHash,
-      lastSubmittedAt: now,
     });
     return { allowed: true };
-  }
-
-  // Deduplication guard: ignore rapid identical re-clicks within 6 seconds
-  if (entry.lastHash === payloadHash && now - entry.lastSubmittedAt < 6000) {
-    return {
-      allowed: false,
-      isDuplicate: true,
-      error: "Your enquiry is already being processed. Please wait.",
-    };
   }
 
   // Rate limit: max 6 submissions per phone per minute
@@ -91,8 +84,6 @@ function checkRateLimitAndDuplicate(
   }
 
   entry.count += 1;
-  entry.lastHash = payloadHash;
-  entry.lastSubmittedAt = now;
   return { allowed: true };
 }
 
@@ -107,6 +98,8 @@ function checkRateLimitAndDuplicate(
 export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Promise<{
   success: boolean;
   enquiryId?: string;
+  referenceCode?: string;
+  isDuplicate?: boolean;
   message?: string;
   error?: string;
 }> {
@@ -129,14 +122,13 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       return { success: false, error: "Invalid characters detected in name." };
     }
 
-    // 3. Validate Contact Phone / WhatsApp
-    const rawPhone = input.phone?.trim() || "";
-    const cleanPhoneDigits = rawPhone.replace(/\D/g, "");
-    if (!cleanPhoneDigits || cleanPhoneDigits.length < 8 || cleanPhoneDigits.length > 15) {
-      return { success: false, error: "Please enter a valid contact phone number (8 to 15 digits)." };
-    }
-    if (cleanPhoneDigits.length === 10 && !/^[6-9]/.test(cleanPhoneDigits)) {
-      return { success: false, error: "Indian mobile numbers must start with 6, 7, 8, or 9." };
+    // 3. Comprehensive Phone / WhatsApp Number Validation (Indian & International)
+    const phoneResult = validateContactPhone(input.phone || "");
+    if (!phoneResult.isValid) {
+      return {
+        success: false,
+        error: phoneResult.error || "Please enter a valid 10-digit Indian mobile number or international number with '+'.",
+      };
     }
 
     // 4. Validate Email (Optional)
@@ -172,12 +164,10 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       return { success: false, error: "Party size exceeds maximum venue capacity." };
     }
 
-    // 7. Anti-Spam Rate Limit & Deduplication Check
-    const submissionKey = cleanPhoneDigits;
-    const payloadHash = `${name}:${cleanPhoneDigits}:${input.type}:${input.dates || ""}:${guestsCount}`;
-    const rateCheck = checkRateLimitAndDuplicate(submissionKey, payloadHash);
+    // 7. Rate Limiting Check
+    const rateCheck = checkRateLimit(phoneResult.cleanDigits);
     if (!rateCheck.allowed) {
-      return { success: false, error: rateCheck.error || "Unable to submit duplicate enquiry." };
+      return { success: false, error: rateCheck.error || "Too many enquiries submitted. Please wait a minute." };
     }
 
     // 8. Connect to Supabase using Authoritative Server-Side Service Role
@@ -241,6 +231,56 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       estimatedTotal = Number(input.details?.totalAmount || 0);
     }
 
+    // 10. Robust Server-Side Idempotency Guard (Memory + Database)
+    // Prevents accidental duplicate submissions if user double-clicks, returns from WhatsApp, or refreshes.
+    const dedupFingerprint = `${phoneResult.cleanDigits}:${channelType}:${checkIn}:${name.toLowerCase()}`;
+
+    // A. Check in-memory store (instant response within 15 minutes)
+    const memoryHit = enquiryIdempotencyCache.get(dedupFingerprint);
+    if (memoryHit && Date.now() - memoryHit.timestamp < 15 * 60 * 1000) {
+      return {
+        success: true,
+        enquiryId: memoryHit.enquiryId,
+        referenceCode: memoryHit.referenceCode,
+        isDuplicate: true,
+        message: "Thank you! Your enquiry has already been received and logged in our system.",
+      };
+    }
+
+    // B. Check database records within the last 15 minutes
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const { data: dbExisting } = await client
+      .from("reservations")
+      .select("id, reference_code, created_at, phone")
+      .eq("channel", channelType)
+      .eq("check_in", checkIn)
+      .gte("created_at", fifteenMinutesAgo)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (dbExisting && dbExisting.length > 0) {
+      const match = dbExisting.find((row: any) => {
+        const rowDigits = (row.phone || "").replace(/\D/g, "");
+        return rowDigits === phoneResult.cleanDigits || row.phone === phoneResult.formattedPhone;
+      });
+
+      if (match) {
+        const existingRef = match.reference_code || `FRM-ENQ-${match.id.slice(0, 8).toUpperCase()}`;
+        enquiryIdempotencyCache.set(dedupFingerprint, {
+          enquiryId: match.id,
+          referenceCode: existingRef,
+          timestamp: Date.now(),
+        });
+        return {
+          success: true,
+          enquiryId: match.id,
+          referenceCode: existingRef,
+          isDuplicate: true,
+          message: "Thank you! Your enquiry has already been received and logged in our system.",
+        };
+      }
+    }
+
     // Compose formatted special_request summary
     const summaryNotes = [
       input.notes,
@@ -258,13 +298,12 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
 
     const refCode = `FRM-ENQ-${Date.now().toString(36).toUpperCase()}`;
 
-    // 10. Base payload strictly matching public.reservations schema
-    // Sets room_type_code to null so it does not trigger the foreign key constraint
-    // on public.room_types, and ensures it never matches physical room inventory (deluxe-room, super-deluxe, premium).
+    // 11. Base payload strictly matching public.reservations schema
+    // Sets room_type_code to null so it does not trigger foreign key constraint on room_types.
     // Sets status to 'new' so it NEVER triggers overbooking guards or blocks rooms.
     const basePayload = {
       full_name: name,
-      phone: rawPhone,
+      phone: phoneResult.formattedPhone,
       email,
       check_in: checkIn,
       check_out: checkOut,
@@ -291,6 +330,15 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       return { success: false, error: "Unable to submit your enquiry right now. Please try again." };
     }
 
+    const confirmedRef = inserted?.reference_code || refCode;
+
+    // Cache the successful enquiry for 15 minutes of idempotency protection
+    enquiryIdempotencyCache.set(dedupFingerprint, {
+      enquiryId: inserted.id,
+      referenceCode: confirmedRef,
+      timestamp: Date.now(),
+    });
+
     try {
       revalidatePath("/admin");
       revalidatePath("/admin/enquiries");
@@ -301,6 +349,7 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
     return {
       success: true,
       enquiryId: inserted?.id,
+      referenceCode: confirmedRef,
       message: "Thank you! Your enquiry has been submitted successfully. Our team will contact you shortly.",
     };
   } catch (err: unknown) {
