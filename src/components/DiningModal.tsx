@@ -51,6 +51,27 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.botField) return;
+    if (isSubmitting) return;
+
+    // Client-side quick validation
+    const cleanDigits = formData.phone.replace(/\D/g, "");
+    if (!cleanDigits || cleanDigits.length < 8 || cleanDigits.length > 15) {
+      setErrorMessage("Please enter a valid contact phone number (8 to 15 digits).");
+      return;
+    }
+    if (cleanDigits.length === 10 && !/^[6-9]/.test(cleanDigits)) {
+      setErrorMessage("Indian mobile numbers must start with 6, 7, 8, or 9.");
+      return;
+    }
+
+    if (formData.date) {
+      const nowIST = new Date(Date.now() + 5.5 * 3600 * 1000);
+      const todayStr = nowIST.toISOString().slice(0, 10);
+      if (formData.date < todayStr) {
+        setErrorMessage("Preferred date cannot be in the past. Please select today or a future date.");
+        return;
+      }
+    }
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -67,11 +88,11 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
           seating: formData.seating,
           specialRequests: formData.specialRequest || "None",
         },
-        notes: `Hotel Fremont Dining Hall table enquiry for ${formData.guests} guests. Seating: ${formData.seating}`,
+        notes: `Hotel Fremont Dining Hall table enquiry for ${formData.guests} guests on ${formData.date} at ${formData.time}. Seating: ${formData.seating}`,
       });
 
       if (!res.success) {
-        setErrorMessage(res.error || "Failed to submit enquiry. Please try again.");
+        setErrorMessage(res.error || "Unable to submit your enquiry right now. Please try again.");
         setIsSubmitting(false);
         return;
       }
@@ -94,7 +115,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
         window.open(waUrl, "_blank");
       }, 800);
     } catch {
-      setErrorMessage("An unexpected error occurred. Please try again or call our reception directly.");
+      setErrorMessage("Unable to submit your enquiry right now. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -244,7 +265,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] text-white text-xs font-sans uppercase tracking-[0.18em] font-semibold transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center space-x-2"
+                  className="w-full py-3.5 rounded-xl bg-[#E02B1D] hover:bg-[#c82215] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-sans uppercase tracking-[0.18em] font-semibold transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center space-x-2"
                 >
                   {isSubmitting ? (
                     <span>Submitting Enquiry...</span>
@@ -263,14 +284,14 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h4 className="text-2xl font-serif font-bold text-[#F7F3EC] mb-2">
-                Enquiry Sent
+                Enquiry Submitted
               </h4>
               <p className="text-xs text-[#A8A59E] mb-6 leading-relaxed max-w-sm mx-auto">
-                Thank you! Our dining hall desk will confirm your table shortly. We also opened WhatsApp to connect directly.
+                Thank you! Your enquiry has been submitted successfully. Our team will contact you shortly.
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-sans uppercase tracking-wider text-white transition"
+                className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-sans uppercase tracking-wider text-white transition cursor-pointer"
               >
                 Close
               </button>

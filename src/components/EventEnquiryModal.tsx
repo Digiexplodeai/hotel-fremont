@@ -63,14 +63,40 @@ export default function EventEnquiryModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.botField) return; // Silent discard for bot spam
+    if (isSubmitting) return;
+
+    // Client-side quick validation
+    const cleanDigits = formData.phone.replace(/\D/g, "");
+    if (!cleanDigits || cleanDigits.length < 8 || cleanDigits.length > 15) {
+      setErrorMessage("Please enter a valid contact phone number (8 to 15 digits).");
+      return;
+    }
+    if (cleanDigits.length === 10 && !/^[6-9]/.test(cleanDigits)) {
+      setErrorMessage("Indian mobile numbers must start with 6, 7, 8, or 9.");
+      return;
+    }
+
+    if (formData.date) {
+      const nowIST = new Date(Date.now() + 5.5 * 3600 * 1000);
+      const todayStr = nowIST.toISOString().slice(0, 10);
+      if (formData.date < todayStr) {
+        setErrorMessage("Preferred date cannot be in the past. Please select today or a future date.");
+        return;
+      }
+    }
 
     setIsSubmitting(true);
     setErrorMessage(null);
 
     try {
-      // Record event inquiry to Supabase pipeline
+      const isConference =
+        formData.venue.toLowerCase().includes("conference") ||
+        formData.eventType.toLowerCase().includes("corporate") ||
+        formData.eventType.toLowerCase().includes("meeting");
+
+      // Record event / conference enquiry to Supabase pipeline
       const res = await submitPublicEnquiryAction({
-        type: "event_banquet",
+        type: isConference ? "conference" : "event_banquet",
         name: formData.name,
         phone: formData.phone,
         email: formData.email || undefined,
@@ -85,7 +111,7 @@ export default function EventEnquiryModal({
       });
 
       if (!res.success) {
-        setErrorMessage(res.error || "Failed to submit event enquiry. Please try again.");
+        setErrorMessage(res.error || "Unable to submit your enquiry right now. Please try again.");
         setIsSubmitting(false);
         return;
       }
@@ -111,8 +137,8 @@ export default function EventEnquiryModal({
       setTimeout(() => {
         window.open(waUrl, "_blank");
       }, 800);
-    } catch (err: any) {
-      setErrorMessage(err?.message || "An unexpected error occurred. Please try again.");
+    } catch {
+      setErrorMessage("Unable to submit your enquiry right now. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -317,11 +343,11 @@ export default function EventEnquiryModal({
               </div>
 
               <h4 className="text-2xl font-serif font-bold text-[#F7F3EC]">
-                Enquiry Sent to Banquet Desk!
+                Enquiry Submitted Successfully
               </h4>
 
               <p className="text-xs text-[#A8A59E] max-w-sm mx-auto font-light leading-relaxed">
-                Thank you, <strong className="text-white">{formData.name}</strong>. Our senior event curator has received your details for {formData.eventType} on {formData.date} and will contact you directly with bespoke pricing and floor plans.
+                Thank you! Your enquiry has been submitted successfully. Our team will contact you shortly.
               </p>
 
               <button

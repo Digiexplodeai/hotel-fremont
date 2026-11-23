@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
 
-export type EnquiryType = "rate_check" | "book_now" | "dining_aura" | "dining" | "event_banquet" | "contact";
+export type EnquiryType = "rate_check" | "book_now" | "dining_aura" | "dining" | "event_banquet" | "conference" | "contact";
 export type EnquiryStatus = "new" | "contacted" | "in_discussion" | "converted" | "closed";
 
 export interface EnquiryRecord {
@@ -42,61 +42,168 @@ export interface SubmitEnquiryInput {
   honeypot?: string;
 }
 
+// In-memory rate limiting and anti-spam deduplication store (server-side runtime)
+const enquiryRateLimitMap = new Map<
+  string,
+  { count: number; resetAt: number; lastHash: string; lastSubmittedAt: number }
+>();
+
+function checkRateLimitAndDuplicate(
+  key: string,
+  payloadHash: string
+): { allowed: boolean; isDuplicate?: boolean; error?: string } {
+  const now = Date.now();
+
+  // Occasional garbage collection
+  if (enquiryRateLimitMap.size > 2000) {
+    for (const [k, v] of enquiryRateLimitMap.entries()) {
+      if (now > v.resetAt) enquiryRateLimitMap.delete(k);
+    }
+  }
+
+  const entry = enquiryRateLimitMap.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    enquiryRateLimitMap.set(key, {
+      count: 1,
+      resetAt: now + 60 * 1000, // 1 minute window
+      lastHash: payloadHash,
+      lastSubmittedAt: now,
+    });
+    return { allowed: true };
+  }
+
+  // Deduplication guard: ignore rapid identical re-clicks within 6 seconds
+  if (entry.lastHash === payloadHash && now - entry.lastSubmittedAt < 6000) {
+    return {
+      allowed: false,
+      isDuplicate: true,
+      error: "Your enquiry is already being processed. Please wait.",
+    };
+  }
+
+  // Rate limit: max 6 submissions per phone per minute
+  if (entry.count >= 6) {
+    return {
+      allowed: false,
+      error: "Too many enquiries submitted in a short period. Please try again shortly.",
+    };
+  }
+
+  entry.count += 1;
+  entry.lastHash = payloadHash;
+  entry.lastSubmittedAt = now;
+  return { allowed: true };
+}
+
 /**
  * Public Server Action to capture leads from all public modals & forms
- * (Check Rates, Room Booking, Dining Hall, Banquet Events, Contact).
- * Inserts directly into public.reservations using the Supabase anon key client.
- * Strictly adheres to anon INSERT-only RLS policy (no .select()).
+ * (Dining Hall, Cloud 6 Banquet, Conference Hall, Contact, Check Rates).
+ * Uses secure server-side credentials (SUPABASE_SERVICE_ROLE_KEY) so that
+ * public visitors can submit enquiries safely without requiring guest login,
+ * without exposing service credentials to the browser, and without exposing
+ * customer reservations to public SELECT or manipulation.
  */
 export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Promise<{
   success: boolean;
   enquiryId?: string;
+  message?: string;
   error?: string;
 }> {
   try {
-    // 1. Honeypot check
+    // 1. Honeypot check (anti-bot trap)
     if (input.honeypot && input.honeypot.trim().length > 0) {
-      console.warn("[Enquiry] Spam submission rejected via honeypot.");
+      console.warn("[Enquiry] Spam submission silently dropped via honeypot.");
       return { success: false, error: "Invalid submission detected." };
     }
 
-    // 2. Validate required contact information
+    // 2. Validate Guest Name
     const name = input.name?.trim();
     if (!name || name.length < 2) {
       return { success: false, error: "Please enter your full name (minimum 2 characters)." };
     }
-
-    const phone = input.phone?.trim();
-    if (!phone) {
-      return { success: false, error: "A contact phone number is required." };
+    if (name.length > 80) {
+      return { success: false, error: "Guest name is too long (maximum 80 characters)." };
     }
-    const cleanDigits = phone.replace(/\D/g, "");
-    if (cleanDigits.length < 8 || cleanDigits.length > 15) {
-      return { success: false, error: "Please enter a valid phone number (8 to 15 digits)." };
+    if (/<[^>]*>/.test(name)) {
+      return { success: false, error: "Invalid characters detected in name." };
     }
 
+    // 3. Validate Contact Phone / WhatsApp
+    const rawPhone = input.phone?.trim() || "";
+    const cleanPhoneDigits = rawPhone.replace(/\D/g, "");
+    if (!cleanPhoneDigits || cleanPhoneDigits.length < 8 || cleanPhoneDigits.length > 15) {
+      return { success: false, error: "Please enter a valid contact phone number (8 to 15 digits)." };
+    }
+    if (cleanPhoneDigits.length === 10 && !/^[6-9]/.test(cleanPhoneDigits)) {
+      return { success: false, error: "Indian mobile numbers must start with 6, 7, 8, or 9." };
+    }
+
+    // 4. Validate Email (Optional)
     let email: string | null = null;
     if (input.email && input.email.trim().length > 0) {
-      email = input.email.trim().toLowerCase();
+      const trimmedEmail = input.email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) || trimmedEmail.length > 120) {
+        return { success: false, error: "Please enter a valid email address." };
+      }
+      email = trimmedEmail;
     }
 
-    // 3. Connect to Supabase using public anon key
+    // 5. Validate Requested Date (Must not be in the past)
+    if (input.dates) {
+      const dateMatch = input.dates.match(/\b(\d{4}-\d{2}-\d{2})\b/);
+      if (dateMatch) {
+        const reqDateStr = dateMatch[1];
+        // Calculate today's date in IST (UTC + 5:30)
+        const nowIST = new Date(Date.now() + 5.5 * 3600 * 1000);
+        const todayStr = nowIST.toISOString().slice(0, 10);
+        if (reqDateStr < todayStr) {
+          return { success: false, error: "Preferred date cannot be in the past. Please select today or a future date." };
+        }
+      }
+    }
+
+    // 6. Validate Party Size / Guests Count
+    let guestsCount = Number(input.guests);
+    if (isNaN(guestsCount) || guestsCount < 1) {
+      guestsCount = input.type === "dining" || input.type === "dining_aura" ? 2 : 50;
+    }
+    if (guestsCount > 500) {
+      return { success: false, error: "Party size exceeds maximum venue capacity." };
+    }
+
+    // 7. Anti-Spam Rate Limit & Deduplication Check
+    const submissionKey = cleanPhoneDigits;
+    const payloadHash = `${name}:${cleanPhoneDigits}:${input.type}:${input.dates || ""}:${guestsCount}`;
+    const rateCheck = checkRateLimitAndDuplicate(submissionKey, payloadHash);
+    if (!rateCheck.allowed) {
+      return { success: false, error: rateCheck.error || "Unable to submit duplicate enquiry." };
+    }
+
+    // 8. Connect to Supabase using Authoritative Server-Side Service Role
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !anonKey) {
-      return { success: false, error: "Database configuration is missing." };
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error("[Enquiry] Server configuration missing: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
+      return { success: false, error: "Unable to submit your enquiry right now. Please try again." };
     }
 
-    const client = createSupabaseClient(supabaseUrl, anonKey);
+    const client = createSupabaseClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
-    // 4. Normalize dates & room_type based on inquiry channel
+    // 9. Normalize dates & room_type based on inquiry channel
     const todayStr = new Date().toISOString().slice(0, 10);
     let checkIn = todayStr;
     let checkOut = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     let roomType = "General Inquiry";
-    let guestsCount = Number(input.guests) || 2;
     let estimatedTotal = 0;
+
+    const channelType = input.type === "dining" ? "dining" : input.type;
 
     if (input.type === "dining_aura" || input.type === "dining") {
       roomType = "Hotel Fremont Dining Hall";
@@ -108,7 +215,13 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
           checkOut = nextDay;
         }
       }
-      guestsCount = Number(input.guests) || 2;
+    } else if (input.type === "conference") {
+      roomType = "Conference Hall";
+      if (input.dates && /^\d{4}-\d{2}-\d{2}$/.test(input.dates)) {
+        checkIn = input.dates;
+        const nextDay = new Date(new Date(input.dates).getTime() + 86400000).toISOString().slice(0, 10);
+        checkOut = nextDay;
+      }
     } else if (input.type === "event_banquet") {
       roomType = input.details?.venue || "Cloud 6 Banquet";
       if (input.dates && /^\d{4}-\d{2}-\d{2}$/.test(input.dates)) {
@@ -116,7 +229,6 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
         const nextDay = new Date(new Date(input.dates).getTime() + 86400000).toISOString().slice(0, 10);
         checkOut = nextDay;
       }
-      guestsCount = Number(input.guests) || 50;
     } else if (input.type === "rate_check" || input.type === "book_now") {
       roomType = input.details?.suite || "Deluxe Room";
       if (input.dates && input.dates.includes(" to ")) {
@@ -126,7 +238,6 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
           checkOut = parts[1].trim();
         }
       }
-      guestsCount = Number(input.guests) || 2;
       estimatedTotal = Number(input.details?.totalAmount || 0);
     }
 
@@ -137,61 +248,65 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       input.details?.time ? `Time: ${input.details.time}` : null,
       input.details?.eventType ? `Event: ${input.details.eventType}` : null,
       input.details?.venue ? `Venue: ${input.details.venue}` : null,
-      input.details?.specialRequests && input.details.specialRequests !== "None" ? `Special: ${input.details.specialRequests}` : null,
+      input.details?.specialRequests && input.details.specialRequests !== "None"
+        ? `Special: ${input.details.specialRequests}`
+        : null,
     ]
       .filter(Boolean)
-      .join(" · ");
+      .join(" · ")
+      .slice(0, 600);
 
-    // Base compatible payload matching current reservations schema
+    const refCode = `FRM-ENQ-${Date.now().toString(36).toUpperCase()}`;
+
+    // 10. Base payload strictly matching public.reservations schema
+    // Sets room_type_code to null so it does not trigger the foreign key constraint
+    // on public.room_types, and ensures it never matches physical room inventory (deluxe-room, super-deluxe, premium).
+    // Sets status to 'new' so it NEVER triggers overbooking guards or blocks rooms.
     const basePayload = {
       full_name: name,
-      phone,
+      phone: rawPhone,
       email,
       check_in: checkIn,
       check_out: checkOut,
       room_type: roomType,
+      room_type_code: null,
       guests: guestsCount,
       special_request: summaryNotes || null,
       estimated_total: estimatedTotal,
       status: "new",
+      channel: channelType,
+      reference_code: refCode,
+      rooms_requested: 1,
+      capacity_override: false,
     };
 
-    // First, try inserting with extended columns (if migration applied)
-    const extendedPayload = {
-      ...basePayload,
-      channel: input.type,
-      event_date: input.dates && /^\d{4}-\d{2}-\d{2}$/.test(input.dates) ? input.dates : null,
-      event_type: input.details?.eventType || null,
-      details: input.details || {},
-    };
-
-    let { error, status } = await client.from("reservations").insert(extendedPayload);
-
-    // If extended columns don't exist yet, seamlessly insert base compatible payload
-    if (error && error.message?.toLowerCase().includes("column")) {
-      const fallbackRes = await client.from("reservations").insert(basePayload);
-      error = fallbackRes.error;
-      status = fallbackRes.status;
-    }
+    const { data: inserted, error } = await client
+      .from("reservations")
+      .insert(basePayload)
+      .select("id, reference_code")
+      .single();
 
     if (error) {
-      console.error("[Enquiry] Supabase insert failed:", error);
-      return { success: false, error: `Failed to save inquiry: ${error.message}` };
+      console.error("[Enquiry] Supabase service_role insert failed:", error);
+      return { success: false, error: "Unable to submit your enquiry right now. Please try again." };
     }
 
-    if (status !== 201 && status !== 200 && status !== 204) {
-      return { success: false, error: "Database rejected submission. Please try again." };
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/enquiries");
+    } catch {
+      // Invariant: static generation store missing outside active Next.js request context
     }
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/enquiries");
-    revalidatePath("/admin/rooms");
-
-    return { success: true };
+    return {
+      success: true,
+      enquiryId: inserted?.id,
+      message: "Thank you! Your enquiry has been submitted successfully. Our team will contact you shortly.",
+    };
   } catch (err: unknown) {
     const error = err as Error;
     console.error("[Enquiry] Exception in submitPublicEnquiryAction:", error);
-    return { success: false, error: error.message || "Failed to submit inquiry." };
+    return { success: false, error: "Unable to submit your enquiry right now. Please try again." };
   }
 }
 
@@ -201,6 +316,7 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
 function determineChannel(row: any): EnquiryType {
   const ch = (row.channel || "").toLowerCase().trim();
   if (ch === "dining_aura" || ch === "dining") return "dining_aura";
+  if (ch === "conference") return "conference";
   if (ch === "event_banquet" || ch === "banquet" || ch === "events") return "event_banquet";
   if (ch === "rate_check") return "rate_check";
   if (ch === "contact") return "contact";
@@ -211,8 +327,17 @@ function determineChannel(row: any): EnquiryType {
   const req = (row.special_request || "").toLowerCase();
   const eventType = (row.event_type || "").toLowerCase();
 
-  if (room.includes("dining") || req.includes("dining") || req.includes("table reservation") || room.includes("restaurant") || req.includes("restaurant")) {
+  if (
+    room.includes("dining") ||
+    req.includes("dining") ||
+    req.includes("table reservation") ||
+    room.includes("restaurant") ||
+    req.includes("restaurant")
+  ) {
     return "dining_aura";
+  }
+  if (room.includes("conference") || req.includes("conference") || eventType.includes("conference")) {
+    return "conference";
   }
   if (
     room.includes("ballroom") ||
@@ -221,7 +346,7 @@ function determineChannel(row: any): EnquiryType {
     room.includes("boardroom") ||
     eventType ||
     req.includes("wedding") ||
-    req.includes("conference") ||
+    req.includes("celebration") ||
     req.includes("cocktail")
   ) {
     return "event_banquet";
@@ -441,8 +566,12 @@ export async function updateEnquiryStatusAction(
       return { success: false, error: error.message };
     }
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/enquiries");
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/enquiries");
+    } catch {
+      // Invariant: static generation store missing outside active Next.js request context
+    }
     revalidatePath("/admin/rooms");
 
     return { success: true };
@@ -480,8 +609,12 @@ export async function deleteEnquiryAction(id: string): Promise<{
       return { success: false, error: error.message };
     }
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/enquiries");
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/enquiries");
+    } catch {
+      // Invariant: static generation store missing outside active Next.js request context
+    }
     revalidatePath("/admin/rooms");
 
     return { success: true };

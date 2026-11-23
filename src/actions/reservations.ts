@@ -421,6 +421,24 @@ export async function getReservationsAction(): Promise<{
           authStatus.paymentStatus === "paid"
         );
 
+        // Exclude non-room enquiries (Dining Hall, Banquets, Conferences, Contact leads)
+        // These belong exclusively to Admin -> Enquiries, preventing any impact on guest room inventory
+        const ch = (row.channel || "").toLowerCase();
+        const rType = (row.room_type || "").toLowerCase();
+        const isLeadEnquiry =
+          ch === "dining" ||
+          ch === "dining_aura" ||
+          ch === "event_banquet" ||
+          ch === "conference" ||
+          ch === "contact" ||
+          rType.includes("dining") ||
+          rType.includes("banquet") ||
+          rType.includes("conference");
+
+        if (isLeadEnquiry && !linkedBooking) {
+          continue;
+        }
+
         list.push({
           id: row.id,
           created_at: row.created_at,
