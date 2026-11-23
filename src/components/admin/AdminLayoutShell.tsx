@@ -24,7 +24,7 @@ export default function AdminLayoutShell({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F8F7F4] text-[#24272B] font-sans antialiased flex flex-col">
+    <div className="min-h-screen bg-[#0D0D10] text-[#F5F2EF] font-sans antialiased flex flex-col">
       {/* Collapsible/Responsive Sidebar */}
       <AdminSidebar
         userEmail={userEmail}

@@ -96,33 +96,33 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
     <div className="space-y-6">
       {/* Toast Feedback */}
       {saveSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 text-xs font-semibold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>Rates updated successfully and synchronized to online booking engine!</span>
         </div>
       )}
 
       {/* Overview Card */}
-      <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#742B40]/10 text-[#742B40] text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#742B40]/25 text-[#C6A16A] text-[10px] font-bold uppercase tracking-wider border border-[#742B40]/40">
               Verified 21-Key Pricing Architecture
             </span>
-            <span className="text-xs text-[#6B7280]">· EP &amp; CP Meal Plans</span>
+            <span className="text-xs text-[#8E8A85]">· EP &amp; CP Meal Plans</span>
           </div>
-          <h2 className="text-xl font-serif font-bold text-[#24272B] mt-1">
+          <h2 className="text-xl font-serif font-bold text-[#F5F2EF] mt-1">
             Room Rates, Meal Plans &amp; GST Rules
           </h2>
-          <p className="text-xs text-[#6B7280] max-w-2xl mt-0.5 leading-relaxed">
+          <p className="text-xs text-[#8E8A85] max-w-2xl mt-0.5 leading-relaxed">
             All prices are dynamically calculated server-side. Indian GST is applied based on government statutory thresholds.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="px-3.5 py-2 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3] text-xs">
-            <span className="text-[10px] text-[#6B7280] uppercase block font-semibold">Active Categories</span>
-            <span className="text-[#24272B] font-bold font-mono">3 Room Classes (21 Keys)</span>
+          <div className="px-3.5 py-2 rounded-xl bg-[#232126] border border-[#373138] text-xs">
+            <span className="text-[10px] text-[#8E8A85] uppercase block font-semibold">Active Categories</span>
+            <span className="text-[#F5F2EF] font-bold font-mono">3 Room Classes (21 Keys)</span>
           </div>
         </div>
       </div>
@@ -138,14 +138,14 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
           return (
             <div
               key={cat.slug}
-              className="bg-white border border-[#EAE8E3] rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between"
+              className="bg-[#1A191D] border border-[#373138] rounded-2xl shadow-sm hover:border-[#C6A16A]/30 transition overflow-hidden flex flex-col justify-between"
             >
               <div>
                 {/* Header */}
-                <div className="p-5 border-b border-[#EAE8E3] bg-[#FAF9F7] flex items-center justify-between">
+                <div className="p-5 border-b border-[#373138] bg-[#232126] flex items-center justify-between">
                   <div>
-                    <h3 className="font-serif font-bold text-base text-[#24272B]">{cat.name}</h3>
-                    <div className="text-[11px] text-[#6B7280] flex items-center gap-2 mt-0.5">
+                    <h3 className="font-serif font-bold text-base text-[#F5F2EF]">{cat.name}</h3>
+                    <div className="text-[11px] text-[#8E8A85] flex items-center gap-2 mt-0.5">
                       <span>{cat.totalRooms} Keys</span>
                       <span>·</span>
                       <span>{cat.sizeSqft} sq ft</span>
@@ -155,7 +155,7 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
                   </div>
                   <button
                     onClick={() => handleStartEdit(cat)}
-                    className="p-2 rounded-xl bg-white border border-[#EAE8E3] text-[#6B7280] hover:text-[#742B40] hover:border-[#742B40]/30 transition"
+                    className="p-2 rounded-xl bg-[#1A191D] border border-[#373138] text-[#B7A9A7] hover:text-[#C6A16A] hover:border-[#C6A16A]/30 transition cursor-pointer"
                     title="Edit Rate Plans"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -165,47 +165,47 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
                 {/* Rates Table */}
                 <div className="p-5 space-y-4">
                   <div className="space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280] flex items-center gap-1.5">
-                      <BedDouble className="w-3.5 h-3.5 text-[#742B40]" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8A85] flex items-center gap-1.5">
+                      <BedDouble className="w-3.5 h-3.5 text-[#C6A16A]" />
                       <span>EP — Room Only (Without Breakfast)</span>
                     </span>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3]">
-                        <span className="text-[10px] text-[#6B7280] block">Single Guest</span>
-                        <span className="text-sm font-bold font-mono text-[#24272B]">
+                      <div className="p-2.5 rounded-xl bg-[#232126] border border-[#373138]">
+                        <span className="text-[10px] text-[#8E8A85] block">Single Guest</span>
+                        <span className="text-sm font-bold font-mono text-[#F5F2EF]">
                           {formatINR(epSingle)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
+                        <span className="text-[10px] text-[#8E8A85] block">+ 5% GST</span>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3]">
-                        <span className="text-[10px] text-[#6B7280] block">Double Guests</span>
-                        <span className="text-sm font-bold font-mono text-[#24272B]">
+                      <div className="p-2.5 rounded-xl bg-[#232126] border border-[#373138]">
+                        <span className="text-[10px] text-[#8E8A85] block">Double Guests</span>
+                        <span className="text-sm font-bold font-mono text-[#F5F2EF]">
                           {formatINR(epDouble)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
+                        <span className="text-[10px] text-[#8E8A85] block">+ 5% GST</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-[#EAE8E3]">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280] flex items-center gap-1.5">
-                      <UtensilsCrossed className="w-3.5 h-3.5 text-[#B69A68]" />
+                  <div className="space-y-2 pt-2 border-t border-[#373138]">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8A85] flex items-center gap-1.5">
+                      <UtensilsCrossed className="w-3.5 h-3.5 text-[#C6A16A]" />
                       <span>CP — With Morning Breakfast</span>
                     </span>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2.5 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
-                        <span className="text-[10px] text-[#6B7280] block">Single Guest</span>
-                        <span className="text-sm font-bold font-mono text-[#742B40]">
+                      <div className="p-2.5 rounded-xl bg-[#232126] border border-[#373138]">
+                        <span className="text-[10px] text-[#8E8A85] block">Single Guest</span>
+                        <span className="text-sm font-bold font-mono text-[#C6A16A]">
                           {formatINR(cpSingle)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
+                        <span className="text-[10px] text-[#8E8A85] block">+ 5% GST</span>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
-                        <span className="text-[10px] text-[#6B7280] block">Double Guests</span>
-                        <span className="text-sm font-bold font-mono text-[#742B40]">
+                      <div className="p-2.5 rounded-xl bg-[#232126] border border-[#373138]">
+                        <span className="text-[10px] text-[#8E8A85] block">Double Guests</span>
+                        <span className="text-sm font-bold font-mono text-[#C6A16A]">
                           {formatINR(cpDouble)}
                         </span>
-                        <span className="text-[10px] text-[#6B7280] block">+ 5% GST</span>
+                        <span className="text-[10px] text-[#8E8A85] block">+ 5% GST</span>
                       </div>
                     </div>
                   </div>
@@ -213,9 +213,9 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
               </div>
 
               {/* Card Footer */}
-              <div className="p-4 bg-[#FAF9F7] border-t border-[#EAE8E3] flex items-center justify-between text-xs">
-                <span className="text-[11px] text-[#6B7280]">Floor Inventory</span>
-                <span className="font-semibold text-[#24272B]">{cat.bedType}</span>
+              <div className="p-4 bg-[#232126] border-t border-[#373138] flex items-center justify-between text-xs">
+                <span className="text-[11px] text-[#8E8A85]">Floor Inventory</span>
+                <span className="font-semibold text-[#F5F2EF]">{cat.bedType}</span>
               </div>
             </div>
           );
@@ -224,25 +224,25 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
 
       {/* Statutory GST & Meal Plan Policy Guide */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 shadow-sm space-y-3">
+        <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 shadow-sm space-y-3">
           <div className="flex items-center gap-2">
-            <Percent className="w-4 h-4 text-[#742B40]" />
-            <h3 className="font-serif font-bold text-sm text-[#24272B]">
+            <Percent className="w-4 h-4 text-[#C6A16A]" />
+            <h3 className="font-serif font-bold text-sm text-[#F5F2EF]">
               Statutory GST Compliance
             </h3>
           </div>
-          <p className="text-xs text-[#6B7280] leading-relaxed">
+          <p className="text-xs text-[#8E8A85] leading-relaxed">
             In accordance with Government of India GST Council notifications:
           </p>
-          <ul className="text-xs text-[#4B5563] space-y-2">
+          <ul className="text-xs text-[#B7A9A7] space-y-2">
             <li className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#742B40] mt-1.5 shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C6A16A] mt-1.5 shrink-0" />
               <span>
                 <strong>12% GST</strong> applies to room tariffs below <strong>₹7,500/night</strong> (CGST 6% + SGST 6%). All Hotel Fremont standard categories fall under this bracket.
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#742B40] mt-1.5 shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C6A16A] mt-1.5 shrink-0" />
               <span>
                 <strong>18% GST</strong> applies to room tariffs of <strong>₹7,500/night and above</strong>.
               </span>
@@ -250,25 +250,25 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
           </ul>
         </div>
 
-        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 shadow-sm space-y-3">
+        <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 shadow-sm space-y-3">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#B69A68]" />
-            <h3 className="font-serif font-bold text-sm text-[#24272B]">
+            <ShieldCheck className="w-4 h-4 text-[#C6A16A]" />
+            <h3 className="font-serif font-bold text-sm text-[#F5F2EF]">
               Extra Guest &amp; Child Policies
             </h3>
           </div>
-          <p className="text-xs text-[#6B7280] leading-relaxed">
+          <p className="text-xs text-[#8E8A85] leading-relaxed">
             Standard hotel occupancy rules applied during check-in:
           </p>
-          <ul className="text-xs text-[#4B5563] space-y-2">
+          <ul className="text-xs text-[#B7A9A7] space-y-2">
             <li className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B69A68] mt-1.5 shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C6A16A] mt-1.5 shrink-0" />
               <span>
                 <strong>Children below 6 years:</strong> Stay complimentary when sharing existing bedding with parents.
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B69A68] mt-1.5 shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C6A16A] mt-1.5 shrink-0" />
               <span>
                 <strong>Extra Bed / Rollaway:</strong> Available at ₹800/night + taxes upon prior front-desk notice.
               </span>
@@ -279,108 +279,108 @@ export default function RatesManager({ initialRoomTypes }: RatesManagerProps) {
 
       {/* Edit Rate Plan Modal */}
       {editingCategory && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-[#EAE8E3]">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 text-[#F5F2EF]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#373138]">
               <div>
-                <h3 className="font-serif font-bold text-base text-[#24272B]">
+                <h3 className="font-serif font-bold text-base text-[#F5F2EF]">
                   Edit Rates: {editingCategory.name}
                 </h3>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#8E8A85]">
                   Configure EP (Room Only) and CP (With Breakfast) tariffs
                 </p>
               </div>
               <button
                 onClick={() => setEditingCategory(null)}
-                className="p-1 rounded-lg text-[#6B7280] hover:text-[#24272B]"
+                className="p-1 rounded-lg text-[#8E8A85] hover:text-[#F5F2EF] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {errorMessage && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800/50 text-rose-300 text-xs">
                 {errorMessage}
               </div>
             )}
 
             <form onSubmit={handleSaveRates} className="space-y-4">
               <div className="space-y-2">
-                <span className="text-xs font-semibold text-[#24272B] block">
+                <span className="text-xs font-semibold text-[#F5F2EF] block">
                   EP Rates (Room Only)
                 </span>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] text-[#6B7280] block mb-1">Single Occupancy (₹)</label>
+                    <label className="text-[11px] text-[#8E8A85] block mb-1">Single Occupancy (₹)</label>
                     <input
                       type="number"
                       value={formData.rateEpSingle}
                       onChange={(e) =>
                         setFormData({ ...formData, rateEpSingle: Number(e.target.value) })
                       }
-                      className="w-full px-3 py-2 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl text-xs font-mono font-bold text-[#24272B] focus:outline-none focus:border-[#742B40]"
+                      className="w-full px-3 py-2 bg-[#0D0D10] border border-[#373138] rounded-xl text-xs font-mono font-bold text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                       required
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] text-[#6B7280] block mb-1">Double Occupancy (₹)</label>
+                    <label className="text-[11px] text-[#8E8A85] block mb-1">Double Occupancy (₹)</label>
                     <input
                       type="number"
                       value={formData.rateEpDouble}
                       onChange={(e) =>
                         setFormData({ ...formData, rateEpDouble: Number(e.target.value) })
                       }
-                      className="w-full px-3 py-2 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl text-xs font-mono font-bold text-[#24272B] focus:outline-none focus:border-[#742B40]"
+                      className="w-full px-3 py-2 bg-[#0D0D10] border border-[#373138] rounded-xl text-xs font-mono font-bold text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                       required
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-[#EAE8E3]">
-                <span className="text-xs font-semibold text-[#24272B] block">
+              <div className="space-y-2 pt-2 border-t border-[#373138]">
+                <span className="text-xs font-semibold text-[#F5F2EF] block">
                   CP Rates (With Breakfast)
                 </span>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] text-[#6B7280] block mb-1">Single Occupancy (₹)</label>
+                    <label className="text-[11px] text-[#8E8A85] block mb-1">Single Occupancy (₹)</label>
                     <input
                       type="number"
                       value={formData.rateCpSingle}
                       onChange={(e) =>
                         setFormData({ ...formData, rateCpSingle: Number(e.target.value) })
                       }
-                      className="w-full px-3 py-2 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl text-xs font-mono font-bold text-[#742B40] focus:outline-none focus:border-[#742B40]"
+                      className="w-full px-3 py-2 bg-[#0D0D10] border border-[#373138] rounded-xl text-xs font-mono font-bold text-[#C6A16A] focus:outline-none focus:border-[#C6A16A]"
                       required
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] text-[#6B7280] block mb-1">Double Occupancy (₹)</label>
+                    <label className="text-[11px] text-[#8E8A85] block mb-1">Double Occupancy (₹)</label>
                     <input
                       type="number"
                       value={formData.rateCpDouble}
                       onChange={(e) =>
                         setFormData({ ...formData, rateCpDouble: Number(e.target.value) })
                       }
-                      className="w-full px-3 py-2 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl text-xs font-mono font-bold text-[#742B40] focus:outline-none focus:border-[#742B40]"
+                      className="w-full px-3 py-2 bg-[#0D0D10] border border-[#373138] rounded-xl text-xs font-mono font-bold text-[#C6A16A] focus:outline-none focus:border-[#C6A16A]"
                       required
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#EAE8E3] flex items-center justify-end gap-3">
+              <div className="pt-3 border-t border-[#373138] flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setEditingCategory(null)}
-                  className="px-4 py-2 rounded-xl border border-[#EAE8E3] text-xs font-medium text-[#6B7280] hover:text-[#24272B]"
+                  className="px-4 py-2 rounded-xl border border-[#373138] bg-[#232126] text-xs font-medium text-[#B7A9A7] hover:text-[#F5F2EF] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-5 py-2.5 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold shadow-sm transition flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#742B40] hover:bg-[#8B344D] text-white border border-[#C6A16A]/20 text-xs font-semibold shadow-sm transition flex items-center gap-2 cursor-pointer"
                 >
                   {isSaving ? "Saving..." : "Save Rate Changes"}
                 </button>

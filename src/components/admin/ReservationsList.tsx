@@ -251,26 +251,26 @@ export default function ReservationsList({
   const paidCount = reservations.filter((r) => r.status === "paid").length;
 
   return (
-    <div className="bg-white border border-[#EAE8E3] rounded-2xl overflow-hidden shadow-xl">
+    <div className="bg-[#1A191D] border border-[#373138] rounded-2xl overflow-hidden shadow-xl">
       {/* Header Bar */}
-      <div className="p-5 border-b border-[#EAE8E3] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-black/40 via-transparent to-black/20">
+      <div className="p-5 border-b border-[#373138] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-black/40 via-transparent to-black/20">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h3 className="text-base sm:text-lg font-serif font-bold text-[#24272B]">
+            <h3 className="text-base sm:text-lg font-serif font-bold text-[#F5F2EF]">
               Bookings &amp; Online Payments
             </h3>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#742B40]/15 text-[#742B40] border border-[#742B40]/30 text-[11px] font-bold font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#742B40]/30 text-white border border-[#C6A16A]/30 text-[11px] font-bold font-mono">
               {reservations.length} Total
             </span>
             {paidCount > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 text-[11px] font-bold flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-emerald-400" />
                 {paidCount} Paid Online
               </span>
             )}
           </div>
-          <p className="text-xs text-[#6B7280]">
-            Real-time Razorpay checkout transactions and confirmed stays from <code className="text-[#B69A68] font-mono">public.bookings</code> &amp; <code className="text-[#B69A68] font-mono">public.reservations</code>
+          <p className="text-xs text-[#8E8A85]">
+            Real-time Razorpay checkout transactions and confirmed stays from <code className="text-[#C6A16A] font-mono">public.bookings</code> &amp; <code className="text-[#C6A16A] font-mono">public.reservations</code>
           </p>
         </div>
 
@@ -279,17 +279,17 @@ export default function ReservationsList({
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="px-3.5 py-2 rounded-xl bg-[#F8F7F4] hover:bg-white/5 border border-[#EAE8E3] hover:border-[#EAE8E3] text-xs text-[#24272B] flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
+            className="px-3.5 py-2 rounded-xl bg-[#0D0D10] hover:bg-[#232126] border border-[#373138] text-xs text-[#F5F2EF] flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
             title="Reload from Supabase"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#B69A68] ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#C6A16A] ${isRefreshing ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="p-4 bg-black/30 border-b border-[#EAE8E3] flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between text-xs">
+      <div className="p-4 bg-black/30 border-b border-[#373138] flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between text-xs">
         {/* Status Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0">
           {[
@@ -306,8 +306,8 @@ export default function ReservationsList({
               onClick={() => setFilterStatus(st.id)}
               className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition cursor-pointer ${
                 filterStatus === st.id
-                  ? "bg-[#742B40] text-white font-semibold shadow"
-                  : "text-[#6B7280] hover:text-white bg-[#F8F7F4] border border-[#EAE8E3]"
+                  ? "bg-[#742B40] text-white font-semibold shadow border border-[#C6A16A]/20"
+                  : "text-[#B7A9A7] hover:text-[#F5F2EF] bg-[#0D0D10] border border-[#373138]"
               }`}
             >
               {st.label}
@@ -318,13 +318,13 @@ export default function ReservationsList({
         {/* Date & Search Inputs */}
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           {/* Date Picker Filter */}
-          <div className="flex items-center gap-1.5 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl px-2.5 py-1.5 text-xs text-[#24272B]">
-            <Calendar className="w-3.5 h-3.5 text-[#B69A68]" />
+          <div className="flex items-center gap-1.5 bg-[#0D0D10] border border-[#373138] rounded-xl px-2.5 py-1.5 text-xs text-[#F5F2EF]">
+            <Calendar className="w-3.5 h-3.5 text-[#C6A16A]" />
             <input
               type="date"
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
-              className="bg-transparent text-xs text-[#24272B] focus:outline-none [color-scheme:dark]"
+              className="bg-transparent text-xs text-[#F5F2EF] focus:outline-none [color-scheme:dark]"
               title="Filter by stay date"
             />
             {filterDate && (
@@ -339,14 +339,14 @@ export default function ReservationsList({
           </div>
 
           {/* Search box */}
-          <div className="flex items-center gap-1.5 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl px-3 py-1.5 text-xs text-[#24272B] w-full sm:w-48">
-            <Search className="w-3.5 h-3.5 text-[#6B7280]" />
+          <div className="flex items-center gap-1.5 bg-[#0D0D10] border border-[#373138] rounded-xl px-3 py-1.5 text-xs text-[#F5F2EF] w-full sm:w-48">
+            <Search className="w-3.5 h-3.5 text-[#8E8A85]" />
             <input
               type="text"
               placeholder="Search ref, guest, phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent w-full text-xs text-[#24272B] focus:outline-none placeholder-[#A8A59E]/50"
+              className="bg-transparent w-full text-xs text-[#F5F2EF] focus:outline-none placeholder-[#8E8A85]/50"
             />
             {searchQuery && (
               <button
@@ -379,26 +379,26 @@ export default function ReservationsList({
       {isRefreshing && reservations.length === 0 ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 text-[#742B40] animate-spin mx-auto" />
-          <p className="text-xs text-[#6B7280]">Fetching records from Supabase...</p>
+          <p className="text-xs text-[#8E8A85]">Fetching records from Supabase...</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-16 text-center space-y-3 px-4">
-          <div className="w-12 h-12 rounded-full bg-white/5 border border-[#EAE8E3] mx-auto flex items-center justify-center text-[#6B7280]">
+          <div className="w-12 h-12 rounded-full bg-white/5 border border-[#373138] mx-auto flex items-center justify-center text-[#8E8A85]">
             <Calendar className="w-6 h-6" />
           </div>
-          <h4 className="text-sm font-serif font-bold text-[#24272B]">
+          <h4 className="text-sm font-serif font-bold text-[#F5F2EF]">
             {filterStatus === "all" && !filterDate && !searchQuery
               ? "No reservations found"
               : "No matching reservations for selected filters"}
           </h4>
-          <p className="text-xs text-[#6B7280] max-w-sm mx-auto">
+          <p className="text-xs text-[#8E8A85] max-w-sm mx-auto">
             Bookings made through Razorpay or front desk reservations will be displayed here in real time.
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-black/50 text-[#6B7280] font-mono border-b border-[#EAE8E3] uppercase text-[10px] tracking-wider">
+            <thead className="bg-black/50 text-[#8E8A85] font-mono border-b border-[#373138] uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="py-3 px-4">Booking Ref &amp; Guest</th>
                 <th className="py-3 px-4">Suite &amp; Stay Dates</th>
@@ -408,7 +408,7 @@ export default function ReservationsList({
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-[#24272B]">
+            <tbody className="divide-y divide-white/5 text-[#F5F2EF]">
               {filtered.map((r) => {
                 const conf = statusConfig[r.status] || statusConfig.new;
                 const cleanPhone = r.phone?.replace(/\D/g, "") || "";
@@ -425,20 +425,20 @@ export default function ReservationsList({
                     {/* Booking Ref & Guest */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono font-bold text-[#742B40] text-xs">
+                        <span className="font-mono font-bold text-[#C6A16A] text-xs">
                           {r.reference_code || `FRM-${r.id.slice(0, 6).toUpperCase()}`}
                         </span>
                         {r.channel === "razorpay" && (
-                          <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] font-mono font-semibold">
+                          <span className="px-1.5 py-0.5 rounded bg-blue-950/40 text-blue-300 border border-blue-800/40 text-[9px] font-mono font-semibold">
                             Razorpay
                           </span>
                         )}
                       </div>
                       <div className="font-semibold text-white text-sm flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-[#B69A68]" />
+                        <User className="w-3.5 h-3.5 text-[#C6A16A]" />
                         <span>{r.full_name}</span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1 text-[11px] text-[#6B7280]">
+                      <div className="flex items-center gap-3 mt-1 text-[11px] text-[#8E8A85]">
                         <a
                           href={`tel:${r.phone}`}
                           className="hover:text-white flex items-center gap-1 font-mono"
@@ -459,14 +459,14 @@ export default function ReservationsList({
                         )}
                       </div>
                       {r.email && (
-                        <div className="flex items-center gap-1 text-[11px] text-[#6B7280] mt-0.5">
-                          <Mail className="w-3 h-3 text-[#B69A68]" />
+                        <div className="flex items-center gap-1 text-[11px] text-[#8E8A85] mt-0.5">
+                          <Mail className="w-3 h-3 text-[#C6A16A]" />
                           <span className="truncate max-w-[200px]">{r.email}</span>
                         </div>
                       )}
                       {r.special_request && (
-                        <div className="mt-1.5 p-1.5 rounded-lg bg-[#F8F7F4] border border-[#EAE8E3] text-[11px] text-[#B69A68] max-w-xs">
-                          <span className="font-semibold uppercase text-[9px] block text-[#6B7280]">
+                        <div className="mt-1.5 p-1.5 rounded-lg bg-[#0D0D10] border border-[#373138] text-[11px] text-[#C6A16A] max-w-xs">
+                          <span className="font-semibold uppercase text-[9px] block text-[#8E8A85]">
                             Request:
                           </span>
                           {r.special_request}
@@ -477,15 +477,15 @@ export default function ReservationsList({
                     {/* Suite & Stay Dates */}
                     <td className="py-3.5 px-4">
                       <div className="font-medium text-white">{r.room_type}</div>
-                      <div className="text-[11px] text-[#6B7280] flex items-center gap-1 mt-0.5 font-mono">
-                        <Users className="w-3 h-3 text-[#B69A68]" />
+                      <div className="text-[11px] text-[#8E8A85] flex items-center gap-1 mt-0.5 font-mono">
+                        <Users className="w-3 h-3 text-[#C6A16A]" />
                         <span>
                           {r.rooms_requested || 1} Room(s) · {r.guests} Guest(s)
                         </span>
                       </div>
                       <div className="mt-2 font-mono text-[11px]">
                         <div className="text-white">In: {r.check_in}</div>
-                        <div className="text-[#6B7280]">Out: {r.check_out} ({diffDays}N)</div>
+                        <div className="text-[#8E8A85]">Out: {r.check_out} ({diffDays}N)</div>
                       </div>
                     </td>
 
@@ -497,12 +497,12 @@ export default function ReservationsList({
                         </div>
 
                         {isPaidOnline ? (
-                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 text-[10px] font-semibold">
                             <CheckCircle2 className="w-3 h-3" />
                             <span>Paid in Full</span>
                           </div>
                         ) : r.status === "refunded" ? (
-                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[10px] font-semibold">
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-950/40 text-purple-300 border border-purple-800/40 text-[10px] font-semibold">
                             <span>Refund Processed</span>
                           </div>
                         ) : (
@@ -532,7 +532,7 @@ export default function ReservationsList({
                         <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
                         {conf.label}
                       </span>
-                      <div className="text-[10px] text-[#6B7280]/60 font-mono mt-1">
+                      <div className="text-[10px] text-[#8E8A85]/60 font-mono mt-1">
                         {new Date(r.created_at).toLocaleDateString("en-IN", {
                           day: "numeric",
                           month: "short",
@@ -546,7 +546,7 @@ export default function ReservationsList({
                         disabled={updatingId === r.id}
                         value={r.status}
                         onChange={(e) => handleStatusChange(r.id, e.target.value as ReservationStatus)}
-                        className="bg-black/60 border border-[#EAE8E3] rounded-lg px-2.5 py-1.5 text-[11px] text-[#24272B] focus:border-[#742B40] focus:outline-none cursor-pointer"
+                        className="bg-[#0D0D10] border border-[#373138] rounded-lg px-2.5 py-1.5 text-[11px] text-[#F5F2EF] focus:border-[#C6A16A] focus:outline-none cursor-pointer"
                       >
                         <option value="paid">Mark as: Paid</option>
                         <option value="confirmed">Mark as: Confirmed</option>

@@ -22,7 +22,7 @@ export default function AdminRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#F8F7F4] text-[#24272B] antialiased selection:bg-[#742B40] selection:text-white font-sans">
+    <div className="admin-portal min-h-screen bg-[#0D0D10] text-[#F5F2EF] antialiased selection:bg-[#742B40] selection:text-white font-sans">
       {children}
     </div>
   );

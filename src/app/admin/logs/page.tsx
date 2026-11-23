@@ -55,15 +55,15 @@ export default async function AdminLogsPage() {
   const getBadgeStyle = (outcome: string, action: string) => {
     const act = action.toLowerCase();
     if (outcome === "blocked" || act.includes("blocked")) {
-      return "bg-rose-50 text-rose-700 border-rose-200";
+      return "bg-rose-950/60 text-rose-400 border-rose-800/50";
     }
     if (act.includes("delete") || act.includes("cleanup")) {
-      return "bg-amber-50 text-amber-700 border-amber-200";
+      return "bg-amber-950/60 text-amber-400 border-amber-800/50";
     }
     if (act.includes("archive")) {
-      return "bg-slate-50 text-slate-700 border-slate-200";
+      return "bg-zinc-800/60 text-zinc-300 border-zinc-700/50";
     }
-    return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    return "bg-emerald-950/60 text-emerald-400 border-emerald-800/50";
   };
 
   const formatTimestamp = (ts: string) => {
@@ -88,21 +88,21 @@ export default async function AdminLogsPage() {
       subtitle="Hotel Fremont · Audit logs of deletions, reservations, customer privacy actions, and system updates"
     >
       <div className="space-y-6">
-        <div className="bg-white border border-[#EAE8E3] rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-[#EAE8E3] bg-[#FAF9F7] flex items-center justify-between">
+        <div className="bg-[#1A191D] border border-[#373138] rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-[#373138] bg-[#232126] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-[#742B40]" />
-              <h3 className="font-serif font-bold text-sm text-[#24272B]">
+              <History className="w-4 h-4 text-[#C6A16A]" />
+              <h3 className="font-serif font-bold text-sm text-[#F5F2EF]">
                 Recent Audit Trail Events
               </h3>
             </div>
-            <span className="text-xs text-[#6B7280]">
+            <span className="text-xs text-[#8E8A85]">
               {logs.length} event{logs.length !== 1 ? "s" : ""} recorded
             </span>
           </div>
 
           {logs.length > 0 ? (
-            <div className="divide-y divide-[#EAE8E3]">
+            <div className="divide-y divide-[#373138]">
               {logs.map((log) => {
                 const Icon = getEntityIcon(log.entityType, log.action);
                 const badgeClass = getBadgeStyle(log.outcome, log.action);
@@ -110,15 +110,15 @@ export default async function AdminLogsPage() {
                 return (
                   <div
                     key={log.id}
-                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#FAF9F7] transition"
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#232126]/60 transition"
                   >
                     <div className="flex items-start sm:items-center gap-3.5">
-                      <div className="w-9 h-9 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-[#742B40] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                      <div className="w-9 h-9 rounded-xl bg-[#232126] border border-[#373138] text-[#C6A16A] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="space-y-0.5">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-semibold text-xs text-[#24272B]">
+                          <span className="font-semibold text-xs text-[#F5F2EF]">
                             {log.action}
                           </span>
                           <span
@@ -126,15 +126,15 @@ export default async function AdminLogsPage() {
                           >
                             {log.entityType} · {log.outcome}
                           </span>
-                          <span className="text-[10px] font-mono text-[#9CA3AF] bg-[#F8F7F4] px-1.5 py-0.5 rounded border border-[#EAE8E3]">
+                          <span className="text-[10px] font-mono text-[#B7A9A7] bg-[#232126] px-1.5 py-0.5 rounded border border-[#373138]">
                             By {log.adminEmail}
                           </span>
                         </div>
-                        <p className="text-xs text-[#6B7280]">{log.details}</p>
+                        <p className="text-xs text-[#8E8A85]">{log.details}</p>
                       </div>
                     </div>
 
-                    <span className="text-[11px] text-[#9CA3AF] font-mono shrink-0 pl-12 sm:pl-0">
+                    <span className="text-[11px] text-[#8E8A85] font-mono shrink-0 pl-12 sm:pl-0">
                       {formatTimestamp(log.timestamp)}
                     </span>
                   </div>
@@ -143,9 +143,9 @@ export default async function AdminLogsPage() {
             </div>
           ) : (
             <div className="py-16 text-center space-y-2">
-              <History className="w-8 h-8 text-[#9CA3AF] mx-auto" />
-              <h4 className="text-sm font-semibold text-[#24272B]">No audit events logged yet</h4>
-              <p className="text-xs text-[#6B7280]">
+              <History className="w-8 h-8 text-[#8E8A85] mx-auto" />
+              <h4 className="text-sm font-semibold text-[#F5F2EF]">No audit events logged yet</h4>
+              <p className="text-xs text-[#8E8A85]">
                 Administrative operations like deletions, status changes, and data cleanups will appear here.
               </p>
             </div>

@@ -65,51 +65,51 @@ const typeBadges: Record<
 > = {
   rate_check: {
     label: "Rate Inquiry",
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
+    bg: "bg-blue-950/40",
+    text: "text-blue-300",
+    border: "border-blue-800/40",
     icon: BedDouble,
   },
   book_now: {
     label: "Room Reservation",
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
+    bg: "bg-emerald-950/40",
+    text: "text-emerald-300",
+    border: "border-emerald-800/40",
     icon: BedDouble,
   },
   dining_aura: {
     label: "Dining Hall",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
+    bg: "bg-amber-950/40",
+    text: "text-amber-300",
+    border: "border-amber-800/40",
     icon: Utensils,
   },
   dining: {
     label: "Dining Hall",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
+    bg: "bg-amber-950/40",
+    text: "text-amber-300",
+    border: "border-amber-800/40",
     icon: Utensils,
   },
   event_banquet: {
     label: "Cloud 6 Banquet",
-    bg: "bg-purple-50",
-    text: "text-purple-700",
-    border: "border-purple-200",
+    bg: "bg-purple-950/40",
+    text: "text-purple-300",
+    border: "border-purple-800/40",
     icon: Building,
   },
   conference: {
     label: "Conference Hall",
-    bg: "bg-indigo-50",
-    text: "text-indigo-700",
-    border: "border-indigo-200",
+    bg: "bg-indigo-950/40",
+    text: "text-indigo-300",
+    border: "border-indigo-800/40",
     icon: Building,
   },
   contact: {
     label: "General Inquiry",
-    bg: "bg-slate-50",
-    text: "text-slate-700",
-    border: "border-slate-200",
+    bg: "bg-[#232126]",
+    text: "text-[#B7A9A7]",
+    border: "border-[#373138]",
     icon: MessageSquare,
   },
 };
@@ -120,33 +120,33 @@ const statusBadges: Record<
 > = {
   new: {
     label: "New Lead",
-    bg: "bg-rose-50",
-    text: "text-rose-700",
-    border: "border-rose-200",
+    bg: "bg-rose-950/40",
+    text: "text-rose-300",
+    border: "border-rose-800/40",
   },
   contacted: {
     label: "Contacted",
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
+    bg: "bg-blue-950/40",
+    text: "text-blue-300",
+    border: "border-blue-800/40",
   },
   in_discussion: {
     label: "In Discussion",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
+    bg: "bg-amber-950/40",
+    text: "text-amber-300",
+    border: "border-amber-800/40",
   },
   converted: {
     label: "Converted",
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
+    bg: "bg-emerald-950/40",
+    text: "text-emerald-300",
+    border: "border-emerald-800/40",
   },
   closed: {
     label: "Closed / Lost",
-    bg: "bg-gray-100",
-    text: "text-gray-600",
-    border: "border-gray-200",
+    bg: "bg-[#232126]",
+    text: "text-[#8E8A85]",
+    border: "border-[#373138]",
   },
 };
 
@@ -417,14 +417,14 @@ export default function EnquiriesManager({
     <div className="space-y-6">
       {/* Feedback Banner */}
       {actionFeedback && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center justify-between shadow-sm animate-in fade-in">
+        <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs font-medium flex items-center justify-between shadow-sm animate-in fade-in">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{actionFeedback}</span>
           </div>
           <button
             onClick={() => setActionFeedback(null)}
-            className="text-emerald-700 hover:text-emerald-950 font-bold ml-2"
+            className="text-emerald-400 hover:text-emerald-200 font-bold ml-2 cursor-pointer"
           >
             ×
           </button>
@@ -432,21 +432,21 @@ export default function EnquiriesManager({
       )}
 
       {/* Top Filter & Search Bar */}
-      <div className="bg-white border border-[#EAE8E3] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           <button
             onClick={() => setActiveTab("all")}
             className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer flex items-center gap-2 ${
               activeTab === "all"
-                ? "bg-[#742B40] text-white shadow-sm"
-                : "text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4]"
+                ? "bg-[#742B40] text-white border border-[#C6A16A]/30 shadow-sm"
+                : "text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126]"
             }`}
           >
             <span>All Leads</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeTab === "all" ? "bg-white/20 text-white" : "bg-[#F8F7F4] text-[#6B7280]"
+                activeTab === "all" ? "bg-white/20 text-white" : "bg-[#232126] text-[#8E8A85]"
               }`}
             >
               {counts.all}
@@ -457,14 +457,14 @@ export default function EnquiriesManager({
             onClick={() => setActiveTab("rooms")}
             className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer flex items-center gap-2 ${
               activeTab === "rooms"
-                ? "bg-[#742B40] text-white shadow-sm"
-                : "text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4]"
+                ? "bg-[#742B40] text-white border border-[#C6A16A]/30 shadow-sm"
+                : "text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126]"
             }`}
           >
             <span>Room Stays</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeTab === "rooms" ? "bg-white/20 text-white" : "bg-[#F8F7F4] text-[#6B7280]"
+                activeTab === "rooms" ? "bg-white/20 text-white" : "bg-[#232126] text-[#8E8A85]"
               }`}
             >
               {counts.rooms}
@@ -475,14 +475,14 @@ export default function EnquiriesManager({
             onClick={() => setActiveTab("banquet")}
             className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer flex items-center gap-2 ${
               activeTab === "banquet"
-                ? "bg-[#742B40] text-white shadow-sm"
-                : "text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4]"
+                ? "bg-[#742B40] text-white border border-[#C6A16A]/30 shadow-sm"
+                : "text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126]"
             }`}
           >
             <span>Cloud 6 Banquet</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeTab === "banquet" ? "bg-white/20 text-white" : "bg-[#F8F7F4] text-[#6B7280]"
+                activeTab === "banquet" ? "bg-white/20 text-white" : "bg-[#232126] text-[#8E8A85]"
               }`}
             >
               {counts.banquet}
@@ -493,14 +493,14 @@ export default function EnquiriesManager({
             onClick={() => setActiveTab("restaurant")}
             className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer flex items-center gap-2 ${
               activeTab === "restaurant"
-                ? "bg-[#742B40] text-white shadow-sm"
-                : "text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4]"
+                ? "bg-[#742B40] text-white border border-[#C6A16A]/30 shadow-sm"
+                : "text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126]"
             }`}
           >
             <span>Dining Hall</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeTab === "restaurant" ? "bg-white/20 text-white" : "bg-[#F8F7F4] text-[#6B7280]"
+                activeTab === "restaurant" ? "bg-white/20 text-white" : "bg-[#232126] text-[#8E8A85]"
               }`}
             >
               {counts.restaurant}
@@ -511,22 +511,22 @@ export default function EnquiriesManager({
         {/* Right Search & Status Filter */}
         <div className="flex items-center gap-2.5">
           <div className="relative flex-1 sm:w-64">
-            <Search className="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#8E8A85] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search guest name, phone, notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-xs text-[#24272B] placeholder-[#9CA3AF] focus:outline-none focus:border-[#742B40] transition"
+              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#0D0D10] border border-[#373138] text-xs text-[#F5F2EF] placeholder-[#8E8A85] focus:outline-none focus:border-[#C6A16A] transition"
             />
           </div>
 
           <div className="flex items-center gap-1.5 text-xs">
-            <Filter className="w-3.5 h-3.5 text-[#6B7280]" />
+            <Filter className="w-3.5 h-3.5 text-[#8E8A85]" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-xs text-[#24272B] focus:outline-none focus:border-[#742B40]"
+              className="px-2.5 py-1.5 rounded-xl bg-[#0D0D10] border border-[#373138] text-xs text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A] cursor-pointer"
             >
               <option value="all">All Statuses</option>
               <option value="new">New Lead</option>
@@ -541,12 +541,12 @@ export default function EnquiriesManager({
 
       {/* Bulk Action Toolbar */}
       {selectedIds.length > 0 && (
-        <div className="bg-[#742B40]/10 border border-[#742B40]/30 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-sm animate-in fade-in">
+        <div className="bg-[#742B40]/20 border border-[#742B40]/40 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-sm animate-in fade-in">
           <div className="flex items-center gap-3">
-            <span className="px-2.5 py-1 rounded-full bg-[#742B40] text-white text-xs font-bold font-mono">
+            <span className="px-2.5 py-1 rounded-full bg-[#742B40] text-white text-xs font-bold font-mono border border-[#C6A16A]/30">
               {selectedIds.length}
             </span>
-            <span className="text-xs font-semibold text-[#24272B]">
+            <span className="text-xs font-semibold text-[#F5F2EF]">
               leads selected for batch processing
             </span>
           </div>
@@ -555,9 +555,9 @@ export default function EnquiriesManager({
             <button
               onClick={handleBulkArchive}
               disabled={isBulkArchiving}
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] font-medium transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 rounded-xl bg-[#232126] hover:bg-[#2c2a30] border border-[#373138] text-[#F5F2EF] font-medium transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              <Archive className="w-3.5 h-3.5 text-[#B69A68]" />
+              <Archive className="w-3.5 h-3.5 text-[#C6A16A]" />
               <span>{isBulkArchiving ? "Archiving..." : "Bulk Archive"}</span>
             </button>
 
@@ -571,7 +571,7 @@ export default function EnquiriesManager({
 
             <button
               onClick={() => setSelectedIds([])}
-              className="px-2.5 py-1.5 text-xs text-[#6B7280] hover:text-[#24272B] cursor-pointer"
+              className="px-2.5 py-1.5 text-xs text-[#8E8A85] hover:text-[#F5F2EF] cursor-pointer"
             >
               Clear Selection
             </button>
@@ -580,32 +580,32 @@ export default function EnquiriesManager({
       )}
 
       {/* Enquiries CRM Table / List */}
-      <div className="bg-white border border-[#EAE8E3] rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-[#1A191D] border border-[#373138] rounded-2xl shadow-sm overflow-hidden">
         {/* Table Header with Select-All Checkbox */}
-        <div className="p-3.5 bg-[#FAF9F7] border-b border-[#EAE8E3] flex items-center justify-between text-xs text-[#6B7280] font-medium">
+        <div className="p-3.5 bg-[#141316] border-b border-[#373138] flex items-center justify-between text-xs text-[#8E8A85] font-medium">
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSelectAll}
-              className="flex items-center gap-2 cursor-pointer hover:text-[#24272B]"
+              className="flex items-center gap-2 cursor-pointer hover:text-[#F5F2EF]"
               title={isAllFilteredSelected ? "Deselect All" : "Select All"}
             >
               {isAllFilteredSelected ? (
-                <CheckSquare className="w-4 h-4 text-[#742B40]" />
+                <CheckSquare className="w-4 h-4 text-[#C6A16A]" />
               ) : (
-                <Square className="w-4 h-4 text-[#9CA3AF]" />
+                <Square className="w-4 h-4 text-[#8E8A85]" />
               )}
-              <span className="text-[11px] font-semibold uppercase tracking-wider">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#B7A9A7]">
                 Select All ({filteredEnquiries.length})
               </span>
             </button>
           </div>
-          <span className="text-[11px] text-[#9CA3AF]">
+          <span className="text-[11px] text-[#8E8A85]">
             Showing {filteredEnquiries.length} of {enquiries.length} leads
           </span>
         </div>
 
         {filteredEnquiries.length > 0 ? (
-          <div className="divide-y divide-[#EAE8E3]">
+          <div className="divide-y divide-[#373138]">
             {filteredEnquiries.map((enquiry) => {
               const badge = typeBadges[enquiry.type] || typeBadges.contact;
               const status = statusBadges[enquiry.status] || statusBadges.new;
@@ -618,7 +618,7 @@ export default function EnquiriesManager({
                 <div
                   key={enquiry.id}
                   className={`p-4 sm:p-5 transition flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
-                    isSelected ? "bg-[#742B40]/5" : "hover:bg-[#FAF9F7]"
+                    isSelected ? "bg-[#742B40]/15" : "hover:bg-[#232126]/60"
                   }`}
                 >
                   {/* Left Column: Selection Checkbox & Guest Info */}
@@ -626,24 +626,24 @@ export default function EnquiriesManager({
                     {/* Row Checkbox */}
                     <button
                       onClick={(e) => toggleSelectOne(enquiry.id, e)}
-                      className="mt-2.5 shrink-0 cursor-pointer text-[#9CA3AF] hover:text-[#742B40]"
+                      className="mt-2.5 shrink-0 cursor-pointer text-[#8E8A85] hover:text-[#C6A16A]"
                     >
                       {isSelected ? (
-                        <CheckSquare className="w-4 h-4 text-[#742B40]" />
+                        <CheckSquare className="w-4 h-4 text-[#C6A16A]" />
                       ) : (
                         <Square className="w-4 h-4" />
                       )}
                     </button>
 
                     <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${badge.bg} ${badge.text}`}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${badge.bg} ${badge.text} ${badge.border}`}
                     >
                       <Icon className="w-5 h-5" />
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-semibold text-sm text-[#24272B]">
+                        <span className="font-semibold text-sm text-[#F5F2EF]">
                           {enquiry.name}
                         </span>
                         <span
@@ -652,21 +652,21 @@ export default function EnquiriesManager({
                           {badge.label}
                         </span>
                         {enquiry.referenceCode && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 bg-[#F8F7F4] text-[#6B7280] rounded border border-[#EAE8E3]">
+                          <span className="text-[10px] font-mono px-2 py-0.5 bg-[#0D0D10] text-[#8E8A85] rounded border border-[#373138]">
                             {enquiry.referenceCode}
                           </span>
                         )}
                       </div>
 
                       {/* Customer Contact & Party Size */}
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#6B7280]">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#B7A9A7]">
                         <span className="flex items-center gap-1">
-                          <Phone className="w-3 h-3 text-[#B69A68]" />
+                          <Phone className="w-3 h-3 text-[#C6A16A]" />
                           <span>{enquiry.phone}</span>
                         </span>
                         {enquiry.email && (
                           <span className="flex items-center gap-1">
-                            <Mail className="w-3 h-3 text-[#B69A68]" />
+                            <Mail className="w-3 h-3 text-[#C6A16A]" />
                             <span>{enquiry.email}</span>
                           </span>
                         )}
@@ -674,8 +674,8 @@ export default function EnquiriesManager({
                           const displayGuests = enquiry.details?.guestRange || (enquiry.guests ? `${enquiry.guests} Guests` : null);
                           if (!displayGuests) return null;
                           return (
-                            <span className="flex items-center gap-1 text-[#4B5563]">
-                              <User className="w-3 h-3 text-[#B69A68]" />
+                            <span className="flex items-center gap-1 text-[#F5F2EF]">
+                              <User className="w-3 h-3 text-[#C6A16A]" />
                               <span>{displayGuests}</span>
                             </span>
                           );
@@ -694,19 +694,19 @@ export default function EnquiriesManager({
 
                           if (hasDate && formattedDate) {
                             return (
-                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-600/30 text-amber-950 font-medium shadow-2xs">
-                                <Calendar className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                                <span className="text-[11px] font-semibold text-amber-800">{dateLabel}:</span>
-                                <span className="font-semibold text-[#24272B]">{formattedDate}{timeStr}</span>
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-950/40 border border-amber-800/40 text-amber-300 font-medium shadow-2xs">
+                                <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                <span className="text-[11px] font-semibold text-amber-300">{dateLabel}:</span>
+                                <span className="font-semibold text-[#F5F2EF]">{formattedDate}{timeStr}</span>
                               </div>
                             );
                           }
 
                           if (!isGeneralContact) {
                             return (
-                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-500 text-xs">
-                                <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                <span className="text-[11px] font-medium text-gray-500">{dateLabel}:</span>
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#232126] border border-[#373138] text-[#8E8A85] text-xs">
+                                <Calendar className="w-3.5 h-3.5 text-[#8E8A85] shrink-0" />
+                                <span className="text-[11px] font-medium text-[#8E8A85]">{dateLabel}:</span>
                                 <span className="italic">Not specified</span>
                               </div>
                             );
@@ -716,10 +716,10 @@ export default function EnquiriesManager({
                         })()}
 
                         {/* Received On (Timestamp, Asia/Kolkata) */}
-                        <div className="inline-flex items-center gap-1.5 text-[11px] text-[#6B7280]">
-                          <Clock className="w-3.5 h-3.5 text-[#B69A68] shrink-0" />
-                          <span className="font-medium text-[#6B7280]">Received On:</span>
-                          <span className="font-mono text-[#374151] font-medium">
+                        <div className="inline-flex items-center gap-1.5 text-[11px] text-[#8E8A85]">
+                          <Clock className="w-3.5 h-3.5 text-[#C6A16A] shrink-0" />
+                          <span className="font-medium text-[#8E8A85]">Received On:</span>
+                          <span className="font-mono text-[#B7A9A7] font-medium">
                             {formatReceivedTimestamp(enquiry.createdAt)}
                           </span>
                         </div>
@@ -727,7 +727,7 @@ export default function EnquiriesManager({
 
                       {/* Clean Description without repeated dates */}
                       {enquiry.notes && (
-                        <p className="text-xs text-[#6B7280] mt-1 line-clamp-2 bg-[#F8F7F4] p-2 rounded-lg border border-[#EAE8E3]">
+                        <p className="text-xs text-[#B7A9A7] mt-1 line-clamp-2 bg-[#141316] p-2 rounded-lg border border-[#373138]">
                           {cleanEnquiryNotes(enquiry.notes)}
                         </p>
                       )}
@@ -735,7 +735,7 @@ export default function EnquiriesManager({
                   </div>
 
                   {/* Right Column: Status, WhatsApp, Note & Three-Dot Menu */}
-                  <div className="flex flex-wrap items-center justify-between lg:justify-end gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#EAE8E3]">
+                  <div className="flex flex-wrap items-center justify-between lg:justify-end gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#373138]">
                     {/* Status Dropdown */}
                     <div className="flex items-center gap-1.5">
                       <select
@@ -759,7 +759,7 @@ export default function EnquiriesManager({
                       href={getWhatsAppLink(enquiry)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm shadow-emerald-950/20"
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm shadow-emerald-950/40"
                     >
                       <Send className="w-3.5 h-3.5" />
                       <span>WhatsApp</span>
@@ -771,9 +771,9 @@ export default function EnquiriesManager({
                         setNoteTargetId(enquiry.id);
                         setNoteModalOpen(true);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-[#F8F7F4] hover:bg-[#EAE8E3] text-[#24272B] text-xs font-medium border border-[#EAE8E3] transition flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-[#232126] hover:bg-[#2c2a30] text-[#F5F2EF] text-xs font-medium border border-[#373138] transition flex items-center gap-1.5 cursor-pointer"
                     >
-                      <StickyNote className="w-3.5 h-3.5 text-[#B69A68]" />
+                      <StickyNote className="w-3.5 h-3.5 text-[#C6A16A]" />
                       <span>Add Note</span>
                     </button>
 
@@ -784,7 +784,7 @@ export default function EnquiriesManager({
                           e.stopPropagation();
                           setActiveMenuId(isMenuOpen ? null : enquiry.id);
                         }}
-                        className="p-1.5 rounded-lg border border-[#EAE8E3] hover:bg-[#F8F7F4] text-[#6B7280] transition cursor-pointer"
+                        className="p-1.5 rounded-lg border border-[#373138] hover:bg-[#232126] text-[#B7A9A7] transition cursor-pointer"
                         title="Actions"
                       >
                         <MoreVertical className="w-4 h-4" />
@@ -793,35 +793,35 @@ export default function EnquiriesManager({
                       {isMenuOpen && (
                         <div
                           onClick={(e) => e.stopPropagation()}
-                          className="absolute right-0 top-8 z-30 w-48 rounded-xl bg-white border border-[#EAE8E3] shadow-lg py-1 text-xs text-[#24272B] animate-in fade-in"
+                          className="absolute right-0 top-8 z-30 w-48 rounded-xl bg-[#1A191D] border border-[#373138] shadow-2xl py-1 text-xs text-[#F5F2EF] animate-in fade-in"
                         >
                           <button
                             onClick={() => {
                               setActiveMenuId(null);
                               setDetailModalEnquiry(enquiry);
                             }}
-                            className="w-full text-left px-3.5 py-2 hover:bg-[#F8F7F4] flex items-center gap-2 cursor-pointer"
+                            className="w-full text-left px-3.5 py-2 hover:bg-[#232126] flex items-center gap-2 cursor-pointer text-[#F5F2EF]"
                           >
-                            <Eye className="w-3.5 h-3.5 text-[#B69A68]" />
+                            <Eye className="w-3.5 h-3.5 text-[#C6A16A]" />
                             <span>View Full Details</span>
                           </button>
 
                           <button
                             onClick={() => handleArchiveSingle(enquiry)}
-                            className="w-full text-left px-3.5 py-2 hover:bg-[#F8F7F4] flex items-center gap-2 cursor-pointer"
+                            className="w-full text-left px-3.5 py-2 hover:bg-[#232126] flex items-center gap-2 cursor-pointer text-[#B7A9A7]"
                           >
-                            <Archive className="w-3.5 h-3.5 text-[#6B7280]" />
+                            <Archive className="w-3.5 h-3.5 text-[#8E8A85]" />
                             <span>Archive Lead</span>
                           </button>
 
-                          <div className="border-t border-[#EAE8E3] my-1" />
+                          <div className="border-t border-[#373138] my-1" />
 
                           <button
                             onClick={() => {
                               setActiveMenuId(null);
                               setDeleteModalEnquiry(enquiry);
                             }}
-                            className="w-full text-left px-3.5 py-2 hover:bg-rose-50 text-rose-600 flex items-center gap-2 cursor-pointer"
+                            className="w-full text-left px-3.5 py-2 hover:bg-rose-950/40 text-rose-400 flex items-center gap-2 cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>Delete Lead</span>
@@ -836,9 +836,9 @@ export default function EnquiriesManager({
           </div>
         ) : (
           <div className="py-16 text-center space-y-2">
-            <MessageSquare className="w-8 h-8 text-[#9CA3AF] mx-auto" />
-            <h4 className="text-sm font-semibold text-[#24272B]">No enquiries found</h4>
-            <p className="text-xs text-[#6B7280]">
+            <MessageSquare className="w-8 h-8 text-[#8E8A85] mx-auto" />
+            <h4 className="text-sm font-semibold text-[#F5F2EF]">No enquiries found</h4>
+            <p className="text-xs text-[#8E8A85]">
               {searchQuery
                 ? "No guest leads match your current search criteria."
                 : "All guest enquiries have been attended to."}
@@ -849,53 +849,53 @@ export default function EnquiriesManager({
 
       {/* Modal: View Full Details */}
       {detailModalEnquiry && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 max-w-lg w-full shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 text-[#F5F2EF]">
+            <div className="flex items-center justify-between border-b border-[#373138] pb-3">
               <div>
-                <h3 className="text-base font-serif font-bold text-[#24272B]">
+                <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                   Lead Details · {detailModalEnquiry.name}
                 </h3>
-                <span className="text-[11px] text-[#9CA3AF] font-mono">
+                <span className="text-[11px] text-[#8E8A85] font-mono">
                   Reference: {detailModalEnquiry.referenceCode || detailModalEnquiry.id}
                 </span>
               </div>
               <button
                 onClick={() => setDetailModalEnquiry(null)}
-                className="text-[#9CA3AF] hover:text-[#24272B]"
+                className="text-[#8E8A85] hover:text-[#F5F2EF] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-3 p-3 bg-[#F8F7F4] rounded-xl border border-[#EAE8E3]">
+              <div className="grid grid-cols-2 gap-3 p-3 bg-[#141316] rounded-xl border border-[#373138]">
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Customer Name</span>
-                  <span className="text-[#24272B] font-semibold">{detailModalEnquiry.name}</span>
+                  <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold">Customer Name</span>
+                  <span className="text-[#F5F2EF] font-semibold">{detailModalEnquiry.name}</span>
                 </div>
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Phone</span>
-                  <span className="font-mono text-[#24272B] font-medium">{detailModalEnquiry.phone}</span>
+                  <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold">Phone</span>
+                  <span className="font-mono text-[#F5F2EF] font-medium">{detailModalEnquiry.phone}</span>
                 </div>
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Email</span>
-                  <span className="text-[#24272B]">{detailModalEnquiry.email || "Not provided"}</span>
+                  <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold">Email</span>
+                  <span className="text-[#F5F2EF]">{detailModalEnquiry.email || "Not provided"}</span>
                 </div>
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Enquiry Category</span>
-                  <span className="font-medium text-[#742B40]">
+                  <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold">Enquiry Category</span>
+                  <span className="font-medium text-[#C6A16A]">
                     {typeBadges[detailModalEnquiry.type]?.label || detailModalEnquiry.type}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Current Status</span>
-                  <span className="font-medium text-[#24272B] capitalize">{detailModalEnquiry.status}</span>
+                  <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold">Current Status</span>
+                  <span className="font-medium text-[#F5F2EF] capitalize">{detailModalEnquiry.status}</span>
                 </div>
                 {(detailModalEnquiry.details?.guestRange || detailModalEnquiry.guests) && (
                   <div>
-                    <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Estimated Guests</span>
-                    <span className="font-medium text-[#24272B]">
+                    <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold">Estimated Guests</span>
+                    <span className="font-medium text-[#F5F2EF]">
                       {detailModalEnquiry.details?.guestRange || `${detailModalEnquiry.guests} Guests`}
                     </span>
                   </div>
@@ -903,57 +903,57 @@ export default function EnquiriesManager({
               </div>
 
               {/* Labeled Dates & Timing Box */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-amber-500/5 rounded-xl border border-amber-600/20">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-amber-950/20 rounded-xl border border-amber-800/30">
                 {/* Event / Dining Date */}
                 <div>
-                  <span className="text-amber-800 block text-[10px] uppercase font-semibold mb-1 flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-amber-700" />
+                  <span className="text-amber-400 block text-[10px] uppercase font-semibold mb-1 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-amber-400" />
                     <span>{getEnquiryDateLabel(detailModalEnquiry.type)}</span>
                   </span>
-                  <p className="font-semibold text-sm text-[#24272B]">
+                  <p className="font-semibold text-sm text-[#F5F2EF]">
                     {detailModalEnquiry.hasEventDate || detailModalEnquiry.eventDate || detailModalEnquiry.dates
                       ? formatEnquiryDate(detailModalEnquiry.eventDate || detailModalEnquiry.dates)
                       : (detailModalEnquiry.type === "contact" ? "Not requested" : "Not specified")}
                   </p>
                   {detailModalEnquiry.eventTime && (
-                    <span className="text-xs text-[#6B7280] block mt-0.5">
-                      Preferred Time: <strong className="text-[#24272B]">{detailModalEnquiry.eventTime}</strong>
+                    <span className="text-xs text-[#B7A9A7] block mt-0.5">
+                      Preferred Time: <strong className="text-[#F5F2EF]">{detailModalEnquiry.eventTime}</strong>
                     </span>
                   )}
                 </div>
 
                 {/* Received Date & Time (Submission Timestamp) */}
                 <div>
-                  <span className="text-[#6B7280] block text-[10px] uppercase font-semibold mb-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[#B69A68]" />
+                  <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold mb-1 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#C6A16A]" />
                     <span>Received On (Submission Time)</span>
                   </span>
-                  <p className="font-mono text-xs font-semibold text-[#24272B]">
+                  <p className="font-mono text-xs font-semibold text-[#F5F2EF]">
                     {formatReceivedTimestamp(detailModalEnquiry.createdAt)}
                   </p>
-                  <span className="text-[10px] text-[#9CA3AF] block mt-0.5">Timezone: Asia/Kolkata (IST)</span>
+                  <span className="text-[10px] text-[#8E8A85] block mt-0.5">Timezone: Asia/Kolkata (IST)</span>
                 </div>
               </div>
 
               {detailModalEnquiry.notes && (
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold mb-1">
+                  <span className="text-[#8E8A85] block text-[10px] uppercase font-semibold mb-1">
                     Event Summary &amp; Customer Notes
                   </span>
-                  <div className="p-3 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] whitespace-pre-wrap leading-relaxed">
+                  <div className="p-3 rounded-xl bg-[#141316] border border-[#373138] text-[#B7A9A7] whitespace-pre-wrap leading-relaxed">
                     {cleanEnquiryNotes(detailModalEnquiry.notes)}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-[#EAE8E3]">
+            <div className="flex items-center justify-between pt-3 border-t border-[#373138]">
               <button
                 onClick={() => {
                   setDeleteModalEnquiry(detailModalEnquiry);
                   setDetailModalEnquiry(null);
                 }}
-                className="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold text-xs transition flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl bg-rose-950/40 text-rose-400 hover:bg-rose-900/60 font-semibold text-xs transition flex items-center gap-1.5 border border-rose-800/40 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete This Lead</span>
@@ -961,7 +961,7 @@ export default function EnquiriesManager({
 
               <button
                 onClick={() => setDetailModalEnquiry(null)}
-                className="px-4 py-2 rounded-xl bg-[#742B40] text-white font-semibold text-xs hover:bg-[#5E2233]"
+                className="px-4 py-2 rounded-xl bg-[#742B40] text-white font-semibold text-xs hover:bg-[#5E2233] border border-[#C6A16A]/30 cursor-pointer"
               >
                 Close
               </button>
@@ -972,15 +972,15 @@ export default function EnquiriesManager({
 
       {/* Modal: Add Internal Note */}
       {noteModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 max-w-md w-full shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
-              <h3 className="text-base font-serif font-bold text-[#24272B]">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-[#F5F2EF]">
+            <div className="flex items-center justify-between border-b border-[#373138] pb-3">
+              <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                 Add Internal Follow-up Note
               </h3>
               <button
                 onClick={() => setNoteModalOpen(false)}
-                className="text-[#9CA3AF] hover:text-[#24272B]"
+                className="text-[#8E8A85] hover:text-[#F5F2EF] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -988,39 +988,39 @@ export default function EnquiriesManager({
 
             <form onSubmit={handleAddNote} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Assigned Staff / Author</label>
+                <label className="block text-[#B7A9A7] mb-1 font-medium">Assigned Staff / Author</label>
                 <input
                   type="text"
                   value={noteAuthor}
                   onChange={(e) => setNoteAuthor(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] focus:outline-none focus:border-[#742B40]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0D0D10] border border-[#373138] text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Note Details</label>
+                <label className="block text-[#B7A9A7] mb-1 font-medium">Note Details</label>
                 <textarea
                   required
                   rows={3}
                   placeholder="e.g. Spoke to guest regarding corporate group stay. Sent quotation for 5 Super Deluxe rooms."
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] focus:outline-none focus:border-[#742B40]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0D0D10] border border-[#373138] text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#EAE8E3]">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#373138]">
                 <button
                   type="button"
                   onClick={() => setNoteModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#F8F7F4] text-[#6B7280] hover:text-[#24272B]"
+                  className="px-4 py-2 rounded-xl bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isAddingNote}
-                  className="px-4 py-2 rounded-xl bg-[#742B40] hover:bg-[#5E2233] text-white font-semibold"
+                  className="px-4 py-2 rounded-xl bg-[#742B40] hover:bg-[#5E2233] text-white font-semibold border border-[#C6A16A]/30 cursor-pointer"
                 >
                   {isAddingNote ? "Saving..." : "Save Note"}
                 </button>

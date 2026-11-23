@@ -277,103 +277,103 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
     <div className="space-y-6">
       {/* Feedback & Warnings */}
       {activeStayWarning && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5 animate-in fade-in">
-          <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-800/40 text-amber-300 text-xs flex items-start gap-2.5 animate-in fade-in">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-semibold block mb-0.5">Active Reservation Conflict</span>
             <span>{activeStayWarning}</span>
           </div>
-          <button onClick={() => setActiveStayWarning(null)} className="text-amber-700 hover:text-amber-900 cursor-pointer">
+          <button onClick={() => setActiveStayWarning(null)} className="text-amber-400 hover:text-amber-200 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {actionFeedback && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 text-xs flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{actionFeedback}</span>
         </div>
       )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm">
+        <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8E8A85]">
               Total Guest Profiles
             </span>
-            <div className="w-8 h-8 rounded-xl bg-[#742B40]/10 text-[#742B40] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[#742B40]/25 text-[#ED252C] border border-[#742B40]/40 flex items-center justify-center">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#24272B] mt-2">
+          <div className="text-2xl font-bold font-serif text-[#F5F2EF] mt-2">
             {guestProfiles.length}
           </div>
-          <p className="text-xs text-[#6B7280] mt-1">Direct booking &amp; reservation contacts</p>
+          <p className="text-xs text-[#8E8A85] mt-1">Direct booking &amp; reservation contacts</p>
         </div>
 
-        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm">
+        <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8E8A85]">
               Repeat Guests
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 flex items-center justify-center">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#24272B] mt-2">
+          <div className="text-2xl font-bold font-serif text-[#F5F2EF] mt-2">
             {repeatCount}
           </div>
-          <p className="text-xs text-[#6B7280] mt-1">Multi-stay loyal customers</p>
+          <p className="text-xs text-[#8E8A85] mt-1">Multi-stay loyal customers</p>
         </div>
 
-        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm">
+        <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8E8A85]">
               Total Lifetime Spend
             </span>
-            <div className="w-8 h-8 rounded-xl bg-[#B69A68]/15 text-[#B69A68] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[#232126] border border-[#373138] text-[#C6A16A] flex items-center justify-center">
               <IndianRupee className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#24272B] mt-2">
+          <div className="text-2xl font-bold font-serif text-[#ED252C] mt-2">
             {formatINR(totalRevenue)}
           </div>
-          <p className="text-xs text-[#6B7280] mt-1">Online &amp; confirmed reservations</p>
+          <p className="text-xs text-[#8E8A85] mt-1">Online &amp; confirmed reservations</p>
         </div>
 
-        <div className="bg-white border border-[#EAE8E3] rounded-2xl p-5 shadow-sm">
+        <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8E8A85]">
               Avg. Spend / Guest
             </span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-blue-950/60 text-blue-400 border border-blue-800/40 flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#24272B] mt-2">
+          <div className="text-2xl font-bold font-serif text-[#F5F2EF] mt-2">
             {guestProfiles.length > 0 ? formatINR(Math.round(totalRevenue / guestProfiles.length)) : "₹0"}
           </div>
-          <p className="text-xs text-[#6B7280] mt-1">Across all room categories</p>
+          <p className="text-xs text-[#8E8A85] mt-1">Across all room categories</p>
         </div>
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="bg-white border border-[#EAE8E3] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8E8A85] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, phone, email, room..."
-            className="w-full pl-10 pr-4 py-2 bg-[#F8F7F4] border border-[#EAE8E3] rounded-xl text-xs text-[#24272B] placeholder-[#9CA3AF] focus:outline-none focus:border-[#742B40] transition"
+            className="w-full pl-10 pr-4 py-2 bg-[#0D0D10] border border-[#373138] rounded-xl text-xs text-[#F5F2EF] placeholder-[#8E8A85] focus:outline-none focus:border-[#C6A16A] transition"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#24272B]"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8A85] hover:text-[#F5F2EF] cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -385,8 +385,8 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
             onClick={() => setFilterType("all")}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
               filterType === "all"
-                ? "bg-[#742B40] text-white shadow-sm"
-                : "bg-[#F8F7F4] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3]"
+                ? "bg-[#742B40] text-white border border-[#C6A16A]/20 shadow-sm"
+                : "bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] border border-[#373138]"
             }`}
           >
             All Guests ({guestProfiles.length})
@@ -395,8 +395,8 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
             onClick={() => setFilterType("repeat")}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
               filterType === "repeat"
-                ? "bg-[#742B40] text-white shadow-sm"
-                : "bg-[#F8F7F4] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3]"
+                ? "bg-[#742B40] text-white border border-[#C6A16A]/20 shadow-sm"
+                : "bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] border border-[#373138]"
             }`}
           >
             Repeat Guests ({repeatCount})
@@ -405,8 +405,8 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
             onClick={() => setFilterType("high_spend")}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
               filterType === "high_spend"
-                ? "bg-[#742B40] text-white shadow-sm"
-                : "bg-[#F8F7F4] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3]"
+                ? "bg-[#742B40] text-white border border-[#C6A16A]/20 shadow-sm"
+                : "bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] border border-[#373138]"
             }`}
           >
             High Spend (&gt; ₹5,000)
@@ -415,10 +415,10 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
       </div>
 
       {/* Guest Directory Table */}
-      <div className="bg-white border border-[#EAE8E3] rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-[#1A191D] border border-[#373138] rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAF9F7] border-b border-[#EAE8E3] text-[#6B7280] uppercase tracking-wider text-[11px] font-semibold">
+            <thead className="bg-[#232126] border-b border-[#373138] text-[#8E8A85] uppercase tracking-wider text-[11px] font-semibold">
               <tr>
                 <th className="py-3 px-4">Guest Profile</th>
                 <th className="py-3 px-4">Contact Details</th>
@@ -429,10 +429,10 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE8E3]">
+            <tbody className="divide-y divide-[#373138]">
               {filteredGuests.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#6B7280]">
+                  <td colSpan={7} className="py-12 text-center text-[#8E8A85]">
                     No guest profiles found matching your search.
                   </td>
                 </tr>
@@ -442,24 +442,24 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                   return (
                     <tr
                       key={guest.id}
-                      className="hover:bg-[#FAF9F7] transition cursor-pointer"
+                      className="hover:bg-[#232126]/60 transition cursor-pointer"
                       onClick={() => setSelectedGuest(guest)}
                     >
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#742B40]/10 text-[#742B40] flex items-center justify-center font-bold font-serif text-sm">
+                          <div className="w-9 h-9 rounded-full bg-[#742B40]/25 text-[#C6A16A] border border-[#742B40]/40 flex items-center justify-center font-bold font-serif text-sm">
                             {guest.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-semibold text-[#24272B] flex items-center gap-2">
+                            <div className="font-semibold text-[#F5F2EF] flex items-center gap-2">
                               <span>{guest.name}</span>
                               {guest.isRepeatGuest && (
-                                <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                                <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 text-[10px] font-bold border border-emerald-800/50">
                                   Repeat
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] text-[#6B7280]">
+                            <span className="text-[11px] text-[#8E8A85]">
                               {guest.records.length} booking record{guest.records.length > 1 ? "s" : ""}
                             </span>
                           </div>
@@ -467,33 +467,33 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                       </td>
 
                       <td className="py-3.5 px-4 space-y-1">
-                        <div className="flex items-center gap-1.5 text-[#24272B] font-mono">
-                          <Phone className="w-3 h-3 text-[#6B7280]" />
+                        <div className="flex items-center gap-1.5 text-[#F5F2EF] font-mono">
+                          <Phone className="w-3 h-3 text-[#8E8A85]" />
                           <span>{guest.phone || "—"}</span>
                         </div>
                         {guest.email && (
-                          <div className="flex items-center gap-1.5 text-[#6B7280]">
-                            <Mail className="w-3 h-3 text-[#9CA3AF]" />
+                          <div className="flex items-center gap-1.5 text-[#8E8A85]">
+                            <Mail className="w-3 h-3 text-[#8E8A85]" />
                             <span className="truncate max-w-[180px]">{guest.email}</span>
                           </div>
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 font-semibold text-[#24272B]">
+                      <td className="py-3.5 px-4 font-semibold text-[#F5F2EF]">
                         {guest.totalStays} stay{guest.totalStays > 1 ? "s" : ""}
                       </td>
 
-                      <td className="py-3.5 px-4 font-bold text-[#742B40] font-mono">
+                      <td className="py-3.5 px-4 font-bold text-[#ED252C] font-mono">
                         {formatINR(guest.totalSpend)}
                       </td>
 
-                      <td className="py-3.5 px-4 text-[#4B5563]">
-                        <span className="px-2 py-1 rounded-lg bg-[#F8F7F4] border border-[#EAE8E3] text-[11px] font-medium">
+                      <td className="py-3.5 px-4 text-[#B7A9A7]">
+                        <span className="px-2 py-1 rounded-lg bg-[#232126] border border-[#373138] text-[11px] font-medium">
                           {guest.preferredRoom || "Standard"}
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4 text-[#6B7280] font-mono">
+                      <td className="py-3.5 px-4 text-[#8E8A85] font-mono">
                         {guest.lastStay ? new Date(guest.lastStay).toLocaleDateString("en-IN") : "—"}
                       </td>
 
@@ -504,7 +504,7 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                               href={`https://wa.me/91${cleanPhone}?text=Hello%20${encodeURIComponent(guest.name)},%20greetings%20from%20Hotel%20Fremont%20Mohali.`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition"
+                              className="p-1.5 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 hover:bg-emerald-900/60 transition"
                               title="Chat on WhatsApp"
                             >
                               <MessageSquare className="w-3.5 h-3.5" />
@@ -513,7 +513,7 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                           {cleanPhone && (
                             <a
                               href={`tel:+91${cleanPhone}`}
-                              className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+                              className="p-1.5 rounded-lg bg-blue-950/60 text-blue-400 border border-blue-800/40 hover:bg-blue-900/60 transition"
                               title="Call Guest"
                             >
                               <Phone className="w-3.5 h-3.5" />
@@ -521,7 +521,7 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                           )}
                           <button
                             onClick={() => setSelectedGuest(guest)}
-                            className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#742B40] hover:bg-[#F8F7F4] transition cursor-pointer"
+                            className="p-1.5 rounded-lg text-[#8E8A85] hover:text-[#C6A16A] hover:bg-[#232126] transition cursor-pointer"
                             title="View Guest History"
                           >
                             <ChevronRight className="w-4 h-4" />
@@ -534,7 +534,7 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                                 e.stopPropagation();
                                 setActiveMenuId(activeMenuId === guest.id ? null : guest.id);
                               }}
-                              className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4] border border-transparent hover:border-[#EAE8E3] transition cursor-pointer"
+                              className="p-1.5 rounded-lg text-[#8E8A85] hover:text-[#F5F2EF] hover:bg-[#232126] border border-transparent hover:border-[#373138] transition cursor-pointer"
                               title="Customer Controls"
                             >
                               <MoreVertical className="w-3.5 h-3.5" />
@@ -542,7 +542,7 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
 
                             {activeMenuId === guest.id && (
                               <div
-                                className="absolute right-0 top-full mt-1 w-52 bg-white border border-[#EAE8E3] rounded-xl shadow-xl py-1 z-30 text-left text-xs animate-in fade-in duration-150"
+                                className="absolute right-0 top-full mt-1 w-52 bg-[#1A191D] border border-[#373138] rounded-xl shadow-xl py-1 z-30 text-left text-xs animate-in fade-in duration-150 text-[#F5F2EF]"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
@@ -550,9 +550,9 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                                     setActiveMenuId(null);
                                     setSelectedGuest(guest);
                                   }}
-                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                  className="w-full px-3 py-1.5 hover:bg-[#232126] text-[#F5F2EF] flex items-center gap-2 transition cursor-pointer"
                                 >
-                                  <Users className="w-3.5 h-3.5 text-[#B69A68]" />
+                                  <Users className="w-3.5 h-3.5 text-[#C6A16A]" />
                                   <span>View Guest Profile</span>
                                 </button>
                                 <button
@@ -560,22 +560,22 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                                     setActiveMenuId(null);
                                     setSelectedGuest(guest);
                                   }}
-                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                  className="w-full px-3 py-1.5 hover:bg-[#232126] text-[#F5F2EF] flex items-center gap-2 transition cursor-pointer"
                                 >
-                                  <History className="w-3.5 h-3.5 text-[#742B40]" />
+                                  <History className="w-3.5 h-3.5 text-[#C6A16A]" />
                                   <span>View Stay History</span>
                                 </button>
                                 <button
                                   onClick={() => handleArchiveGuest(guest)}
-                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                  className="w-full px-3 py-1.5 hover:bg-[#232126] text-[#B7A9A7] flex items-center gap-2 transition cursor-pointer"
                                 >
-                                  <Archive className="w-3.5 h-3.5 text-[#6B7280]" />
+                                  <Archive className="w-3.5 h-3.5 text-[#8E8A85]" />
                                   <span>Archive Guest</span>
                                 </button>
-                                <div className="border-t border-[#EAE8E3] my-1" />
+                                <div className="border-t border-[#373138] my-1" />
                                 <button
                                   onClick={() => handleInitiateDeleteGuest(guest)}
-                                  className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                  className="w-full px-3 py-1.5 hover:bg-rose-950/40 text-rose-400 flex items-center gap-2 transition cursor-pointer font-medium"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                   <span>Delete Customer Data</span>
@@ -596,31 +596,31 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
 
       {/* Guest Details Drawer */}
       {selectedGuest && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end">
-          <div className="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex justify-end">
+          <div className="w-full max-w-lg bg-[#1A191D] border-l border-[#373138] text-[#F5F2EF] h-full shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
             <div>
               {/* Header */}
-              <div className="p-6 border-b border-[#EAE8E3] flex items-center justify-between">
+              <div className="p-6 border-b border-[#373138] flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#742B40] text-white flex items-center justify-center font-serif font-bold text-lg">
+                  <div className="w-12 h-12 rounded-2xl bg-[#742B40] border border-[#C6A16A]/30 text-white flex items-center justify-center font-serif font-bold text-lg">
                     {selectedGuest.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold font-serif text-[#24272B] flex items-center gap-2">
+                    <h3 className="text-base font-bold font-serif text-[#F5F2EF] flex items-center gap-2">
                       <span>{selectedGuest.name}</span>
                       {selectedGuest.isRepeatGuest && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 text-[10px] font-bold">
                           VIP Repeat
                         </span>
                       )}
                     </h3>
-                    <p className="text-xs text-[#6B7280]">Customer History &amp; CRM Profile</p>
+                    <p className="text-xs text-[#8E8A85]">Customer History &amp; CRM Profile</p>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setSelectedGuest(null)}
-                  className="p-2 rounded-xl text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4] transition"
+                  className="p-2 rounded-xl text-[#8E8A85] hover:text-[#F5F2EF] hover:bg-[#232126] transition cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -629,20 +629,20 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
               {/* Guest Summary Card */}
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3]">
-                    <span className="text-[10px] uppercase font-semibold text-[#6B7280] block">
+                  <div className="p-3.5 rounded-xl bg-[#232126] border border-[#373138]">
+                    <span className="text-[10px] uppercase font-semibold text-[#8E8A85] block">
                       Lifetime Spend
                     </span>
-                    <span className="text-lg font-bold font-mono text-[#742B40] mt-1 block">
+                    <span className="text-lg font-bold font-mono text-[#ED252C] mt-1 block">
                       {formatINR(selectedGuest.totalSpend)}
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3]">
-                    <span className="text-[10px] uppercase font-semibold text-[#6B7280] block">
+                  <div className="p-3.5 rounded-xl bg-[#232126] border border-[#373138]">
+                    <span className="text-[10px] uppercase font-semibold text-[#8E8A85] block">
                       Total Stays
                     </span>
-                    <span className="text-lg font-bold font-mono text-[#24272B] mt-1 block">
+                    <span className="text-lg font-bold font-mono text-[#F5F2EF] mt-1 block">
                       {selectedGuest.totalStays} reservation{selectedGuest.totalStays > 1 ? "s" : ""}
                     </span>
                   </div>
@@ -650,25 +650,25 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
 
                 {/* Contact details */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[#8E8A85]">
                     Contact Information
                   </h4>
-                  <div className="p-4 rounded-xl border border-[#EAE8E3] bg-[#FAF9F7] space-y-2 text-xs">
+                  <div className="p-4 rounded-xl border border-[#373138] bg-[#232126] space-y-2 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-[#6B7280]">Phone:</span>
-                      <span className="font-mono font-semibold text-[#24272B]">
+                      <span className="text-[#8E8A85]">Phone:</span>
+                      <span className="font-mono font-semibold text-[#F5F2EF]">
                         {selectedGuest.phone || "—"}
                       </span>
                     </div>
                     {selectedGuest.email && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[#6B7280]">Email:</span>
-                        <span className="font-mono text-[#24272B]">{selectedGuest.email}</span>
+                        <span className="text-[#8E8A85]">Email:</span>
+                        <span className="font-mono text-[#F5F2EF]">{selectedGuest.email}</span>
                       </div>
                     )}
                     <div className="flex items-center justify-between">
-                      <span className="text-[#6B7280]">Preferred Category:</span>
-                      <span className="font-semibold text-[#742B40]">
+                      <span className="text-[#8E8A85]">Preferred Category:</span>
+                      <span className="font-semibold text-[#C6A16A]">
                         {selectedGuest.preferredRoom || "Standard"}
                       </span>
                     </div>
@@ -677,8 +677,8 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
 
                 {/* Stay History Timeline */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] flex items-center gap-1.5">
-                    <History className="w-3.5 h-3.5" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[#8E8A85] flex items-center gap-1.5">
+                    <History className="w-3.5 h-3.5 text-[#C6A16A]" />
                     <span>Booking &amp; Stay History ({selectedGuest.records.length})</span>
                   </h4>
 
@@ -686,31 +686,31 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                     {selectedGuest.records.map((rec, i) => (
                       <div
                         key={i}
-                        className="p-3.5 rounded-xl border border-[#EAE8E3] bg-white hover:border-[#742B40]/40 transition space-y-2"
+                        className="p-3.5 rounded-xl border border-[#373138] bg-[#232126] hover:border-[#C6A16A]/40 transition space-y-2"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-xs text-[#24272B]">
+                          <span className="font-mono font-bold text-xs text-[#F5F2EF]">
                             {rec.reference}
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-[#742B40]/10 text-[#742B40]">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-[#742B40]/25 text-[#ED252C] border border-[#742B40]/40">
                             {rec.status}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between text-xs text-[#6B7280]">
+                        <div className="flex items-center justify-between text-xs text-[#8E8A85]">
                           <div className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5 text-[#9CA3AF]" />
+                            <Calendar className="w-3.5 h-3.5 text-[#8E8A85]" />
                             <span>
                               {rec.checkIn} → {rec.checkOut}
                             </span>
                           </div>
-                          <span className="font-bold text-[#742B40] font-mono">
+                          <span className="font-bold text-[#ED252C] font-mono">
                             {formatINR(rec.amount)}
                           </span>
                         </div>
 
-                        <div className="text-[11px] text-[#4B5563] flex items-center gap-1">
-                          <BedDouble className="w-3 h-3 text-[#9CA3AF]" />
+                        <div className="text-[11px] text-[#B7A9A7] flex items-center gap-1">
+                          <BedDouble className="w-3 h-3 text-[#8E8A85]" />
                           <span>{rec.roomType}</span>
                         </div>
                       </div>
@@ -721,10 +721,10 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
                 {/* Guest notes */}
                 {selectedGuest.notes.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-[#8E8A85]">
                       Special Requests &amp; Notes
                     </h4>
-                    <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200/80 text-xs text-amber-900 space-y-1">
+                    <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/40 text-xs text-amber-300 space-y-1">
                       {selectedGuest.notes.map((note, i) => (
                         <p key={i} className="leading-relaxed">
                           • {note}
@@ -737,7 +737,7 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
             </div>
 
             {/* Bottom Actions */}
-            <div className="p-6 border-t border-[#EAE8E3] bg-[#FAF9F7] flex items-center gap-3">
+            <div className="p-6 border-t border-[#373138] bg-[#232126] flex items-center gap-3">
               {selectedGuest.phone && (
                 <a
                   href={`https://wa.me/91${selectedGuest.phone.replace(/\D/g, "").slice(-10)}?text=Hello%20${encodeURIComponent(selectedGuest.name)},%20Hotel%20Fremont%20front%20desk%20here.`}
@@ -752,9 +752,9 @@ export default function GuestDirectory({ bookings, reservations }: GuestDirector
               {selectedGuest.phone && (
                 <a
                   href={`tel:+91${selectedGuest.phone.replace(/\D/g, "").slice(-10)}`}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-[#EAE8E3] hover:bg-[#F8F7F4] text-[#24272B] text-xs font-semibold transition flex items-center justify-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-[#1A191D] border border-[#373138] hover:bg-[#2A2830] text-[#F5F2EF] text-xs font-semibold transition flex items-center justify-center gap-2"
                 >
-                  <Phone className="w-4 h-4 text-[#6B7280]" />
+                  <Phone className="w-4 h-4 text-[#8E8A85]" />
                   <span>Call</span>
                 </a>
               )}

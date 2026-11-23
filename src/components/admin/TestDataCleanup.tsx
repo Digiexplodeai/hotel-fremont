@@ -132,20 +132,20 @@ export default function TestDataCleanup() {
   const selectedCount = selectedBookingIds.length + selectedReservationIds.length;
 
   return (
-    <div className="bg-white border border-[#EAE8E3] rounded-2xl shadow-sm overflow-hidden space-y-0">
+    <div className="bg-[#1A191D] border border-[#373138] rounded-2xl shadow-sm overflow-hidden space-y-0">
       {/* Header */}
-      <div className="p-6 border-b border-[#EAE8E3] bg-[#FAF9F7] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 border-b border-[#373138] bg-[#232126] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/50">
               Razorpay Test Mode Active
             </span>
           </div>
-          <h3 className="font-serif font-bold text-lg text-[#24272B]">
+          <h3 className="font-serif font-bold text-lg text-[#F5F2EF]">
             Test Data Management &amp; Pre-Launch Clean Slate
           </h3>
-          <p className="text-xs text-[#6B7280] mt-0.5">
+          <p className="text-xs text-[#8E8A85] mt-0.5">
             Safely inspect, archive, and permanently delete simulated test bookings and enquiries before go-live.
           </p>
         </div>
@@ -154,7 +154,7 @@ export default function TestDataCleanup() {
           <button
             onClick={fetchSummary}
             disabled={loading}
-            className="p-2 rounded-xl bg-white border border-[#EAE8E3] text-[#4B5563] hover:text-[#24272B] transition disabled:opacity-50"
+            className="p-2 rounded-xl bg-[#1A191D] border border-[#373138] text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] transition disabled:opacity-50 cursor-pointer"
             title="Refresh Test Data"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -166,7 +166,7 @@ export default function TestDataCleanup() {
                 setDeleteMode("all");
                 setDeleteModalOpen(true);
               }}
-              className="px-4 py-2 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Clean All Test Data</span>
@@ -176,58 +176,58 @@ export default function TestDataCleanup() {
       </div>
 
       {successBanner && (
-        <div className="m-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="m-6 p-4 rounded-xl bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{successBanner}</span>
         </div>
       )}
 
       {/* KPI Stats */}
-      <div className="p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 border-b border-[#EAE8E3]">
-        <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
-          <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block">
+      <div className="p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 border-b border-[#373138]">
+        <div className="p-4 rounded-xl bg-[#232126] border border-[#373138]">
+          <span className="text-[10px] font-semibold text-[#8E8A85] uppercase tracking-wider block">
             Test Online Bookings
           </span>
-          <span className="text-2xl font-serif font-bold text-[#24272B] mt-1 block">
+          <span className="text-2xl font-serif font-bold text-[#F5F2EF] mt-1 block">
             {data.bookings.length}
           </span>
-          <span className="text-[11px] text-amber-700 font-mono mt-0.5 block">
+          <span className="text-[11px] text-amber-400 font-mono mt-0.5 block">
             Razorpay Simulated
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
-          <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block">
+        <div className="p-4 rounded-xl bg-[#232126] border border-[#373138]">
+          <span className="text-[10px] font-semibold text-[#8E8A85] uppercase tracking-wider block">
             Test Room Reservations
           </span>
-          <span className="text-2xl font-serif font-bold text-[#24272B] mt-1 block">
+          <span className="text-2xl font-serif font-bold text-[#F5F2EF] mt-1 block">
             {data.reservations.length}
           </span>
-          <span className="text-[11px] text-[#6B7280] mt-0.5 block">
+          <span className="text-[11px] text-[#8E8A85] mt-0.5 block">
             Front Desk Test Records
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
-          <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block">
+        <div className="p-4 rounded-xl bg-[#232126] border border-[#373138]">
+          <span className="text-[10px] font-semibold text-[#8E8A85] uppercase tracking-wider block">
             Test Leads &amp; Enquiries
           </span>
-          <span className="text-2xl font-serif font-bold text-[#24272B] mt-1 block">
+          <span className="text-2xl font-serif font-bold text-[#F5F2EF] mt-1 block">
             {data.enquiries.length}
           </span>
-          <span className="text-[11px] text-[#6B7280] mt-0.5 block">
+          <span className="text-[11px] text-[#8E8A85] mt-0.5 block">
             Banquet / Dining Inquiries
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
-          <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block">
+        <div className="p-4 rounded-xl bg-[#232126] border border-[#373138]">
+          <span className="text-[10px] font-semibold text-[#8E8A85] uppercase tracking-wider block">
             Simulated Revenue
           </span>
-          <span className="text-2xl font-serif font-bold text-[#742B40] mt-1 block">
+          <span className="text-2xl font-serif font-bold text-[#ED252C] mt-1 block">
             {formatINR(data.totalSimulatedAmount)}
           </span>
-          <span className="text-[11px] text-emerald-700 mt-0.5 block">
+          <span className="text-[11px] text-emerald-400 mt-0.5 block">
             100% Test Mode Volume
           </span>
         </div>
@@ -242,8 +242,8 @@ export default function TestDataCleanup() {
               onClick={() => setActiveTab("bookings")}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                 activeTab === "bookings"
-                  ? "bg-[#742B40] text-white shadow-sm"
-                  : "bg-[#F8F7F4] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3]"
+                  ? "bg-[#742B40] text-white border border-[#C6A16A]/20 shadow-sm"
+                  : "bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] border border-[#373138]"
               }`}
             >
               Test Bookings ({data.bookings.length})
@@ -252,8 +252,8 @@ export default function TestDataCleanup() {
               onClick={() => setActiveTab("reservations")}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                 activeTab === "reservations"
-                  ? "bg-[#742B40] text-white shadow-sm"
-                  : "bg-[#F8F7F4] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3]"
+                  ? "bg-[#742B40] text-white border border-[#C6A16A]/20 shadow-sm"
+                  : "bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] border border-[#373138]"
               }`}
             >
               Test Reservations ({data.reservations.length})
@@ -262,8 +262,8 @@ export default function TestDataCleanup() {
               onClick={() => setActiveTab("enquiries")}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                 activeTab === "enquiries"
-                  ? "bg-[#742B40] text-white shadow-sm"
-                  : "bg-[#F8F7F4] text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3]"
+                  ? "bg-[#742B40] text-white border border-[#C6A16A]/20 shadow-sm"
+                  : "bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] border border-[#373138]"
               }`}
             >
               Test Enquiries ({data.enquiries.length})
@@ -277,7 +277,7 @@ export default function TestDataCleanup() {
                 setDeleteMode("selected");
                 setDeleteModalOpen(true);
               }}
-              className="px-4 py-2 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete {selectedCount} Selected Record(s)</span>
@@ -286,12 +286,12 @@ export default function TestDataCleanup() {
         </div>
 
         {/* Records Table */}
-        <div className="border border-[#EAE8E3] rounded-xl overflow-hidden">
+        <div className="border border-[#373138] rounded-xl overflow-hidden">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAF9F7] border-b border-[#EAE8E3] text-[#6B7280] uppercase tracking-wider text-[11px] font-semibold">
+            <thead className="bg-[#232126] border-b border-[#373138] text-[#8E8A85] uppercase tracking-wider text-[11px] font-semibold">
               <tr>
                 <th className="py-3 px-4 w-10">
-                  <button onClick={handleSelectAllInTab} className="text-[#6B7280] hover:text-[#24272B]">
+                  <button onClick={handleSelectAllInTab} className="text-[#8E8A85] hover:text-[#F5F2EF]">
                     <CheckSquare className="w-4 h-4" />
                   </button>
                 </th>
@@ -304,11 +304,11 @@ export default function TestDataCleanup() {
                 <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE8E3]">
+            <tbody className="divide-y divide-[#373138]">
               {activeTab === "bookings" &&
                 (data.bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-[#6B7280]">
+                    <td colSpan={8} className="py-8 text-center text-[#8E8A85]">
                       No test bookings in database. Clean slate confirmed!
                     </td>
                   </tr>
@@ -318,8 +318,8 @@ export default function TestDataCleanup() {
                     return (
                       <tr
                         key={b.id}
-                        className={`hover:bg-[#FAF9F7] transition cursor-pointer ${
-                          isSelected ? "bg-rose-50/40" : ""
+                        className={`hover:bg-[#232126]/60 transition cursor-pointer ${
+                          isSelected ? "bg-rose-950/30" : ""
                         }`}
                         onClick={() => handleToggleBooking(b.id)}
                       >
@@ -328,31 +328,31 @@ export default function TestDataCleanup() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleBooking(b.id)}
-                            className="rounded border-[#EAE8E3] text-[#742B40] focus:ring-[#742B40] cursor-pointer"
+                            className="rounded border-[#373138] bg-[#0D0D10] text-[#742B40] focus:ring-[#742B40] cursor-pointer"
                           />
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-[#742B40]">
+                        <td className="py-3.5 px-4 font-mono font-bold text-[#C6A16A]">
                           {b.booking_ref}
                         </td>
-                        <td className="py-3.5 px-4 font-semibold text-[#24272B]">
+                        <td className="py-3.5 px-4 font-semibold text-[#F5F2EF]">
                           {b.guest_name}
                         </td>
-                        <td className="py-3.5 px-4 text-[#4B5563]">
+                        <td className="py-3.5 px-4 text-[#B7A9A7]">
                           {b.room_category}
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-[#6B7280] text-[11px]">
+                        <td className="py-3.5 px-4 font-mono text-[#8E8A85] text-[11px]">
                           {b.check_in} → {b.check_out}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-[#24272B]">
+                        <td className="py-3.5 px-4 text-right font-mono font-bold text-[#F5F2EF]">
                           {formatINR(Number(b.total_amount) || 0)}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/60 text-amber-400 border border-amber-800/50">
                             TEST
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 uppercase">
                             {b.status}
                           </span>
                         </td>
@@ -364,7 +364,7 @@ export default function TestDataCleanup() {
               {activeTab === "reservations" &&
                 (data.reservations.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-[#6B7280]">
+                    <td colSpan={8} className="py-8 text-center text-[#8E8A85]">
                       No test reservations in database.
                     </td>
                   </tr>
@@ -374,8 +374,8 @@ export default function TestDataCleanup() {
                     return (
                       <tr
                         key={r.id}
-                        className={`hover:bg-[#FAF9F7] transition cursor-pointer ${
-                          isSelected ? "bg-rose-50/40" : ""
+                        className={`hover:bg-[#232126]/60 transition cursor-pointer ${
+                          isSelected ? "bg-rose-950/30" : ""
                         }`}
                         onClick={() => handleToggleReservation(r.id)}
                       >
@@ -384,31 +384,31 @@ export default function TestDataCleanup() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleReservation(r.id)}
-                            className="rounded border-[#EAE8E3] text-[#742B40] focus:ring-[#742B40] cursor-pointer"
+                            className="rounded border-[#373138] bg-[#0D0D10] text-[#742B40] focus:ring-[#742B40] cursor-pointer"
                           />
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-[#742B40]">
+                        <td className="py-3.5 px-4 font-mono font-bold text-[#C6A16A]">
                           {r.reference_code || `FRM-${r.id.slice(0, 6)}`}
                         </td>
-                        <td className="py-3.5 px-4 font-semibold text-[#24272B]">
+                        <td className="py-3.5 px-4 font-semibold text-[#F5F2EF]">
                           {r.full_name}
                         </td>
-                        <td className="py-3.5 px-4 text-[#4B5563]">
+                        <td className="py-3.5 px-4 text-[#B7A9A7]">
                           {r.room_type}
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-[#6B7280] text-[11px]">
+                        <td className="py-3.5 px-4 font-mono text-[#8E8A85] text-[11px]">
                           {r.check_in} → {r.check_out}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-[#24272B]">
+                        <td className="py-3.5 px-4 text-right font-mono font-bold text-[#F5F2EF]">
                           {formatINR(Number(r.estimated_total) || 0)}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/60 text-amber-400 border border-amber-800/50">
                             TEST
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 uppercase">
                             {r.status}
                           </span>
                         </td>
@@ -420,7 +420,7 @@ export default function TestDataCleanup() {
               {activeTab === "enquiries" &&
                 (data.enquiries.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-[#6B7280]">
+                    <td colSpan={8} className="py-8 text-center text-[#8E8A85]">
                       No test enquiries in database.
                     </td>
                   </tr>
@@ -430,8 +430,8 @@ export default function TestDataCleanup() {
                     return (
                       <tr
                         key={e.id}
-                        className={`hover:bg-[#FAF9F7] transition cursor-pointer ${
-                          isSelected ? "bg-rose-50/40" : ""
+                        className={`hover:bg-[#232126]/60 transition cursor-pointer ${
+                          isSelected ? "bg-rose-950/30" : ""
                         }`}
                         onClick={() => handleToggleReservation(e.id)}
                       >
@@ -440,31 +440,31 @@ export default function TestDataCleanup() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleReservation(e.id)}
-                            className="rounded border-[#EAE8E3] text-[#742B40] focus:ring-[#742B40] cursor-pointer"
+                            className="rounded border-[#373138] bg-[#0D0D10] text-[#742B40] focus:ring-[#742B40] cursor-pointer"
                           />
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-[#742B40]">
+                        <td className="py-3.5 px-4 font-mono font-bold text-[#C6A16A]">
                           {e.reference_code || `FRM-${e.id.slice(0, 6)}`}
                         </td>
-                        <td className="py-3.5 px-4 font-semibold text-[#24272B]">
+                        <td className="py-3.5 px-4 font-semibold text-[#F5F2EF]">
                           {e.full_name}
                         </td>
-                        <td className="py-3.5 px-4 text-[#4B5563]">
+                        <td className="py-3.5 px-4 text-[#B7A9A7]">
                           {e.room_type || e.channel}
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-[#6B7280] text-[11px]">
+                        <td className="py-3.5 px-4 font-mono text-[#8E8A85] text-[11px]">
                           {e.check_in || "General Inquiry"}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-[#24272B]">
+                        <td className="py-3.5 px-4 text-right font-mono font-bold text-[#F5F2EF]">
                           —
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/60 text-amber-400 border border-amber-800/50">
                             TEST
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 uppercase">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-950/60 text-blue-400 border border-blue-800/50 uppercase">
                             {e.status}
                           </span>
                         </td>

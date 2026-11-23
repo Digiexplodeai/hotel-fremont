@@ -27,22 +27,22 @@ export default function AdminHeader({
   onNewEnquiry,
 }: AdminHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#EAE8E3] px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4 transition-all">
+    <header className="sticky top-0 z-30 bg-[#141316]/95 backdrop-blur-md border-b border-[#373138] px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4 transition-all">
       {/* Left: Mobile hamburger & Page Title */}
       <div className="flex items-center gap-3">
         <button
           onClick={onMobileMenuToggle}
-          className="lg:hidden p-2 rounded-xl text-[#4B5563] hover:text-[#24272B] hover:bg-[#F8F7F4] transition"
+          className="lg:hidden p-2 rounded-xl text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] transition cursor-pointer"
           aria-label="Open mobile menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         <div>
-          <h1 className="text-base sm:text-lg font-serif font-bold text-[#24272B] tracking-tight">
+          <h1 className="text-base sm:text-lg font-serif font-bold text-[#F5F2EF] tracking-tight">
             {title}
           </h1>
-          <p className="text-xs text-[#6B7280] hidden sm:block">
+          <p className="text-xs text-[#B7A9A7] hidden sm:block">
             {subtitle}
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function AdminHeader({
         {onNewReservation ? (
           <button
             onClick={onNewReservation}
-            className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#742B40] hover:bg-[#5E2233] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 shadow-sm shadow-[#742B40]/20 cursor-pointer"
+            className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#742B40] hover:bg-[#8B344D] text-white border border-[#C6A16A]/30 text-xs font-semibold tracking-wide transition flex items-center gap-1.5 shadow-sm shadow-[#742B40]/30 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">New Reservation</span>
@@ -63,7 +63,7 @@ export default function AdminHeader({
         ) : (
           <Link
             href="/admin/reservations?action=new"
-            className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#742B40] hover:bg-[#5E2233] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 shadow-sm shadow-[#742B40]/20 cursor-pointer"
+            className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#742B40] hover:bg-[#8B344D] text-white border border-[#C6A16A]/30 text-xs font-semibold tracking-wide transition flex items-center gap-1.5 shadow-sm shadow-[#742B40]/30 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">New Reservation</span>
@@ -75,9 +75,9 @@ export default function AdminHeader({
         <Link
           href="/"
           target="_blank"
-          className="px-3 py-1.5 rounded-xl bg-[#F8F7F4] hover:bg-white text-[#4B5563] hover:text-[#24272B] border border-[#EAE8E3] text-xs font-medium transition flex items-center gap-1.5"
+          className="px-3 py-1.5 rounded-xl bg-[#1A191D] hover:bg-[#232126] text-[#B7A9A7] hover:text-[#F5F2EF] border border-[#373138] text-xs font-medium transition flex items-center gap-1.5"
         >
-          <ExternalLink className="w-3.5 h-3.5 text-[#B69A68]" />
+          <ExternalLink className="w-3.5 h-3.5 text-[#C6A16A]" />
           <span className="hidden md:inline">Live Site</span>
         </Link>
       </div>

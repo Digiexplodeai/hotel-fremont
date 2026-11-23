@@ -317,12 +317,12 @@ export default function ContentManager({
   return (
     <div className="space-y-6">
       {/* Action Header Banner */}
-      <div className="bg-white border border-[#EAE8E3] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md sticky top-[73px] z-20 backdrop-blur-md">
+      <div className="bg-[#141316]/95 border border-[#373138] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md sticky top-[73px] z-20 backdrop-blur-md">
         <div>
-          <h2 className="text-base font-serif font-bold text-[#24272B]">
+          <h2 className="text-base font-serif font-bold text-[#F5F2EF]">
             Hotel Fremont CMS &amp; Website Data
           </h2>
-          <p className="text-xs text-[#6B7280]">
+          <p className="text-xs text-[#8E8A85]">
             {isDatabase
               ? "Persisted to Supabase PostgreSQL (site_settings, facilities, venues, nearby_places)"
               : "Active with automatic runtime fallback"}
@@ -341,7 +341,7 @@ export default function ContentManager({
             <button
               onClick={() => handleSaveSettings()}
               disabled={isSaving}
-              className="px-5 py-2.5 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-2 cursor-pointer shadow-lg shadow-[#742B40]/20"
+              className="px-5 py-2.5 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-2 cursor-pointer shadow-lg shadow-[#742B40]/20 border border-[#C6A16A]/20"
             >
               {isSaving ? (
                 <>
@@ -372,13 +372,13 @@ export default function ContentManager({
       )}
 
       {/* CMS Sub-Tabs Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto border-b border-[#EAE8E3] pb-3">
+      <div className="flex items-center gap-2 overflow-x-auto border-b border-[#373138] pb-3">
         <button
           onClick={() => setActiveTab("policies")}
           className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "policies"
-              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20"
-              : "bg-white text-[#6B7280] hover:text-white hover:bg-white/5 border border-[#EAE8E3]"
+              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20 border border-[#C6A16A]/20"
+              : "bg-[#1A191D] text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] border border-[#373138]"
           }`}
         >
           <Settings className="w-3.5 h-3.5" />
@@ -389,8 +389,8 @@ export default function ContentManager({
           onClick={() => setActiveTab("facilities")}
           className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "facilities"
-              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20"
-              : "bg-white text-[#6B7280] hover:text-white hover:bg-white/5 border border-[#EAE8E3]"
+              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20 border border-[#C6A16A]/20"
+              : "bg-[#1A191D] text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] border border-[#373138]"
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
@@ -401,8 +401,8 @@ export default function ContentManager({
           onClick={() => setActiveTab("venues")}
           className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "venues"
-              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20"
-              : "bg-white text-[#6B7280] hover:text-white hover:bg-white/5 border border-[#EAE8E3]"
+              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20 border border-[#C6A16A]/20"
+              : "bg-[#1A191D] text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] border border-[#373138]"
           }`}
         >
           <Building className="w-3.5 h-3.5" />
@@ -413,8 +413,8 @@ export default function ContentManager({
           onClick={() => setActiveTab("dining")}
           className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "dining"
-              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20"
-              : "bg-white text-[#6B7280] hover:text-white hover:bg-white/5 border border-[#EAE8E3]"
+              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20 border border-[#C6A16A]/20"
+              : "bg-[#1A191D] text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] border border-[#373138]"
           }`}
         >
           <Utensils className="w-3.5 h-3.5" />
@@ -425,8 +425,8 @@ export default function ContentManager({
           onClick={() => setActiveTab("nearby")}
           className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "nearby"
-              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20"
-              : "bg-white text-[#6B7280] hover:text-white hover:bg-white/5 border border-[#EAE8E3]"
+              ? "bg-[#742B40] text-white shadow-md shadow-[#742B40]/20 border border-[#C6A16A]/20"
+              : "bg-[#1A191D] text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] border border-[#373138]"
           }`}
         >
           <Navigation className="w-3.5 h-3.5" />
@@ -440,17 +440,17 @@ export default function ContentManager({
       {activeTab === "policies" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card: Brand Identity */}
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#EAE8E3] pb-3">
-              <Building className="w-4 h-4 text-[#B69A68]" />
-              <h3 className="text-sm font-serif font-bold text-[#24272B]">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#373138] pb-3">
+              <Building className="w-4 h-4 text-[#C6A16A]" />
+              <h3 className="text-sm font-serif font-bold text-[#F5F2EF]">
                 Brand Identity &amp; Hotel Presentation
               </h3>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Hotel Name</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Hotel Name</label>
                 <input
                   type="text"
                   value={settings.branding.name}
@@ -460,13 +460,13 @@ export default function ContentManager({
                       branding: { ...settings.branding, name: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Hotel Badge / Category</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Hotel Badge / Category</label>
                   <input
                     type="text"
                     value={settings.branding.badge}
@@ -476,11 +476,11 @@ export default function ContentManager({
                         branding: { ...settings.branding, badge: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Hero Sub-Line</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Hero Sub-Line</label>
                   <input
                     type="text"
                     value={settings.branding.heroLine}
@@ -490,13 +490,13 @@ export default function ContentManager({
                         branding: { ...settings.branding, heroLine: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Tagline</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Tagline</label>
                 <input
                   type="text"
                   value={settings.branding.tagline}
@@ -506,12 +506,12 @@ export default function ContentManager({
                       branding: { ...settings.branding, tagline: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Sub-Line</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Sub-Line</label>
                 <input
                   type="text"
                   value={settings.branding.subline}
@@ -521,12 +521,12 @@ export default function ContentManager({
                       branding: { ...settings.branding, subline: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">
+                <label className="block text-[#8E8A85] mb-1 font-medium">
                   Official Property Description (Honest &amp; Modest)
                 </label>
                 <textarea
@@ -538,17 +538,17 @@ export default function ContentManager({
                       branding: { ...settings.branding, description: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
             </div>
           </div>
 
           {/* Card: Official Contact */}
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#EAE8E3] pb-3">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#373138] pb-3">
               <Phone className="w-4 h-4 text-[#742B40]" />
-              <h3 className="text-sm font-serif font-bold text-[#24272B]">
+              <h3 className="text-sm font-serif font-bold text-[#F5F2EF]">
                 Official Contact &amp; Channels
               </h3>
             </div>
@@ -556,7 +556,7 @@ export default function ContentManager({
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Phone Display Number</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Phone Display Number</label>
                   <input
                     type="text"
                     value={settings.contact.phoneDisplay}
@@ -566,11 +566,11 @@ export default function ContentManager({
                         contact: { ...settings.contact, phoneDisplay: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Telephone Link (tel:)</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Telephone Link (tel:)</label>
                   <input
                     type="text"
                     value={settings.contact.phoneTel}
@@ -580,14 +580,14 @@ export default function ContentManager({
                         contact: { ...settings.contact, phoneTel: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">WhatsApp Number</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">WhatsApp Number</label>
                   <input
                     type="text"
                     value={settings.contact.whatsappNumber}
@@ -597,11 +597,11 @@ export default function ContentManager({
                         contact: { ...settings.contact, whatsappNumber: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Official Email</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Official Email</label>
                   <input
                     type="email"
                     value={settings.contact.email}
@@ -611,13 +611,13 @@ export default function ContentManager({
                         contact: { ...settings.contact, email: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Official Postal Address</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Official Postal Address</label>
                 <textarea
                   rows={2}
                   value={settings.contact.address}
@@ -627,12 +627,12 @@ export default function ContentManager({
                       contact: { ...settings.contact, address: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">City / State</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">City / State</label>
                 <input
                   type="text"
                   value={settings.contact.city}
@@ -642,17 +642,17 @@ export default function ContentManager({
                       contact: { ...settings.contact, city: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
             </div>
           </div>
 
           {/* Card: Timings & Hotel Operations */}
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#EAE8E3] pb-3">
-              <Clock className="w-4 h-4 text-[#B69A68]" />
-              <h3 className="text-sm font-serif font-bold text-[#24272B]">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#373138] pb-3">
+              <Clock className="w-4 h-4 text-[#C6A16A]" />
+              <h3 className="text-sm font-serif font-bold text-[#F5F2EF]">
                 Timings &amp; Guest Check-in Policies
               </h3>
             </div>
@@ -660,7 +660,7 @@ export default function ContentManager({
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Standard Check-In Time</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Standard Check-In Time</label>
                   <input
                     type="text"
                     value={settings.timings.checkInTime}
@@ -670,11 +670,11 @@ export default function ContentManager({
                         timings: { ...settings.timings, checkInTime: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Standard Check-Out Time</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Standard Check-Out Time</label>
                   <input
                     type="text"
                     value={settings.timings.checkOutTime}
@@ -684,13 +684,13 @@ export default function ContentManager({
                         timings: { ...settings.timings, checkOutTime: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Front Desk Reception</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Front Desk Reception</label>
                 <input
                   type="text"
                   value={settings.timings.frontDesk}
@@ -700,12 +700,12 @@ export default function ContentManager({
                       timings: { ...settings.timings, frontDesk: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Photo ID Verification Requirement</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Photo ID Verification Requirement</label>
                 <textarea
                   rows={2}
                   value={settings.timings.idPolicy}
@@ -715,12 +715,12 @@ export default function ContentManager({
                       timings: { ...settings.timings, idPolicy: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Early Arrival / Late Departure Policy</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Early Arrival / Late Departure Policy</label>
                 <textarea
                   rows={2}
                   value={settings.timings.earlyLatePolicy}
@@ -730,24 +730,24 @@ export default function ContentManager({
                       timings: { ...settings.timings, earlyLatePolicy: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
             </div>
           </div>
 
           {/* Card: Cancellation & GST Rules */}
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#EAE8E3] pb-3">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#373138] pb-3">
               <Shield className="w-4 h-4 text-[#742B40]" />
-              <h3 className="text-sm font-serif font-bold text-[#24272B]">
+              <h3 className="text-sm font-serif font-bold text-[#F5F2EF]">
                 Cancellation Rules &amp; GST Configuration
               </h3>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">
+                <label className="block text-[#8E8A85] mb-1 font-medium">
                   Free Cancellation Window (Hours Prior to Check-in)
                 </label>
                 <input
@@ -759,12 +759,12 @@ export default function ContentManager({
                       cancellation: { ...settings.cancellation, hours: Number(e.target.value) || 24 },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Free Cancellation Terms</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Free Cancellation Terms</label>
                 <textarea
                   rows={2}
                   value={settings.cancellation.freeWindowText}
@@ -774,12 +774,12 @@ export default function ContentManager({
                       cancellation: { ...settings.cancellation, freeWindowText: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Late Cancellation Charge</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Late Cancellation Charge</label>
                 <input
                   type="text"
                   value={settings.cancellation.lateChargeText}
@@ -789,12 +789,12 @@ export default function ContentManager({
                       cancellation: { ...settings.cancellation, lateChargeText: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">No-Show Charge</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">No-Show Charge</label>
                 <input
                   type="text"
                   value={settings.cancellation.noShowText}
@@ -804,12 +804,12 @@ export default function ContentManager({
                       cancellation: { ...settings.cancellation, noShowText: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Refund Timeline</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Refund Timeline</label>
                 <input
                   type="text"
                   value={settings.cancellation.refundText}
@@ -819,16 +819,16 @@ export default function ContentManager({
                       cancellation: { ...settings.cancellation, refundText: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               {/* GST configuration */}
-              <div className="pt-3 border-t border-[#EAE8E3]">
-                <span className="block text-white font-semibold mb-2">Government GST Structure</span>
+              <div className="pt-3 border-t border-[#373138]">
+                <span className="block text-[#F5F2EF] font-semibold mb-2">Government GST Structure</span>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-[11px] text-[#6B7280] mb-1">Threshold (₹)</label>
+                    <label className="block text-[11px] text-[#8E8A85] mb-1">Threshold (₹)</label>
                     <input
                       type="number"
                       value={settings.gst.threshold}
@@ -838,11 +838,11 @@ export default function ContentManager({
                           gst: { ...settings.gst, threshold: Number(e.target.value) || 7500 },
                         })
                       }
-                      className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2 text-[#24272B] focus:outline-none"
+                      className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#6B7280] mb-1">Low Rate (≤7.5k)</label>
+                    <label className="block text-[11px] text-[#8E8A85] mb-1">Low Rate (≤7.5k)</label>
                     <input
                       type="number"
                       value={settings.gst.rateLow}
@@ -852,11 +852,11 @@ export default function ContentManager({
                           gst: { ...settings.gst, rateLow: Number(e.target.value) || 5 },
                         })
                       }
-                      className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2 text-[#24272B] focus:outline-none"
+                      className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#6B7280] mb-1">High Rate (&gt;7.5k)</label>
+                    <label className="block text-[11px] text-[#8E8A85] mb-1">High Rate (&gt;7.5k)</label>
                     <input
                       type="number"
                       value={settings.gst.rateHigh}
@@ -866,7 +866,7 @@ export default function ContentManager({
                           gst: { ...settings.gst, rateHigh: Number(e.target.value) || 18 },
                         })
                       }
-                      className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2 text-[#24272B] focus:outline-none"
+                      className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                     />
                   </div>
                 </div>
@@ -875,17 +875,17 @@ export default function ContentManager({
           </div>
 
           {/* Card: SEO & Socials */}
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#EAE8E3] pb-3">
-              <Globe className="w-4 h-4 text-[#B69A68]" />
-              <h3 className="text-sm font-serif font-bold text-[#24272B]">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#373138] pb-3">
+              <Globe className="w-4 h-4 text-[#C6A16A]" />
+              <h3 className="text-sm font-serif font-bold text-[#F5F2EF]">
                 SEO &amp; Canonical URL
               </h3>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Meta Page Title</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Meta Page Title</label>
                 <input
                   type="text"
                   value={settings.seo.title}
@@ -895,12 +895,12 @@ export default function ContentManager({
                       seo: { ...settings.seo, title: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Meta Description</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Meta Description</label>
                 <textarea
                   rows={2}
                   value={settings.seo.description}
@@ -910,12 +910,12 @@ export default function ContentManager({
                       seo: { ...settings.seo, description: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Meta Keywords</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Meta Keywords</label>
                 <input
                   type="text"
                   value={settings.seo.keywords}
@@ -925,12 +925,12 @@ export default function ContentManager({
                       seo: { ...settings.seo, keywords: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Canonical Production URL</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Canonical Production URL</label>
                 <input
                   type="text"
                   value={settings.seo.canonical}
@@ -940,24 +940,24 @@ export default function ContentManager({
                       seo: { ...settings.seo, canonical: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
             </div>
           </div>
 
           {/* Card: Social Media Links */}
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#EAE8E3] pb-3">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#373138] pb-3">
               <Share2 className="w-4 h-4 text-[#742B40]" />
-              <h3 className="text-sm font-serif font-bold text-[#24272B]">
+              <h3 className="text-sm font-serif font-bold text-[#F5F2EF]">
                 Official Social Profiles
               </h3>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Instagram URL</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Instagram URL</label>
                 <input
                   type="text"
                   placeholder="https://instagram.com/hotelfremont"
@@ -968,12 +968,12 @@ export default function ContentManager({
                       socials: { ...settings.socials, instagram: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Facebook URL</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Facebook URL</label>
                 <input
                   type="text"
                   placeholder="https://facebook.com/hotelfremont"
@@ -984,12 +984,12 @@ export default function ContentManager({
                       socials: { ...settings.socials, facebook: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">LinkedIn URL</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">LinkedIn URL</label>
                 <input
                   type="text"
                   placeholder="https://linkedin.com/company/hotelfremont"
@@ -1000,7 +1000,7 @@ export default function ContentManager({
                       socials: { ...settings.socials, linkedin: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
             </div>
@@ -1013,15 +1013,15 @@ export default function ContentManager({
       {/* ======================================================== */}
       {activeTab === "facilities" && (
         <div className="space-y-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#B69A68]" />
-                <h3 className="text-base font-serif font-bold text-white">
+                <Sparkles className="w-4 h-4 text-[#C6A16A]" />
+                <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                   Hotel Facilities &amp; Amenities
                 </h3>
               </div>
-              <p className="text-xs text-[#6B7280] mt-0.5">
+              <p className="text-xs text-[#8E8A85] mt-0.5">
                 Manage the facilities shown in the Amenities section of the website. Toggle availability or add new services.
               </p>
             </div>
@@ -1040,7 +1040,7 @@ export default function ContentManager({
                   },
                 })
               }
-              className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md border border-[#C6A16A]/20"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Facility</span>
@@ -1051,17 +1051,17 @@ export default function ContentManager({
             {facilities.map((fac) => (
               <div
                 key={fac.id}
-                className="bg-white border border-[#EAE8E3] rounded-xl p-4 shadow-md flex flex-col justify-between space-y-3"
+                className="bg-[#1A191D] border border-[#373138] rounded-xl p-4 shadow-md flex flex-col justify-between space-y-3"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#C9A96E]/10 border border-[#B69A68]/30 flex items-center justify-center text-[#B69A68]">
+                      <div className="w-8 h-8 rounded-lg bg-[#C6A16A]/10 border border-[#C6A16A]/30 flex items-center justify-center text-[#C6A16A]">
                         <Sparkles className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-sm font-serif font-bold text-white">{fac.title}</h4>
-                        <span className="text-[10px] text-[#6B7280] font-mono">
+                        <h4 className="text-sm font-serif font-bold text-[#F5F2EF]">{fac.title}</h4>
+                        <span className="text-[10px] text-[#8E8A85] font-mono">
                           Icon: {fac.icon} · Order: #{fac.sort_order}
                         </span>
                       </div>
@@ -1071,30 +1071,30 @@ export default function ContentManager({
                       onClick={() => handleToggleFacilityActive(fac)}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold border cursor-pointer transition ${
                         fac.is_active
-                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                          : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                          ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
+                          : "bg-neutral-900 text-neutral-400 border-neutral-800"
                       }`}
                     >
                       {fac.is_active ? "Active" : "Hidden"}
                     </button>
                   </div>
 
-                  <p className="text-xs text-[#6B7280] mt-2 line-clamp-2">{fac.description}</p>
+                  <p className="text-xs text-[#B7A9A7] mt-2 line-clamp-2">{fac.description}</p>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#EAE8E3]">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#373138]">
                   <button
                     onClick={() =>
                       setFacilityModal({ open: true, isEditing: true, data: { ...fac } })
                     }
-                    className="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-[11px] text-[#B69A68] flex items-center gap-1 transition cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-[#232126] hover:bg-[#2e2b32] text-[11px] text-[#C6A16A] flex items-center gap-1 transition cursor-pointer border border-[#373138]"
                   >
                     <Edit className="w-3 h-3" />
                     <span>Edit</span>
                   </button>
                   <button
                     onClick={() => handleDeleteFacility(fac.id)}
-                    className="px-2.5 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 text-[11px] text-rose-300 flex items-center gap-1 transition cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-rose-950/40 hover:bg-rose-900/50 text-[11px] text-rose-300 flex items-center gap-1 transition cursor-pointer border border-rose-800/40"
                   >
                     <Trash2 className="w-3 h-3" />
                     <span>Delete</span>
@@ -1111,15 +1111,15 @@ export default function ContentManager({
       {/* ======================================================== */}
       {activeTab === "venues" && (
         <div className="space-y-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-[#B69A68]" />
-                <h3 className="text-base font-serif font-bold text-white">
+                <Building className="w-4 h-4 text-[#C6A16A]" />
+                <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                   Venues &amp; Banquet Spaces
                 </h3>
               </div>
-              <p className="text-xs text-[#6B7280] mt-0.5">
+              <p className="text-xs text-[#8E8A85] mt-0.5">
                 Cloud 6 Banquet (up to 150 guests) and Conference Hall (approx 40 to 50 guests).
               </p>
             </div>
@@ -1141,7 +1141,7 @@ export default function ContentManager({
                   },
                 })
               }
-              className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md border border-[#C6A16A]/20"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Venue</span>
@@ -1152,18 +1152,18 @@ export default function ContentManager({
             {venues.map((venue) => (
               <div
                 key={venue.id}
-                className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md flex flex-col justify-between space-y-4"
+                className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md flex flex-col justify-between space-y-4"
               >
                 <div>
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="text-base font-serif font-bold text-white">{venue.name}</h4>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-white/10 text-[#B69A68]">
+                        <h4 className="text-base font-serif font-bold text-[#F5F2EF]">{venue.name}</h4>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-[#232126] text-[#C6A16A] border border-[#373138]">
                           {venue.type === "banquet" ? "Banquet Space" : "Conference Room"}
                         </span>
                       </div>
-                      <span className="text-xs font-medium text-[#B69A68] mt-0.5 block">
+                      <span className="text-xs font-medium text-[#C6A16A] mt-0.5 block">
                         {venue.capacity_text}
                       </span>
                     </div>
@@ -1172,35 +1172,35 @@ export default function ContentManager({
                       onClick={() => handleToggleVenueActive(venue)}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold border cursor-pointer transition ${
                         venue.is_active
-                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                          : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                          ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
+                          : "bg-neutral-900 text-neutral-400 border-neutral-800"
                       }`}
                     >
                       {venue.is_active ? "Active" : "Hidden"}
                     </button>
                   </div>
 
-                  <p className="text-xs text-[#6B7280] mt-3">{venue.description}</p>
+                  <p className="text-xs text-[#B7A9A7] mt-3">{venue.description}</p>
 
-                  <div className="mt-3 pt-3 border-t border-[#EAE8E3] flex items-center justify-between text-[11px] text-[#6B7280] font-mono">
+                  <div className="mt-3 pt-3 border-t border-[#373138] flex items-center justify-between text-[11px] text-[#8E8A85] font-mono">
                     <span>Photo Slot: {venue.image_slot || "None"}</span>
                     <span>Order: #{venue.sort_order}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#EAE8E3]">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#373138]">
                   <button
                     onClick={() =>
                       setVenueModal({ open: true, isEditing: true, data: { ...venue } })
                     }
-                    className="px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-xs text-[#B69A68] flex items-center gap-1.5 transition cursor-pointer"
+                    className="px-3 py-1.5 rounded bg-[#232126] hover:bg-[#2e2b32] text-xs text-[#C6A16A] flex items-center gap-1.5 transition cursor-pointer border border-[#373138]"
                   >
                     <Edit className="w-3.5 h-3.5" />
                     <span>Edit Venue</span>
                   </button>
                   <button
                     onClick={() => handleDeleteVenue(venue.id)}
-                    className="px-3 py-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-xs text-rose-300 flex items-center gap-1.5 transition cursor-pointer"
+                    className="px-3 py-1.5 rounded bg-rose-950/40 hover:bg-rose-900/50 text-xs text-rose-300 flex items-center gap-1.5 transition cursor-pointer border border-rose-800/40"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete</span>
@@ -1217,14 +1217,14 @@ export default function ContentManager({
       {/* ======================================================== */}
       {activeTab === "dining" && (
         <div className="max-w-3xl space-y-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#EAE8E3] pb-3">
-              <Utensils className="w-4 h-4 text-[#B69A68]" />
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#373138] pb-3">
+              <Utensils className="w-4 h-4 text-[#C6A16A]" />
               <div>
-                <h3 className="text-base font-serif font-bold text-white">
+                <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                   Hotel Fremont Dining Hall Configuration
                 </h3>
-                <p className="text-xs text-[#6B7280] mt-0.5">
+                <p className="text-xs text-[#8E8A85] mt-0.5">
                   Ground floor dining hall, approx. 50 guests, in-house kitchen open daily until 10:30 PM, breakfast buffet.
                 </p>
               </div>
@@ -1232,7 +1232,7 @@ export default function ContentManager({
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Dining Hall Name</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Dining Hall Name</label>
                 <input
                   type="text"
                   value={settings.restaurant.name}
@@ -1242,13 +1242,13 @@ export default function ContentManager({
                       restaurant: { ...settings.restaurant, name: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Floor / Location</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Floor / Location</label>
                   <input
                     type="text"
                     value={settings.restaurant.location}
@@ -1258,11 +1258,11 @@ export default function ContentManager({
                         restaurant: { ...settings.restaurant, location: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Seating Capacity (Covers)</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Seating Capacity (Covers)</label>
                   <input
                     type="number"
                     value={settings.restaurant.covers}
@@ -1275,13 +1275,13 @@ export default function ContentManager({
                         },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Kitchen &amp; Operational Timings</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Kitchen &amp; Operational Timings</label>
                 <input
                   type="text"
                   value={settings.restaurant.timings}
@@ -1291,12 +1291,12 @@ export default function ContentManager({
                       restaurant: { ...settings.restaurant, timings: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Breakfast Buffet Arrangement</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Breakfast Buffet Arrangement</label>
                 <textarea
                   rows={2}
                   value={settings.restaurant.breakfast}
@@ -1306,7 +1306,7 @@ export default function ContentManager({
                       restaurant: { ...settings.restaurant, breakfast: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
@@ -1315,7 +1315,7 @@ export default function ContentManager({
                   type="button"
                   onClick={() => handleSaveSettings()}
                   disabled={isSaving}
-                  className="px-5 py-2.5 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-2 cursor-pointer shadow-lg shadow-[#742B40]/20"
+                  className="px-5 py-2.5 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-2 cursor-pointer shadow-lg shadow-[#742B40]/20 border border-[#C6A16A]/20"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>Save Dining Hall Configuration</span>
@@ -1331,15 +1331,15 @@ export default function ContentManager({
       {/* ======================================================== */}
       {activeTab === "nearby" && (
         <div className="space-y-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-xl p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-xl p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <Navigation className="w-4 h-4 text-[#B69A68]" />
-                <h3 className="text-base font-serif font-bold text-white">
+                <Navigation className="w-4 h-4 text-[#C6A16A]" />
+                <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                   Nearby Key Destinations &amp; Landmarks
                 </h3>
               </div>
-              <p className="text-xs text-[#6B7280] mt-0.5">
+              <p className="text-xs text-[#8E8A85] mt-0.5">
                 Travel times vary with route and traffic. (Honest listing without unverified drive times).
               </p>
             </div>
@@ -1356,7 +1356,7 @@ export default function ContentManager({
                   },
                 })
               }
-              className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md border border-[#C6A16A]/20"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Attraction</span>
@@ -1367,15 +1367,15 @@ export default function ContentManager({
             {nearbyPlaces.map((place) => (
               <div
                 key={place.id}
-                className="bg-white border border-[#EAE8E3] rounded-xl p-4 shadow-md flex items-center justify-between gap-3"
+                className="bg-[#1A191D] border border-[#373138] rounded-xl p-4 shadow-md flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-[#C9A96E]/10 border border-[#B69A68]/20 flex items-center justify-center text-[#B69A68] shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-[#C6A16A]/10 border border-[#C6A16A]/20 flex items-center justify-center text-[#C6A16A] shrink-0">
                     <MapPin className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-serif font-bold text-white">{place.name}</h4>
-                    <span className="text-[10px] text-[#6B7280] font-mono">
+                    <h4 className="text-xs font-serif font-bold text-[#F5F2EF]">{place.name}</h4>
+                    <span className="text-[10px] text-[#8E8A85] font-mono">
                       Order: #{place.sort_order}
                     </span>
                   </div>
@@ -1386,8 +1386,8 @@ export default function ContentManager({
                     onClick={() => handleToggleNearbyActive(place)}
                     className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold border cursor-pointer transition ${
                       place.is_active
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                        : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                        ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
+                        : "bg-neutral-900 text-neutral-400 border-neutral-800"
                     }`}
                   >
                     {place.is_active ? "Active" : "Hidden"}
@@ -1397,14 +1397,14 @@ export default function ContentManager({
                     onClick={() =>
                       setNearbyModal({ open: true, isEditing: true, data: { ...place } })
                     }
-                    className="p-1 rounded bg-white/5 hover:bg-white/10 text-[#B69A68] transition cursor-pointer"
+                    className="p-1 rounded bg-[#232126] hover:bg-[#2e2b32] text-[#C6A16A] transition cursor-pointer border border-[#373138]"
                   >
                     <Edit className="w-3.5 h-3.5" />
                   </button>
 
                   <button
                     onClick={() => handleDeleteNearbyPlace(place.id)}
-                    className="p-1 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition cursor-pointer"
+                    className="p-1 rounded bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 transition cursor-pointer border border-rose-800/40"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -1419,15 +1419,15 @@ export default function ContentManager({
       {/* MODAL: ADD / EDIT FACILITY */}
       {/* ======================================================== */}
       {facilityModal.open && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
-              <h3 className="text-base font-serif font-bold text-white">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#373138] pb-3">
+              <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                 {facilityModal.isEditing ? "Edit Facility" : "Add New Facility"}
               </h3>
               <button
                 onClick={() => setFacilityModal({ open: false, isEditing: false, data: {} })}
-                className="text-[#6B7280] hover:text-white"
+                className="text-[#8E8A85] hover:text-[#F5F2EF]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1435,7 +1435,7 @@ export default function ContentManager({
 
             <form onSubmit={handleSaveFacility} className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Facility Title</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Facility Title</label>
                 <input
                   type="text"
                   required
@@ -1446,12 +1446,12 @@ export default function ContentManager({
                       data: { ...facilityModal.data, title: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Description</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Description</label>
                 <textarea
                   rows={2}
                   value={facilityModal.data.description || ""}
@@ -1461,13 +1461,13 @@ export default function ContentManager({
                       data: { ...facilityModal.data, description: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Lucide Icon Name</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Lucide Icon Name</label>
                   <input
                     type="text"
                     value={facilityModal.data.icon || "Sparkles"}
@@ -1477,11 +1477,11 @@ export default function ContentManager({
                         data: { ...facilityModal.data, icon: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Sort Order</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Sort Order</label>
                   <input
                     type="number"
                     value={facilityModal.data.sort_order || 1}
@@ -1491,7 +1491,7 @@ export default function ContentManager({
                         data: { ...facilityModal.data, sort_order: Number(e.target.value) || 1 },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
@@ -1507,25 +1507,25 @@ export default function ContentManager({
                       data: { ...facilityModal.data, is_active: e.target.checked },
                     })
                   }
-                  className="rounded bg-[#F8F7F4] border-[#EAE8E3] text-[#742B40] focus:ring-0"
+                  className="rounded bg-[#0D0D10] border-[#373138] text-[#742B40] focus:ring-0"
                 />
-                <label htmlFor="fac_active" className="text-[#24272B] text-xs cursor-pointer">
+                <label htmlFor="fac_active" className="text-[#F5F2EF] text-xs cursor-pointer">
                   Active (visible on website)
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#EAE8E3]">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#373138]">
                 <button
                   type="button"
                   onClick={() => setFacilityModal({ open: false, isEditing: false, data: {} })}
-                  className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-white"
+                  className="px-4 py-2 rounded-lg bg-[#232126] hover:bg-[#2e2b32] text-xs text-[#B7A9A7] border border-[#373138] transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md border border-[#C6A16A]/20"
                 >
                   {isSaving ? "Saving..." : "Save Facility"}
                 </button>
@@ -1539,15 +1539,15 @@ export default function ContentManager({
       {/* MODAL: ADD / EDIT VENUE */}
       {/* ======================================================== */}
       {venueModal.open && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
-              <h3 className="text-base font-serif font-bold text-white">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#373138] pb-3">
+              <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                 {venueModal.isEditing ? "Edit Venue" : "Add New Venue"}
               </h3>
               <button
                 onClick={() => setVenueModal({ open: false, isEditing: false, data: {} })}
-                className="text-[#6B7280] hover:text-white"
+                className="text-[#8E8A85] hover:text-[#F5F2EF]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1555,7 +1555,7 @@ export default function ContentManager({
 
             <form onSubmit={handleSaveVenue} className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Venue Name</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Venue Name</label>
                 <input
                   type="text"
                   required
@@ -1566,13 +1566,13 @@ export default function ContentManager({
                       data: { ...venueModal.data, name: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Venue Type</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Venue Type</label>
                   <select
                     value={venueModal.data.type || "banquet"}
                     onChange={(e) =>
@@ -1581,14 +1581,14 @@ export default function ContentManager({
                         data: { ...venueModal.data, type: e.target.value as any },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   >
                     <option value="banquet">Banquet Hall</option>
                     <option value="conference">Conference Hall</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Capacity Text</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Capacity Text</label>
                   <input
                     type="text"
                     placeholder="Up to 150 guests"
@@ -1599,13 +1599,13 @@ export default function ContentManager({
                         data: { ...venueModal.data, capacity_text: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Description</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Description</label>
                 <textarea
                   rows={2}
                   value={venueModal.data.description || ""}
@@ -1615,13 +1615,13 @@ export default function ContentManager({
                       data: { ...venueModal.data, description: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Image Slot Code</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Image Slot Code</label>
                   <input
                     type="text"
                     placeholder="cloud-6-banquet"
@@ -1632,11 +1632,11 @@ export default function ContentManager({
                         data: { ...venueModal.data, image_slot: e.target.value },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#6B7280] mb-1 font-medium">Sort Order</label>
+                  <label className="block text-[#8E8A85] mb-1 font-medium">Sort Order</label>
                   <input
                     type="number"
                     value={venueModal.data.sort_order || 1}
@@ -1646,7 +1646,7 @@ export default function ContentManager({
                         data: { ...venueModal.data, sort_order: Number(e.target.value) || 1 },
                       })
                     }
-                    className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                    className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                   />
                 </div>
               </div>
@@ -1662,25 +1662,25 @@ export default function ContentManager({
                       data: { ...venueModal.data, is_active: e.target.checked },
                     })
                   }
-                  className="rounded bg-[#F8F7F4] border-[#EAE8E3] text-[#742B40] focus:ring-0"
+                  className="rounded bg-[#0D0D10] border-[#373138] text-[#742B40] focus:ring-0"
                 />
-                <label htmlFor="ven_active" className="text-[#24272B] text-xs cursor-pointer">
+                <label htmlFor="ven_active" className="text-[#F5F2EF] text-xs cursor-pointer">
                   Active (visible on website)
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#EAE8E3]">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#373138]">
                 <button
                   type="button"
                   onClick={() => setVenueModal({ open: false, isEditing: false, data: {} })}
-                  className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-white"
+                  className="px-4 py-2 rounded-lg bg-[#232126] hover:bg-[#2e2b32] text-xs text-[#B7A9A7] border border-[#373138] transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md border border-[#C6A16A]/20"
                 >
                   {isSaving ? "Saving..." : "Save Venue"}
                 </button>
@@ -1694,15 +1694,15 @@ export default function ContentManager({
       {/* MODAL: ADD / EDIT NEARBY PLACE */}
       {/* ======================================================== */}
       {nearbyModal.open && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#EAE8E3] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-3">
-              <h3 className="text-base font-serif font-bold text-white">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#373138] pb-3">
+              <h3 className="text-base font-serif font-bold text-[#F5F2EF]">
                 {nearbyModal.isEditing ? "Edit Attraction" : "Add Nearby Attraction"}
               </h3>
               <button
                 onClick={() => setNearbyModal({ open: false, isEditing: false, data: {} })}
-                className="text-[#6B7280] hover:text-white"
+                className="text-[#8E8A85] hover:text-[#F5F2EF]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1710,7 +1710,7 @@ export default function ContentManager({
 
             <form onSubmit={handleSaveNearbyPlace} className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Attraction / Landmark Name</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Attraction / Landmark Name</label>
                 <input
                   type="text"
                   required
@@ -1721,12 +1721,12 @@ export default function ContentManager({
                       data: { ...nearbyModal.data, name: e.target.value },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none focus:border-[#B69A68]"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Sort Order</label>
+                <label className="block text-[#8E8A85] mb-1 font-medium">Sort Order</label>
                 <input
                   type="number"
                   value={nearbyModal.data.sort_order || 1}
@@ -1736,7 +1736,7 @@ export default function ContentManager({
                       data: { ...nearbyModal.data, sort_order: Number(e.target.value) || 1 },
                     })
                   }
-                  className="w-full bg-[#F8F7F4] border border-[#EAE8E3] rounded-lg p-2.5 text-[#24272B] focus:outline-none"
+                  className="w-full bg-[#0D0D10] border border-[#373138] rounded-lg p-2.5 text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                 />
               </div>
 
@@ -1751,25 +1751,25 @@ export default function ContentManager({
                       data: { ...nearbyModal.data, is_active: e.target.checked },
                     })
                   }
-                  className="rounded bg-[#F8F7F4] border-[#EAE8E3] text-[#742B40] focus:ring-0"
+                  className="rounded bg-[#0D0D10] border-[#373138] text-[#742B40] focus:ring-0"
                 />
-                <label htmlFor="np_active" className="text-[#24272B] text-xs cursor-pointer">
+                <label htmlFor="np_active" className="text-[#F5F2EF] text-xs cursor-pointer">
                   Active (visible on website)
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#EAE8E3]">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#373138]">
                 <button
                   type="button"
                   onClick={() => setNearbyModal({ open: false, isEditing: false, data: {} })}
-                  className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-white"
+                  className="px-4 py-2 rounded-lg bg-[#232126] hover:bg-[#2e2b32] text-xs text-[#B7A9A7] border border-[#373138] transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-lg bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-md border border-[#C6A16A]/20"
                 >
                   {isSaving ? "Saving..." : "Save Attraction"}
                 </button>

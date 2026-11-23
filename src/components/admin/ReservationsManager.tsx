@@ -412,23 +412,23 @@ export default function ReservationsManager({
   return (
     <div className="space-y-6">
       {actionFeedback && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{actionFeedback}</span>
         </div>
       )}
 
       {/* Search & Filter Toolbar */}
-      <div className="bg-white border border-[#EAE8E3] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div className="bg-[#1A191D] border border-[#373138] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search className="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-[#8E8A85] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search by guest name, phone, or booking ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-xs text-[#24272B] placeholder-[#9CA3AF] focus:outline-none focus:border-[#742B40] transition"
+            className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#0D0D10] border border-[#373138] text-xs text-[#F5F2EF] placeholder-[#8E8A85] focus:outline-none focus:border-[#C6A16A] transition"
           />
         </div>
 
@@ -438,7 +438,7 @@ export default function ReservationsManager({
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-xs text-[#24272B] focus:outline-none focus:border-[#742B40]"
+            className="px-3 py-2 rounded-xl bg-[#0D0D10] border border-[#373138] text-xs text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A] cursor-pointer"
           >
             <option value="all">All Categories</option>
             <option value="deluxe">Deluxe Room (9)</option>
@@ -450,7 +450,7 @@ export default function ReservationsManager({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-xs text-[#24272B] focus:outline-none focus:border-[#742B40]"
+            className="px-3 py-2 rounded-xl bg-[#0D0D10] border border-[#373138] text-xs text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A] cursor-pointer"
           >
             <option value="all">All Bookings</option>
             <option value="confirmed">Confirmed</option>
@@ -464,7 +464,7 @@ export default function ReservationsManager({
           <select
             value={paymentFilter}
             onChange={(e) => setPaymentFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-xs text-[#24272B] focus:outline-none focus:border-[#742B40]"
+            className="px-3 py-2 rounded-xl bg-[#0D0D10] border border-[#373138] text-xs text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A] cursor-pointer"
           >
             <option value="all">All Payments</option>
             <option value="paid">Paid (Razorpay)</option>
@@ -475,11 +475,11 @@ export default function ReservationsManager({
       </div>
 
       {/* Booking Management Table */}
-      <div className="bg-white border border-[#EAE8E3] rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-[#1A191D] border border-[#373138] rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-[#FAF9F7] border-b border-[#EAE8E3] text-[11px] font-sans font-bold uppercase tracking-wider text-[#6B7280]">
+              <tr className="bg-[#141316] border-b border-[#373138] text-[11px] font-sans font-bold uppercase tracking-wider text-[#8E8A85]">
                 <th className="py-3.5 px-4">Booking Ref</th>
                 <th className="py-3.5 px-4">Guest Details</th>
                 <th className="py-3.5 px-4">Stay Dates</th>
@@ -490,43 +490,43 @@ export default function ReservationsManager({
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE8E3]">
+            <tbody className="divide-y divide-[#373138]">
               {filteredRows.length > 0 ? (
                 filteredRows.map((booking) => {
                   return (
                     <tr
                       key={`${booking.source}-${booking.id}`}
-                      className="hover:bg-[#FAF9F7] transition cursor-pointer"
+                      className="hover:bg-[#232126]/60 transition cursor-pointer"
                       onClick={() => setSelectedBooking(booking)}
                     >
                       {/* Ref */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#742B40]">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#C6A16A]">
                         {booking.ref}
                       </td>
 
                       {/* Guest */}
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[#24272B]">{booking.guestName}</div>
-                        <div className="text-[11px] text-[#6B7280] font-mono">{booking.phone}</div>
+                        <div className="font-semibold text-[#F5F2EF]">{booking.guestName}</div>
+                        <div className="text-[11px] text-[#8E8A85] font-mono">{booking.phone}</div>
                       </td>
 
                       {/* Dates */}
                       <td className="py-3.5 px-4">
-                        <div className="font-medium text-[#24272B]">
+                        <div className="font-medium text-[#F5F2EF]">
                           {booking.checkIn} &rarr; {booking.checkOut}
                         </div>
-                        <div className="text-[11px] text-[#6B7280]">
+                        <div className="text-[11px] text-[#8E8A85]">
                           {booking.nights} Night{booking.nights > 1 ? "s" : ""} · {booking.guests} Guests
                         </div>
                       </td>
 
                       {/* Category */}
-                      <td className="py-3.5 px-4 font-medium text-[#24272B]">
+                      <td className="py-3.5 px-4 font-medium text-[#F5F2EF]">
                         {booking.roomCategory}
                       </td>
 
                       {/* Amount */}
-                      <td className="py-3.5 px-4 text-right font-serif font-bold text-sm text-[#24272B]">
+                      <td className="py-3.5 px-4 text-right font-serif font-bold text-sm text-[#F5F2EF]">
                         ₹{booking.totalAmount.toLocaleString("en-IN")}
                       </td>
 
@@ -535,14 +535,14 @@ export default function ReservationsManager({
                         <span
                           className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
                             booking.bookingStatus === "confirmed"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
                               : booking.bookingStatus === "checked_in"
-                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              ? "bg-blue-950/40 text-blue-300 border-blue-800/40"
                               : booking.bookingStatus === "checked_out"
-                              ? "bg-gray-100 text-gray-700 border-gray-200"
+                              ? "bg-[#232126] text-[#8E8A85] border-[#373138]"
                               : booking.bookingStatus === "pending"
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-rose-50 text-rose-700 border-rose-200"
+                              ? "bg-amber-950/40 text-amber-300 border-amber-800/40"
+                              : "bg-rose-950/40 text-rose-300 border-rose-800/40"
                           }`}
                         >
                           {booking.bookingStatus.replace(/_/g, " ").toUpperCase()}
@@ -555,12 +555,12 @@ export default function ReservationsManager({
                           <span
                             className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
                               booking.paymentStatus === "paid"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
                                 : booking.paymentStatus === "refunded"
-                                ? "bg-purple-50 text-purple-700 border-purple-200"
+                                ? "bg-purple-950/40 text-purple-300 border-purple-800/40"
                                 : booking.paymentStatus === "failed"
-                                ? "bg-rose-50 text-rose-700 border-rose-200"
-                                : "bg-amber-50 text-amber-700 border-amber-200"
+                                ? "bg-rose-950/40 text-rose-300 border-rose-800/40"
+                                : "bg-amber-950/40 text-amber-300 border-amber-800/40"
                             }`}
                           >
                             {booking.paymentStatus === "paid"
@@ -568,7 +568,7 @@ export default function ReservationsManager({
                               : booking.paymentStatus.toUpperCase()}
                           </span>
                           {booking.paymentEnvironment === "TEST" && (
-                            <span className="inline-block px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-300 text-[9px] font-mono font-bold tracking-wider">
+                            <span className="inline-block px-1.5 py-0.2 rounded bg-amber-950/60 text-amber-300 border border-amber-700/60 text-[9px] font-mono font-bold tracking-wider">
                               TEST MODE
                             </span>
                           )}
@@ -583,14 +583,14 @@ export default function ReservationsManager({
                         <div className="flex items-center justify-end gap-1.5 relative">
                           <button
                             onClick={() => handlePrintVoucher(booking)}
-                            className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#742B40] hover:bg-white border border-transparent hover:border-[#EAE8E3] transition cursor-pointer"
+                            className="p-1.5 rounded-lg text-[#8E8A85] hover:text-[#C6A16A] hover:bg-[#232126] border border-transparent hover:border-[#373138] transition cursor-pointer"
                             title="Print Voucher"
                           >
                             <Printer className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setSelectedBooking(booking)}
-                            className="px-2.5 py-1 rounded-lg bg-[#F8F7F4] hover:bg-[#EAE8E3] text-[#24272B] font-medium text-[11px] border border-[#EAE8E3] transition cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg bg-[#232126] hover:bg-[#2c2a30] text-[#F5F2EF] font-medium text-[11px] border border-[#373138] transition cursor-pointer"
                           >
                             Details
                           </button>
@@ -602,7 +602,7 @@ export default function ReservationsManager({
                                 e.stopPropagation();
                                 setActiveMenuId(activeMenuId === booking.id ? null : booking.id);
                               }}
-                              className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4] border border-transparent hover:border-[#EAE8E3] transition cursor-pointer"
+                              className="p-1.5 rounded-lg text-[#8E8A85] hover:text-[#F5F2EF] hover:bg-[#232126] border border-transparent hover:border-[#373138] transition cursor-pointer"
                               title="More Options"
                             >
                               <MoreVertical className="w-3.5 h-3.5" />
@@ -610,7 +610,7 @@ export default function ReservationsManager({
 
                             {activeMenuId === booking.id && (
                               <div
-                                className="absolute right-0 top-full mt-1 w-48 bg-white border border-[#EAE8E3] rounded-xl shadow-xl py-1 z-30 text-left text-xs animate-in fade-in duration-150"
+                                className="absolute right-0 top-full mt-1 w-48 bg-[#1A191D] border border-[#373138] rounded-xl shadow-2xl py-1 z-30 text-left text-xs animate-in fade-in duration-150"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
@@ -618,9 +618,9 @@ export default function ReservationsManager({
                                     setActiveMenuId(null);
                                     setSelectedBooking(booking);
                                   }}
-                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#24272B] flex items-center gap-2 transition cursor-pointer"
+                                  className="w-full px-3 py-1.5 hover:bg-[#232126] text-[#F5F2EF] flex items-center gap-2 transition cursor-pointer"
                                 >
-                                  <Eye className="w-3.5 h-3.5 text-[#B69A68]" />
+                                  <Eye className="w-3.5 h-3.5 text-[#C6A16A]" />
                                   <span>View Dossier</span>
                                 </button>
 
@@ -632,16 +632,16 @@ export default function ReservationsManager({
                                         setActiveMenuId(null);
                                         handleUpdateStatus(booking, "checked_in");
                                       }}
-                                      className="w-full px-3 py-1.5 hover:bg-blue-50 text-blue-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                      className="w-full px-3 py-1.5 hover:bg-blue-950/40 text-blue-300 flex items-center gap-2 transition cursor-pointer font-medium"
                                     >
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
                                       <span>Mark Checked In</span>
                                     </button>
                                     <button
                                       onClick={() => handleCancelReservation(booking)}
-                                      className="w-full px-3 py-1.5 hover:bg-amber-50 text-amber-700 flex items-center gap-2 transition cursor-pointer"
+                                      className="w-full px-3 py-1.5 hover:bg-amber-950/40 text-amber-300 flex items-center gap-2 transition cursor-pointer"
                                     >
-                                      <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                                      <XCircle className="w-3.5 h-3.5 text-amber-400" />
                                       <span>Cancel Reservation</span>
                                     </button>
                                   </>
@@ -653,9 +653,9 @@ export default function ReservationsManager({
                                       setActiveMenuId(null);
                                       handleUpdateStatus(booking, "checked_out");
                                     }}
-                                    className="w-full px-3 py-1.5 hover:bg-emerald-50 text-emerald-800 flex items-center gap-2 transition cursor-pointer font-medium"
+                                    className="w-full px-3 py-1.5 hover:bg-emerald-950/40 text-emerald-300 flex items-center gap-2 transition cursor-pointer font-medium"
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                                     <span>Mark Checked Out</span>
                                   </button>
                                 )}
@@ -667,16 +667,16 @@ export default function ReservationsManager({
                                         setActiveMenuId(null);
                                         handleUpdateStatus(booking, "confirmed");
                                       }}
-                                      className="w-full px-3 py-1.5 hover:bg-emerald-50 text-emerald-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                      className="w-full px-3 py-1.5 hover:bg-emerald-950/40 text-emerald-300 flex items-center gap-2 transition cursor-pointer font-medium"
                                     >
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                                       <span>Confirm Booking</span>
                                     </button>
                                     <button
                                       onClick={() => handleCancelReservation(booking)}
-                                      className="w-full px-3 py-1.5 hover:bg-amber-50 text-amber-700 flex items-center gap-2 transition cursor-pointer"
+                                      className="w-full px-3 py-1.5 hover:bg-amber-950/40 text-amber-300 flex items-center gap-2 transition cursor-pointer"
                                     >
-                                      <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                                      <XCircle className="w-3.5 h-3.5 text-amber-400" />
                                       <span>Cancel Reservation</span>
                                     </button>
                                   </>
@@ -684,18 +684,18 @@ export default function ReservationsManager({
 
                                 <button
                                   onClick={() => handleArchiveReservation(booking)}
-                                  className="w-full px-3 py-1.5 hover:bg-[#FAF9F7] text-[#6B7280] flex items-center gap-2 transition cursor-pointer"
+                                  className="w-full px-3 py-1.5 hover:bg-[#232126] text-[#8E8A85] flex items-center gap-2 transition cursor-pointer"
                                 >
-                                  <Archive className="w-3.5 h-3.5 text-[#6B7280]" />
+                                  <Archive className="w-3.5 h-3.5 text-[#8E8A85]" />
                                   <span>Archive</span>
                                 </button>
-                                <div className="border-t border-[#EAE8E3] my-1" />
+                                <div className="border-t border-[#373138] my-1" />
                                 <button
                                   onClick={() => {
                                     setActiveMenuId(null);
                                     setDeleteModalBooking(booking);
                                   }}
-                                  className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                                  className="w-full px-3 py-1.5 hover:bg-rose-950/40 text-rose-400 flex items-center gap-2 transition cursor-pointer font-medium"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                   <span>Delete Test Record</span>
@@ -710,7 +710,7 @@ export default function ReservationsManager({
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-[#6B7280]">
+                  <td colSpan={8} className="py-12 text-center text-[#8E8A85]">
                     No reservations match the selected search or filter criteria.
                   </td>
                 </tr>
@@ -722,22 +722,22 @@ export default function ReservationsManager({
 
       {/* Reservation Details Drawer */}
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end">
-          <div className="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-y-auto p-6 space-y-6">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex justify-end">
+          <div className="bg-[#1A191D] border-l border-[#373138] w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-y-auto p-6 space-y-6 text-[#F5F2EF]">
             {/* Drawer Header */}
             <div>
-              <div className="flex items-center justify-between border-b border-[#EAE8E3] pb-4">
+              <div className="flex items-center justify-between border-b border-[#373138] pb-4">
                 <div>
-                  <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#9CA3AF] block">
+                  <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#8E8A85] block">
                     Reservation Dossier
                   </span>
-                  <h3 className="text-xl font-serif font-bold text-[#742B40]">
+                  <h3 className="text-xl font-serif font-bold text-[#C6A16A]">
                     {selectedBooking.ref}
                   </h3>
                 </div>
                 <button
                   onClick={() => setSelectedBooking(null)}
-                  className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4]"
+                  className="p-1.5 rounded-lg text-[#8E8A85] hover:text-[#F5F2EF] hover:bg-[#232126] cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -746,115 +746,115 @@ export default function ReservationsManager({
               {/* Guest & Stay Cards */}
               <div className="space-y-4 pt-4 text-xs">
                 {/* Guest Card */}
-                <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3] space-y-2">
-                  <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
+                <div className="p-4 rounded-xl bg-[#141316] border border-[#373138] space-y-2">
+                  <span className="text-[10px] uppercase font-bold text-[#8E8A85] tracking-wider block">
                     Guest Information
                   </span>
-                  <div className="text-sm font-bold text-[#24272B]">
+                  <div className="text-sm font-bold text-[#F5F2EF]">
                     {selectedBooking.guestName}
                   </div>
-                  <div className="flex items-center gap-2 text-[#6B7280]">
-                    <Phone className="w-3.5 h-3.5 text-[#B69A68]" />
+                  <div className="flex items-center gap-2 text-[#B7A9A7]">
+                    <Phone className="w-3.5 h-3.5 text-[#C6A16A]" />
                     <span className="font-mono">{selectedBooking.phone}</span>
                   </div>
                   {selectedBooking.email && (
-                    <div className="flex items-center gap-2 text-[#6B7280]">
-                      <Mail className="w-3.5 h-3.5 text-[#B69A68]" />
+                    <div className="flex items-center gap-2 text-[#B7A9A7]">
+                      <Mail className="w-3.5 h-3.5 text-[#C6A16A]" />
                       <span>{selectedBooking.email}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Stay Card */}
-                <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3] space-y-2">
-                  <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
+                <div className="p-4 rounded-xl bg-[#141316] border border-[#373138] space-y-2">
+                  <span className="text-[10px] uppercase font-bold text-[#8E8A85] tracking-wider block">
                     Stay Specifications
                   </span>
-                  <div className="font-semibold text-[#24272B]">
+                  <div className="font-semibold text-[#F5F2EF]">
                     {selectedBooking.roomCategory}
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280]">
+                  <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Check-in:</span>
-                    <span className="font-medium text-[#24272B]">{selectedBooking.checkIn} (from 1:00 PM)</span>
+                    <span className="font-medium text-[#F5F2EF]">{selectedBooking.checkIn} (from 1:00 PM)</span>
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280]">
+                  <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Check-out:</span>
-                    <span className="font-medium text-[#24272B]">{selectedBooking.checkOut} (until 11:00 AM)</span>
+                    <span className="font-medium text-[#F5F2EF]">{selectedBooking.checkOut} (until 11:00 AM)</span>
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280]">
+                  <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Duration:</span>
-                    <span className="font-medium text-[#24272B]">{selectedBooking.nights} Night(s)</span>
+                    <span className="font-medium text-[#F5F2EF]">{selectedBooking.nights} Night(s)</span>
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280]">
+                  <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Number of Guests:</span>
-                    <span className="font-medium text-[#24272B]">{selectedBooking.guests} Guests</span>
+                    <span className="font-medium text-[#F5F2EF]">{selectedBooking.guests} Guests</span>
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280] pt-1 border-t border-[#EAE8E3]">
+                  <div className="flex items-center justify-between text-[#B7A9A7] pt-1 border-t border-[#373138]">
                     <span>Assigned Room:</span>
-                    <span className="font-semibold text-[#742B40] font-mono">
+                    <span className="font-semibold text-[#C6A16A] font-mono">
                       {selectedBooking.roomNumber ? `Room ${selectedBooking.roomNumber}` : "Not Assigned"}
                     </span>
                   </div>
                 </div>
 
                 {/* Billing Card */}
-                <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3] space-y-2">
+                <div className="p-4 rounded-xl bg-[#141316] border border-[#373138] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
+                    <span className="text-[10px] uppercase font-bold text-[#8E8A85] tracking-wider block">
                       Financial Summary
                     </span>
                     {selectedBooking.paymentEnvironment && (
                       <span
                         className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${
                           selectedBooking.paymentEnvironment === "TEST"
-                            ? "bg-amber-50 text-amber-800 border-amber-300"
-                            : "bg-emerald-50 text-emerald-800 border-emerald-300"
+                            ? "bg-amber-950/60 text-amber-300 border-amber-700/60"
+                            : "bg-emerald-950/60 text-emerald-300 border-emerald-700/60"
                         }`}
                       >
                         {selectedBooking.paymentEnvironment} ENVIRONMENT
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center justify-between text-base font-bold text-[#742B40]">
+                  <div className="flex items-center justify-between text-base font-bold text-[#F5F2EF]">
                     <span>Total Tariff &amp; Taxes:</span>
-                    <span className="font-serif">₹{selectedBooking.totalAmount.toLocaleString("en-IN")}</span>
+                    <span className="font-serif text-[#C6A16A]">₹{selectedBooking.totalAmount.toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280]">
+                  <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Operational Status:</span>
                     <span
                       className={`font-semibold uppercase text-[11px] px-2 py-0.5 rounded border ${
                         selectedBooking.bookingStatus === "confirmed"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
                           : selectedBooking.bookingStatus === "checked_in"
-                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                          ? "bg-blue-950/40 text-blue-300 border-blue-800/40"
                           : selectedBooking.bookingStatus === "checked_out"
-                          ? "bg-gray-100 text-gray-700 border-gray-300"
+                          ? "bg-[#232126] text-[#8E8A85] border-[#373138]"
                           : selectedBooking.bookingStatus === "pending"
-                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-rose-50 text-rose-700 border-rose-200"
+                          ? "bg-amber-950/40 text-amber-300 border-amber-800/40"
+                          : "bg-rose-950/40 text-rose-300 border-rose-800/40"
                       }`}
                     >
                       {selectedBooking.bookingStatus.replace(/_/g, " ").toUpperCase()}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280]">
+                  <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Payment Status:</span>
                     <span
                       className={`font-semibold uppercase text-[11px] ${
-                        selectedBooking.paymentStatus === "paid" ? "text-emerald-700" : "text-amber-700"
+                        selectedBooking.paymentStatus === "paid" ? "text-emerald-400" : "text-amber-400"
                       }`}
                     >
                       {selectedBooking.paymentStatus === "paid" ? "PAID" : "PENDING"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[#6B7280]">
+                  <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Payment Gateway:</span>
-                    <span className="font-medium text-[#24272B] text-[11px]">
+                    <span className="font-medium text-[#F5F2EF] text-[11px]">
                       {selectedBooking.paymentGateway || (selectedBooking.razorpayPaymentId ? "Razorpay" : "Front Desk Cash")}
                     </span>
                   </div>
                   {selectedBooking.razorpayPaymentId && (
-                    <div className="text-[10px] text-[#6B7280] font-mono pt-1 border-t border-[#EAE8E3] space-y-0.5">
+                    <div className="text-[10px] text-[#8E8A85] font-mono pt-1 border-t border-[#373138] space-y-0.5">
                       <div>Payment ID: {selectedBooking.razorpayPaymentId}</div>
                       {selectedBooking.razorpayOrderId && (
                         <div>Order ID: {selectedBooking.razorpayOrderId}</div>
@@ -865,8 +865,8 @@ export default function ReservationsManager({
 
                 {/* Status Update Error Toast */}
                 {statusErrorMessage && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-start gap-2">
+                    <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <span className="font-bold block">Status Transition Blocked</span>
                       <span>{statusErrorMessage}</span>
@@ -875,38 +875,38 @@ export default function ReservationsManager({
                 )}
 
                 {/* Booking Status Control Section */}
-                <div className="p-4 rounded-xl bg-white border border-[#EAE8E3] space-y-3">
+                <div className="p-4 rounded-xl bg-[#141316] border border-[#373138] space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold text-[#9CA3AF] tracking-wider block">
+                    <span className="text-[10px] uppercase font-bold text-[#8E8A85] tracking-wider block">
                       Operational Workflow Control
                     </span>
-                    <span className="text-[10px] font-mono text-[#6B7280]">
+                    <span className="text-[10px] font-mono text-[#8E8A85]">
                       Current: {selectedBooking.bookingStatus.replace(/_/g, " ").toUpperCase()}
                     </span>
                   </div>
 
                   {/* Context Guidance Message */}
                   {selectedBooking.bookingStatus === "confirmed" && (
-                    <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-emerald-800 text-[11px] flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div className="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-[11px] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                       <span>Confirmed reservation. Assign a room and mark Checked In upon arrival.</span>
                     </div>
                   )}
                   {selectedBooking.bookingStatus === "checked_in" && (
-                    <div className="p-2.5 rounded-lg bg-blue-50/70 border border-blue-200 text-blue-800 text-[11px] flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                    <div className="p-2.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-blue-300 text-[11px] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
                       <span>Guest is currently in-house. Mark Checked Out upon departure.</span>
                     </div>
                   )}
                   {selectedBooking.bookingStatus === "checked_out" && (
-                    <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-700 text-[11px] flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-gray-500 shrink-0" />
+                    <div className="p-2.5 rounded-lg bg-[#232126] border border-[#373138] text-[#8E8A85] text-[11px] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-[#8E8A85] shrink-0" />
                       <span>Stay completed and checked out. Room is released to housekeeping.</span>
                     </div>
                   )}
                   {selectedBooking.bookingStatus === "cancelled" && (
-                    <div className="p-2.5 rounded-lg bg-rose-50/70 border border-rose-200 text-rose-800 text-[11px] flex items-center gap-2">
-                      <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <div className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-800/40 text-rose-300 text-[11px] flex items-center gap-2">
+                      <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
                       <span>Reservation cancelled. Inventory returned to hotel pool.</span>
                     </div>
                   )}
@@ -914,7 +914,7 @@ export default function ReservationsManager({
                   {/* Room Assignment Field (for check-in) */}
                   {(selectedBooking.bookingStatus === "confirmed" || selectedBooking.bookingStatus === "pending") && (
                     <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-[#24272B] block">
+                      <label className="text-[11px] font-medium text-[#B7A9A7] block">
                         Assign Room Number (e.g. 101, 204):
                       </label>
                       <input
@@ -922,7 +922,7 @@ export default function ReservationsManager({
                         value={roomNumberInput}
                         onChange={(e) => setRoomNumberInput(e.target.value)}
                         placeholder="Enter room number"
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#FAF9F7] border border-[#EAE8E3] text-xs font-mono text-[#24272B] focus:outline-none focus:border-[#742B40]"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0D0D10] border border-[#373138] text-xs font-mono text-[#F5F2EF] focus:outline-none focus:border-[#C6A16A]"
                       />
                     </div>
                   )}
@@ -947,7 +947,7 @@ export default function ReservationsManager({
                           ? "Cannot check in a cancelled booking"
                           : "Mark guest as checked in"
                       }
-                      className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold border border-blue-200 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
+                      className="px-3 py-2 rounded-xl bg-blue-950/40 text-blue-300 hover:bg-blue-900/60 font-semibold border border-blue-800/40 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Mark Checked In</span>
@@ -965,7 +965,7 @@ export default function ReservationsManager({
                           ? "Guest must be checked in before checkout"
                           : "Mark stay completed and check out"
                       }
-                      className="px-3 py-2 rounded-xl bg-gray-100 text-gray-800 hover:bg-gray-200 font-semibold border border-gray-300 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
+                      className="px-3 py-2 rounded-xl bg-[#232126] text-[#B7A9A7] hover:bg-[#2c2a30] hover:text-[#F5F2EF] font-semibold border border-[#373138] transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Mark Checked Out</span>
@@ -985,7 +985,7 @@ export default function ReservationsManager({
                           ? "Cannot confirm active or closed stay"
                           : "Confirm pending booking"
                       }
-                      className="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold border border-emerald-200 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
+                      className="px-3 py-2 rounded-xl bg-emerald-950/40 text-emerald-300 hover:bg-emerald-900/60 font-semibold border border-emerald-800/40 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Confirm Booking</span>
@@ -1013,7 +1013,7 @@ export default function ReservationsManager({
                           ? "Booking is already cancelled"
                           : "Cancel reservation"
                       }
-                      className="px-3 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold border border-rose-200 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
+                      className="px-3 py-2 rounded-xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 font-semibold border border-rose-800/40 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs flex items-center justify-center gap-1.5"
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       <span>Cancel Booking</span>
@@ -1022,21 +1022,21 @@ export default function ReservationsManager({
 
                   {/* Administrative Correction Override (For exceptional operational corrections) */}
                   {(selectedBooking.bookingStatus === "checked_out" || selectedBooking.bookingStatus === "cancelled") && (
-                    <div className="pt-2 border-t border-[#EAE8E3]">
+                    <div className="pt-2 border-t border-[#373138]">
                       <button
                         type="button"
                         onClick={() => setShowAdminOverride(!showAdminOverride)}
-                        className="text-[10px] text-[#9CA3AF] hover:text-[#742B40] underline block cursor-pointer"
+                        className="text-[10px] text-[#8E8A85] hover:text-[#C6A16A] underline block cursor-pointer"
                       >
                         {showAdminOverride ? "Hide Administrative Override" : "Need to correct an accidental entry? Admin Override"}
                       </button>
 
                       {showAdminOverride && (
-                        <div className="mt-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] space-y-2">
-                          <p className="font-semibold text-amber-950">
+                        <div className="mt-2 p-2.5 rounded-lg bg-amber-950/40 border border-amber-800/40 text-amber-300 text-[11px] space-y-2">
+                          <p className="font-semibold text-amber-200">
                             Supervised Administrative Correction:
                           </p>
-                          <p className="text-[10px] text-amber-800">
+                          <p className="text-[10px] text-amber-400">
                             Reverting a terminal state requires administrative authorization and audit logging.
                           </p>
                           <div className="flex gap-2">
@@ -1061,17 +1061,17 @@ export default function ReservationsManager({
             </div>
 
             {/* Bottom Actions */}
-            <div className="pt-4 border-t border-[#EAE8E3] flex items-center justify-between gap-3">
+            <div className="pt-4 border-t border-[#373138] flex items-center justify-between gap-3">
               <button
                 onClick={() => handlePrintVoucher(selectedBooking)}
-                className="px-4 py-2 rounded-xl bg-[#F8F7F4] hover:bg-[#EAE8E3] text-[#24272B] font-semibold text-xs border border-[#EAE8E3] transition flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#232126] hover:bg-[#2c2a30] text-[#F5F2EF] font-semibold text-xs border border-[#373138] transition flex items-center gap-1.5 cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Print Voucher</span>
               </button>
               <button
                 onClick={() => setSelectedBooking(null)}
-                className="px-4 py-2 rounded-xl bg-[#742B40] hover:bg-[#5E2233] text-white font-semibold text-xs transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#742B40] hover:bg-[#5E2233] text-white font-semibold text-xs transition border border-[#C6A16A]/30 cursor-pointer"
               >
                 Close Drawer
               </button>

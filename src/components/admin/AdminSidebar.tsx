@@ -97,13 +97,13 @@ export default function AdminSidebar({
       {isMobileOpen && (
         <div
           onClick={onMobileClose}
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-black/70 z-40 lg:hidden backdrop-blur-sm transition-opacity"
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 bg-white border-r border-[#EAE8E3] flex flex-col justify-between transition-all duration-300 shadow-[2px_0_12px_rgba(0,0,0,0.02)] ${
+        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#141316] border-r border-[#373138] flex flex-col justify-between transition-all duration-300 shadow-[2px_0_16px_rgba(0,0,0,0.5)] ${
           isCollapsed ? "w-20" : "w-64"
         } ${
           isMobileOpen
@@ -113,7 +113,7 @@ export default function AdminSidebar({
       >
         {/* Top Header / Branding */}
         <div>
-          <div className="h-16 border-b border-[#EAE8E3] px-4 flex items-center justify-between">
+          <div className="h-16 border-b border-[#373138] px-4 flex items-center justify-between">
             {!isCollapsed ? (
               <Link href="/admin" className="flex items-center gap-2.5 overflow-hidden">
                 <Image
@@ -121,13 +121,13 @@ export default function AdminSidebar({
                   alt="Hotel Fremont"
                   width={130}
                   height={26}
-                  className="h-6 w-auto object-contain"
+                  className="h-6 w-auto object-contain brightness-110"
                   priority
                 />
               </Link>
             ) : (
               <Link href="/admin" className="mx-auto" title="Hotel Fremont">
-                <div className="w-9 h-9 rounded-xl bg-[#742B40] text-white flex items-center justify-center font-serif font-bold text-base shadow-sm">
+                <div className="w-9 h-9 rounded-xl bg-[#742B40] border border-[#C6A16A]/30 text-[#F5F2EF] flex items-center justify-center font-serif font-bold text-base shadow-sm">
                   F
                 </div>
               </Link>
@@ -136,7 +136,7 @@ export default function AdminSidebar({
             {/* Desktop collapse toggle */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex w-7 h-7 rounded-lg text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4] items-center justify-center transition cursor-pointer"
+              className="hidden lg:flex w-7 h-7 rounded-lg text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] items-center justify-center transition cursor-pointer"
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -145,7 +145,7 @@ export default function AdminSidebar({
             {/* Mobile Close Button */}
             <button
               onClick={onMobileClose}
-              className="lg:hidden w-8 h-8 rounded-lg text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4] flex items-center justify-center transition"
+              className="lg:hidden w-8 h-8 rounded-lg text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#232126] flex items-center justify-center transition"
             >
               <X className="w-5 h-5" />
             </button>
@@ -153,15 +153,15 @@ export default function AdminSidebar({
 
           {/* Quick Property Badge */}
           {!isCollapsed && (
-            <div className="mx-4 my-3 px-3 py-2 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] flex items-center justify-between text-xs">
+            <div className="mx-4 my-3 px-3 py-2 rounded-xl bg-[#1A191D] border border-[#373138] flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#742B40]" />
+                <Building2 className="w-4 h-4 text-[#C6A16A]" />
                 <div>
-                  <span className="font-semibold text-[#24272B] block">Sector 80, Mohali</span>
-                  <span className="text-[10px] text-[#6B7280]">21 Keys · 3-Star Hotel</span>
+                  <span className="font-semibold text-[#F5F2EF] block">Sector 80, Mohali</span>
+                  <span className="text-[10px] text-[#B7A9A7]">21 Keys · 3-Star Hotel</span>
                 </div>
               </div>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100" title="System Operational" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-950/60" title="System Operational" />
             </div>
           )}
 
@@ -170,7 +170,7 @@ export default function AdminSidebar({
             {navigation.map((section) => (
               <div key={section.title} className="space-y-1">
                 {!isCollapsed && (
-                  <div className="px-3 pb-1.5 text-[10px] font-sans tracking-[0.18em] font-bold text-[#9CA3AF] uppercase">
+                  <div className="px-3 pb-1.5 text-[10px] font-sans tracking-[0.18em] font-bold text-[#8E8A85] uppercase">
                     {section.title}
                   </div>
                 )}
@@ -186,15 +186,15 @@ export default function AdminSidebar({
                         title={isCollapsed ? item.label : undefined}
                         className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all group cursor-pointer ${
                           active
-                            ? "bg-[#742B40] text-white shadow-sm shadow-[#742B40]/20 font-semibold"
-                            : "text-[#4B5563] hover:text-[#24272B] hover:bg-[#F8F7F4]"
+                            ? "bg-[#742B40] text-white border border-[#C6A16A]/20 shadow-sm shadow-[#742B40]/40 font-semibold"
+                            : "text-[#B7A9A7] hover:text-[#F5F2EF] hover:bg-[#1A191D]"
                         } ${isCollapsed ? "justify-center px-2" : ""}`}
                       >
                         <Icon
                           className={`w-4 h-4 shrink-0 transition-colors ${
                             active
-                              ? "text-white"
-                              : "text-[#6B7280] group-hover:text-[#742B40]"
+                              ? "text-[#C6A16A]"
+                              : "text-[#8E8A85] group-hover:text-[#F5F2EF]"
                           }`}
                         />
                         {!isCollapsed && (
@@ -205,7 +205,7 @@ export default function AdminSidebar({
                             className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ${
                               active
                                 ? "bg-white/20 text-white"
-                                : "bg-[#742B40]/10 text-[#742B40]"
+                                : "bg-[#742B40]/30 text-[#F5F2EF] border border-[#742B40]/40"
                             }`}
                           >
                             {item.badge}
@@ -221,22 +221,22 @@ export default function AdminSidebar({
         </div>
 
         {/* Bottom User Profile & Sign Out */}
-        <div className="p-3 border-t border-[#EAE8E3] bg-[#FAF9F7]">
+        <div className="p-3 border-t border-[#373138] bg-[#141316]">
           {!isCollapsed ? (
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2 px-2 py-1">
                 <div className="truncate">
-                  <span className="text-xs font-semibold text-[#24272B] block truncate">
+                  <span className="text-xs font-semibold text-[#F5F2EF] block truncate">
                     Front Desk &amp; Admin
                   </span>
-                  <span className="text-[11px] text-[#6B7280] block truncate">
+                  <span className="text-[11px] text-[#B7A9A7] block truncate">
                     {userEmail}
                   </span>
                 </div>
                 <Link
                   href="/"
                   target="_blank"
-                  className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#742B40] hover:bg-white transition"
+                  className="p-1.5 rounded-lg text-[#B7A9A7] hover:text-[#C6A16A] hover:bg-[#232126] transition"
                   title="View Public Site"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -246,7 +246,7 @@ export default function AdminSidebar({
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  className="w-full px-3 py-1.5 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 border border-rose-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 border border-rose-900/40 hover:border-rose-700/60 transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sign Out</span>
@@ -257,7 +257,7 @@ export default function AdminSidebar({
             <form action={signOutAction} className="flex justify-center">
               <button
                 type="submit"
-                className="w-9 h-9 rounded-xl text-rose-600 hover:bg-rose-50 flex items-center justify-center transition cursor-pointer"
+                className="w-9 h-9 rounded-xl text-rose-400 hover:bg-rose-950/40 border border-rose-900/40 flex items-center justify-center transition cursor-pointer"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />
