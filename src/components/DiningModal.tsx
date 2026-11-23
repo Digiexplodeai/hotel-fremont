@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Clock, Users, CheckCircle2, Phone, Sparkles } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { submitPublicEnquiryAction } from "@/actions/enquiries";
+import { formatEnquiryDate } from "@/lib/enquiryFormat";
 import { lockScroll, unlockScroll } from "@/lib/scroll";
 import { validateContactPhone } from "@/config/hotel";
 
@@ -79,6 +80,12 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
     setErrorMessage(null);
 
     try {
+      const formattedDate = formatEnquiryDate(formData.date);
+      const specialReq = formData.specialRequest && formData.specialRequest.trim() && formData.specialRequest !== "None"
+        ? ` · Special: ${formData.specialRequest.trim()}`
+        : "";
+      const cleanSummary = `Dining Hall Table · ${formData.guests} Guests · ${formattedDate} at ${formData.time} · Seating: ${formData.seating}${specialReq}`;
+
       const res = await submitPublicEnquiryAction({
         type: "dining",
         name: formData.name,
@@ -90,7 +97,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
           seating: formData.seating,
           specialRequests: formData.specialRequest || "None",
         },
-        notes: `Hotel Fremont Dining Hall table enquiry for ${formData.guests} guests on ${formData.date} at ${formData.time}. Seating: ${formData.seating}`,
+        notes: cleanSummary,
       });
 
       if (!res.success) {
@@ -105,10 +112,12 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
       )}%0A*Name:* ${encodeURIComponent(
         formData.name
       )}%0A*Phone:* ${encodeURIComponent(phoneCheck.formattedPhone)}%0A*Date:* ${encodeURIComponent(
-        formData.date
+        formattedDate
       )}%0A*Time:* ${encodeURIComponent(formData.time)}%0A*Party Size:* ${encodeURIComponent(
         formData.guests
-      )} Guests%0A*Special Requests:* ${encodeURIComponent(
+      )} Guests%0A*Seating:* ${encodeURIComponent(
+        formData.seating
+      )}%0A*Special Requests:* ${encodeURIComponent(
         formData.specialRequest || "None"
       )}`;
 
@@ -314,7 +323,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#6B7280]">Schedule:</span>
-                  <span className="text-[#F7F3EC] font-mono">{formData.date} at {formData.time}</span>
+                  <span className="text-[#F7F3EC] font-mono">{formatEnquiryDate(formData.date)} at {formData.time}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#6B7280]">Party Size:</span>

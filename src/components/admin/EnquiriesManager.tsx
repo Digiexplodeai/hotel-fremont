@@ -8,6 +8,7 @@ import {
   updateEnquiryStatusAction,
   addEnquiryNoteAction,
 } from "@/actions/enquiries";
+import { cleanEnquiryNotes, formatEnquiryDate } from "@/lib/enquiryFormat";
 import {
   deleteEnquiryAction,
   bulkDeleteEnquiriesAction,
@@ -397,10 +398,11 @@ export default function EnquiriesManager({
     if (!phoneDigits.startsWith("91") && phoneDigits.length === 10) {
       phoneDigits = "91" + phoneDigits;
     }
+    const cleanFirstLine = cleanEnquiryNotes(enquiry.notes || "").split("\n")[0];
     const message = encodeURIComponent(
       `Hello ${enquiry.name}, thank you for reaching out to Hotel Fremont (Sector 80, Airport Road, Mohali). We are following up on your ${
         typeBadges[enquiry.type]?.label || "inquiry"
-      }. How may we assist you today?`
+      }${cleanFirstLine ? ` (${cleanFirstLine})` : ""}. How may we assist you today?`
     );
     return `https://wa.me/${phoneDigits}?text=${message}`;
   };
@@ -664,20 +666,24 @@ export default function EnquiriesManager({
                         {enquiry.dates && (
                           <span className="flex items-center gap-1 font-mono text-[11px]">
                             <Calendar className="w-3 h-3 text-[#B69A68]" />
-                            <span>{enquiry.dates}</span>
+                            <span>{formatEnquiryDate(enquiry.dates)}</span>
                           </span>
                         )}
-                        {enquiry.guests && (
-                          <span className="flex items-center gap-1">
-                            <User className="w-3 h-3 text-[#B69A68]" />
-                            <span>{enquiry.guests} Guests</span>
-                          </span>
-                        )}
+                        {(() => {
+                          const displayGuests = enquiry.details?.guestRange || (enquiry.guests ? `${enquiry.guests} Guests` : null);
+                          if (!displayGuests) return null;
+                          return (
+                            <span className="flex items-center gap-1">
+                              <User className="w-3 h-3 text-[#B69A68]" />
+                              <span>{displayGuests}</span>
+                            </span>
+                          );
+                        })()}
                       </div>
 
                       {enquiry.notes && (
                         <p className="text-xs text-[#6B7280] mt-1 line-clamp-2 bg-[#F8F7F4] p-2 rounded-lg border border-[#EAE8E3]">
-                          {enquiry.notes}
+                          {cleanEnquiryNotes(enquiry.notes)}
                         </p>
                       )}
                     </div>
@@ -837,6 +843,14 @@ export default function EnquiriesManager({
                   <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Current Status</span>
                   <span className="font-medium text-[#24272B] capitalize">{detailModalEnquiry.status}</span>
                 </div>
+                {(detailModalEnquiry.details?.guestRange || detailModalEnquiry.guests) && (
+                  <div className="col-span-2">
+                    <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Estimated Guests</span>
+                    <span className="font-medium text-[#24272B]">
+                      {detailModalEnquiry.details?.guestRange || `${detailModalEnquiry.guests} Guests`}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {detailModalEnquiry.dates && (
@@ -845,7 +859,7 @@ export default function EnquiriesManager({
                     Requested Dates
                   </span>
                   <p className="p-2.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] font-mono text-[#24272B]">
-                    {detailModalEnquiry.dates}
+                    {formatEnquiryDate(detailModalEnquiry.dates)}
                   </p>
                 </div>
               )}
@@ -856,7 +870,7 @@ export default function EnquiriesManager({
                     Customer Message &amp; Notes
                   </span>
                   <div className="p-3 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] whitespace-pre-wrap leading-relaxed">
-                    {detailModalEnquiry.notes}
+                    {cleanEnquiryNotes(detailModalEnquiry.notes)}
                   </div>
                 </div>
               )}

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Crown, Users, Sparkles, CheckCircle2, Phone, Mail } from "lucide-react";
 import { siteConfig } from "@/data/content";
 import { submitPublicEnquiryAction } from "@/actions/enquiries";
+import { formatEnquiryDate, normalizeGuestRange } from "@/lib/enquiryFormat";
 import { lockScroll, unlockScroll } from "@/lib/scroll";
 import { validateContactPhone } from "@/config/hotel";
 
@@ -25,7 +26,7 @@ export default function EventEnquiryModal({
     email: "",
     eventType: "Celebration / Special Occasion",
     venue: preSelectedVenue,
-    guests: "50-100 Guests",
+    guests: "50–100 Guests",
     date: new Date().toISOString().split("T")[0],
     notes: "",
     botField: "",
@@ -96,6 +97,22 @@ export default function EventEnquiryModal({
         formData.eventType.toLowerCase().includes("corporate") ||
         formData.eventType.toLowerCase().includes("meeting");
 
+      // Parse estimated guests number (50, 100, 150)
+      let parsedGuests = 50;
+      if (formData.guests.includes("100–150") || formData.guests.includes("100-150")) {
+        parsedGuests = 150;
+      } else if (formData.guests.includes("50–100") || formData.guests.includes("50-100")) {
+        parsedGuests = 100;
+      } else {
+        parsedGuests = 50;
+      }
+
+      const formattedDisplayDate = formatEnquiryDate(formData.date);
+      const customNotes = formData.notes && formData.notes.trim() && formData.notes !== "None"
+        ? ` · Notes: ${formData.notes.trim()}`
+        : "";
+      const cleanSummary = `${formData.eventType} · ${formData.guests} · ${formattedDisplayDate} · ${formData.venue}${customNotes}`;
+
       // Record event / conference enquiry to Supabase pipeline
       const res = await submitPublicEnquiryAction({
         type: isConference ? "conference" : "event_banquet",
@@ -103,13 +120,14 @@ export default function EventEnquiryModal({
         phone: formData.phone,
         email: formData.email || undefined,
         dates: formData.date,
-        guests: parseInt(formData.guests) || 100,
+        guests: parsedGuests,
         details: {
           eventType: formData.eventType,
           venue: formData.venue,
+          guestRange: formData.guests,
           notes: formData.notes || "None",
         },
-        notes: `${formData.eventType} in ${formData.venue} for ~${formData.guests} guests on ${formData.date}`,
+        notes: cleanSummary,
       });
 
       if (!res.success) {
@@ -125,14 +143,14 @@ export default function EventEnquiryModal({
         formData.name
       )}%0A*Phone:* ${encodeURIComponent(phoneCheck.formattedPhone)}%0A*Email:* ${encodeURIComponent(
         formData.email || "N/A"
-      )}%0A*Event Type:* ${encodeURIComponent(
+      )}%0A*Event Occasion:* ${encodeURIComponent(
         formData.eventType
       )}%0A*Venue:* ${encodeURIComponent(
         formData.venue
-      )}%0A*Estimated Guests:* ${encodeURIComponent(
+      )}%0A*Guest Range:* ${encodeURIComponent(
         formData.guests
       )}%0A*Preferred Date:* ${encodeURIComponent(
-        formData.date
+        formattedDisplayDate
       )}%0A*Notes/Requirements:* ${encodeURIComponent(formData.notes || "None")}`;
 
       const waUrl = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${message}`;
@@ -291,8 +309,8 @@ export default function EventEnquiryModal({
                       className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     >
                       <option value="Up to 50 Guests">Up to 50 Guests</option>
-                      <option value="50-100 Guests">50 - 100 Guests</option>
-                      <option value="100-150 Guests">100 - 150 Guests</option>
+                      <option value="50–100 Guests">50–100 Guests</option>
+                      <option value="100–150 Guests">100–150 Guests</option>
                     </select>
                   </div>
 
@@ -380,7 +398,7 @@ export default function EventEnquiryModal({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#6B7280]">Date &amp; Guests:</span>
-                  <span className="text-[#F7F3EC] font-mono">{formData.date} · {formData.guests}</span>
+                  <span className="text-[#F7F3EC] font-mono">{formatEnquiryDate(formData.date)} · {formData.guests}</span>
                 </div>
               </div>
 

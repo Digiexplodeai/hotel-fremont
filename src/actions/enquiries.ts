@@ -5,6 +5,12 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
 import { validateContactPhone } from "@/config/hotel";
+import {
+  cleanEnquiryNotes,
+  formatEnquiryDate,
+  normalizeGuestRange,
+  formatEnquirySummary,
+} from "@/lib/enquiryFormat";
 
 export type EnquiryType = "rate_check" | "book_now" | "dining_aura" | "dining" | "event_banquet" | "conference" | "contact";
 export type EnquiryStatus = "new" | "contacted" | "in_discussion" | "converted" | "closed";
@@ -54,6 +60,7 @@ const enquiryIdempotencyCache = new Map<
   string,
   { enquiryId: string; referenceCode: string; timestamp: number }
 >();
+
 
 function checkRateLimit(key: string): { allowed: boolean; error?: string } {
   const now = Date.now();
@@ -281,20 +288,8 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       }
     }
 
-    // Compose formatted special_request summary
-    const summaryNotes = [
-      input.notes,
-      input.details?.seating ? `Seating: ${input.details.seating}` : null,
-      input.details?.time ? `Time: ${input.details.time}` : null,
-      input.details?.eventType ? `Event: ${input.details.eventType}` : null,
-      input.details?.venue ? `Venue: ${input.details.venue}` : null,
-      input.details?.specialRequests && input.details.specialRequests !== "None"
-        ? `Special: ${input.details.specialRequests}`
-        : null,
-    ]
-      .filter(Boolean)
-      .join(" · ")
-      .slice(0, 600);
+    // Compose clean formatted special_request summary without duplicates
+    const summaryNotes = input.notes ? cleanEnquiryNotes(input.notes) : formatEnquirySummary(input);
 
     const refCode = `FRM-ENQ-${Date.now().toString(36).toUpperCase()}`;
 
@@ -497,6 +492,12 @@ export async function getEnquiriesAction(): Promise<{
         details.eventType = r.event_type;
       }
 
+      // Extract guest range if present in special_request for consistent display
+      const guestRangeMatch = (r.special_request || "").match(/(Up to 50 Guests|50[–-]100 Guests|100[–-]150 Guests|\d+[–-]\d+\s*Guests?)/i);
+      if (guestRangeMatch) {
+        details.guestRange = guestRangeMatch[1].replace("-", "–");
+      }
+
       const nightsCalculated = r.nights 
         ? Number(r.nights) 
         : (r.check_in && r.check_out ? Math.max(1, Math.round((new Date(r.check_out).getTime() - new Date(r.check_in).getTime()) / 86400000)) : 1);
@@ -518,7 +519,7 @@ export async function getEnquiriesAction(): Promise<{
         roomTypeCode: r.room_type_code || undefined,
         details,
         status,
-        notes: r.special_request || undefined,
+        notes: r.special_request ? cleanEnquiryNotes(r.special_request) : undefined,
         createdAt: r.created_at || new Date().toISOString(),
         capacityOverride: Boolean(r.capacity_override),
       };
