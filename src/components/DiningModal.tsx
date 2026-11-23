@@ -67,7 +67,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
           seating: formData.seating,
           specialRequests: formData.specialRequest || "None",
         },
-        notes: `Hotel Fremont Restaurant table enquiry for ${formData.guests} guests. Seating: ${formData.seating}`,
+        notes: `Hotel Fremont Dining Hall table enquiry for ${formData.guests} guests. Seating: ${formData.seating}`,
       });
 
       if (!res.success) {
@@ -79,7 +79,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
       setIsSubmitted(true);
       setIsSubmitting(false);
 
-      const message = `*Table Enquiry - Hotel Fremont Restaurant*%0A%0A*Name:* ${encodeURIComponent(
+      const message = `*Table Enquiry - Hotel Fremont Dining Hall*%0A%0A*Name:* ${encodeURIComponent(
         formData.name
       )}%0A*Phone:* ${encodeURIComponent(formData.phone)}%0A*Date:* ${encodeURIComponent(
         formData.date
@@ -129,15 +129,15 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
             <div>
               <div className="inline-flex items-center space-x-1.5 text-[10px] font-sans tracking-[0.25em] text-[#C9A96E] uppercase font-semibold mb-2">
                 <Sparkles className="w-3 h-3 text-[#E02B1D]" />
-                <span>HOTEL FREMONT RESTAURANT</span>
+                <span>HOTEL FREMONT DINING HALL</span>
               </div>
 
               <h3 className="text-2xl font-serif font-bold text-[#F7F3EC] mb-2">
-                Table Enquiry
+                Dining Hall Table Enquiry
               </h3>
 
               <p className="text-xs text-[#A8A59E] mb-6 font-light">
-                Ground floor dining with 50 covers. Kitchen operational daily until 10:30 PM.
+                Ground floor dining with seating for approximately 50 guests. Kitchen operational daily until 10:30 PM.
               </p>
 
               {errorMessage && (
@@ -251,7 +251,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                   ) : (
                     <>
                       <Calendar className="w-4 h-4" />
-                      <span>Send Table Enquiry</span>
+                      <span>Enquire For Dining</span>
                     </>
                   )}
                 </button>
@@ -266,7 +266,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
                 Enquiry Sent
               </h4>
               <p className="text-xs text-[#A8A59E] mb-6 leading-relaxed max-w-sm mx-auto">
-                Thank you! Our restaurant desk will confirm your table shortly. We also opened WhatsApp to connect directly.
+                Thank you! Our dining hall desk will confirm your table shortly. We also opened WhatsApp to connect directly.
               </p>
               <button
                 onClick={onClose}

@@ -16,7 +16,7 @@ interface EventEnquiryModalProps {
 export default function EventEnquiryModal({
   isOpen,
   onClose,
-  preSelectedVenue = "Cloud Six Banquet",
+  preSelectedVenue = "Cloud 6 Banquet",
 }: EventEnquiryModalProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -244,7 +244,7 @@ export default function EventEnquiryModal({
                       onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-[#0E0E10] border border-white/10 text-xs text-[#F7F3EC] focus:border-[#E02B1D] focus:outline-none"
                     >
-                      <option value="Cloud Six Banquet">Cloud Six Banquet (Up to 150 guests)</option>
+                      <option value="Cloud 6 Banquet">Cloud 6 Banquet (Up to 150 guests)</option>
                       <option value="Conference Hall">Conference Hall (40 to 50 guests)</option>
                     </select>
                   </div>

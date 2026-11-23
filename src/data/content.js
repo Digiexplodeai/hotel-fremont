@@ -16,7 +16,7 @@ export const siteConfig = {
     heroLine: "A comfortable stay in Mohali.",
     badge: "3-Star Hotel",
     shortDescription:
-      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, a ground-floor dining hall, Cloud 6 Banquet and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
     accentColor: "#E02B1D",
     goldColor: "#C9A96E",
     darkColor: "#0E0E10",
@@ -65,7 +65,7 @@ export const siteConfig = {
     tagline: "Thoughtful comfort. Warm hospitality.",
     subline: "A convenient address on Airport Road.",
     description:
-      "Hotel Fremont brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room on Airport Road, Sector 80, Mohali.",
+      "Hotel Fremont brings together thoughtfully appointed guest rooms, a ground-floor dining hall, Cloud 6 Banquet and a conference room on Airport Road, Sector 80, Mohali.",
     ctaPrimary: "Book Your Stay",
     ctaSecondary: "View Rooms",
     startingRateText: "From Rs 2,299 + taxes",
@@ -74,15 +74,15 @@ export const siteConfig = {
   stats: [
     { value: 21, suffix: " Rooms", label: "Guest Rooms", sub: "Deluxe, Super Deluxe & Premium" },
     { value: 3, suffix: " Categories", label: "Room Categories", sub: "Designed for Comfort" },
-    { value: "50", suffix: " Covers", label: "In-House Restaurant", sub: "Ground Floor Dining" },
-    { value: "150", suffix: " Guests", label: "Cloud Six Banquet", sub: "Celebrations & Meetings" },
+    { value: "50", suffix: " Covers", label: "Dining Hall", sub: "Ground Floor Dining" },
+    { value: "150", suffix: " Guests", label: "Cloud 6 Banquet", sub: "Celebrations & Meetings" },
   ],
 
   about: {
     eyebrow: "ABOUT HOTEL FREMONT",
     title: "A Contemporary Hotel on Airport Road, Mohali",
     paragraph1:
-      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, a ground-floor dining hall, Cloud 6 Banquet and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
     paragraph2:
       "Guests enjoy 24-hour reception assistance, high-speed Wi-Fi, secure on-site parking, and an in-house kitchen open daily until 10:30 PM. With three room categories accommodating singles and couples, Hotel Fremont provides practical comfort along Mohali's premier arterial road.",
     features: [
@@ -92,7 +92,7 @@ export const siteConfig = {
       },
       {
         title: "Dining & Celebrations",
-        desc: "Hotel Fremont Restaurant on the ground floor (50 covers), Cloud Six Banquet (150 guests), and conference hall (40-50 guests).",
+        desc: "Hotel Fremont Dining Hall on the ground floor (approx. 50 guests), Cloud 6 Banquet (up to 150 guests), and conference hall (40-50 guests).",
       },
       {
         title: "Convenient Location",
@@ -157,18 +157,18 @@ export const siteConfig = {
 
   dining: {
     eyebrow: "IN-HOUSE DINING",
-    name: "Hotel Fremont Restaurant",
-    tagline: "Thoughtfully prepared meals on the ground floor",
+    name: "Hotel Fremont Dining Hall",
+    tagline: "Thoughtfully prepared meals in our ground-floor dining hall",
     location: "Ground Floor",
-    covers: "50 Covers",
-    timing: "Daily until 10:30 PM",
+    covers: "Seating for approximately 50 guests",
+    timing: "In-house kitchen until 10:30 PM",
     description:
-      "Hotel Fremont Restaurant is located on the ground floor with seating for approximately 50 covers. Guests enjoy a morning breakfast buffet and fresh à la carte dining from our in-house kitchen open daily until 10:30 PM. Breakfast is complimentary with breakfast-inclusive room rates.",
+      "Located on the ground floor, Hotel Fremont's Dining Hall offers a comfortable setting for breakfast and freshly prepared meals. With seating for approximately 50 guests, the in-house kitchen operates daily until 10:30 PM. Breakfast is included with applicable breakfast-inclusive room rates.",
     features: [
-      "Ground Floor Location",
-      "50 Covers Seating",
+      "Ground Floor",
+      "Seating for approximately 50 guests",
+      "In-house kitchen until 10:30 PM",
       "Breakfast Buffet",
-      "In-House Kitchen Daily until 10:30 PM",
     ],
   },
 
@@ -179,7 +179,7 @@ export const siteConfig = {
       "Dedicated venues for private celebrations, corporate meetings, and social gatherings in Mohali.",
     venues: [
       {
-        name: "Cloud Six Banquet",
+        name: "Cloud 6 Banquet",
         type: "Banquet Venue",
         capacity: "Up to 150 guests",
         imageSlot: "cloud-six-banquet",
@@ -228,9 +228,9 @@ export const siteConfig = {
 
   footer: {
     about:
-      "A contemporary 3-star hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed rooms, in-house restaurant, banquet and conference facilities.",
+      "A contemporary 3-star hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed rooms, ground-floor dining hall, Cloud 6 Banquet and conference facilities.",
     brandDescription:
-      "A contemporary 3-star hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed rooms, in-house restaurant, banquet and conference facilities.",
+      "A contemporary 3-star hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed rooms, ground-floor dining hall, Cloud 6 Banquet and conference facilities.",
     quickLinks: [
       { label: "Rooms & Stays", href: "/#rooms" },
       { label: "Dining", href: "/#dining" },

@@ -658,7 +658,7 @@ export default function MediaManager() {
                   : "No items match your search"}
               </h3>
               <p className="text-xs text-stone-500 max-w-sm mt-1">
-                Upload room photos, hero banners or restaurant assets using the upload panel above to start serving them from Cloudflare R2.
+                Upload room photos, hero banners or dining hall assets using the upload panel above to start serving them from Cloudflare R2.
               </p>
             </div>
           ) : (

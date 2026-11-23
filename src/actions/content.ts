@@ -122,7 +122,7 @@ const defaultFacilities: FacilityItem[] = [
 const defaultVenues: VenueItem[] = [
   {
     id: "ven-1",
-    name: "Cloud Six Banquet",
+    name: "Cloud 6 Banquet",
     type: "banquet",
     count: 1,
     capacity_text: "Up to 150 guests",
@@ -172,7 +172,7 @@ let memorySettings: SiteSettings = {
     subline: "A convenient address on Airport Road.",
     heroLine: "A comfortable stay in Mohali.",
     description:
-      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, a ground-floor dining hall, Cloud 6 Banquet and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
   },
   timings: {
     checkInTime: "1:00 PM",
@@ -194,7 +194,7 @@ let memorySettings: SiteSettings = {
     rateHigh: 18,
   },
   restaurant: {
-    name: "Hotel Fremont Restaurant",
+    name: "Hotel Fremont Dining Hall",
     location: "Ground Floor",
     covers: 50,
     timings: "In-house kitchen operational daily until 10:30 PM",
@@ -203,7 +203,7 @@ let memorySettings: SiteSettings = {
   seo: {
     title: "Hotel Fremont | Comfortable Hotel on Airport Road, Mohali",
     description:
-      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. Offering 21 guest rooms, in-house restaurant, Cloud Six Banquet and conference hall.",
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. Offering 21 guest rooms, ground-floor dining hall, Cloud 6 Banquet and conference hall.",
     keywords: "hotel in Mohali, hotel near Chandigarh airport, hotel Airport Road Mohali, banquet hall Mohali, Hotel Fremont Sector 80",
     canonical: "https://www.hotelfremont.in",
   },

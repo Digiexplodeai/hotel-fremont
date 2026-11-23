@@ -44,7 +44,7 @@ export interface SubmitEnquiryInput {
 
 /**
  * Public Server Action to capture leads from all public modals & forms
- * (Check Rates, Room Booking, Restaurant Dining, Banquet Events, Contact).
+ * (Check Rates, Room Booking, Dining Hall, Banquet Events, Contact).
  * Inserts directly into public.reservations using the Supabase anon key client.
  * Strictly adheres to anon INSERT-only RLS policy (no .select()).
  */
@@ -98,8 +98,8 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
     let guestsCount = Number(input.guests) || 2;
     let estimatedTotal = 0;
 
-    if (input.type === "dining_aura") {
-      roomType = "Hotel Fremont Restaurant";
+    if (input.type === "dining_aura" || input.type === "dining") {
+      roomType = "Hotel Fremont Dining Hall";
       if (input.dates) {
         const rawDate = input.dates.split(" ")[0].trim();
         if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
@@ -110,7 +110,7 @@ export async function submitPublicEnquiryAction(input: SubmitEnquiryInput): Prom
       }
       guestsCount = Number(input.guests) || 2;
     } else if (input.type === "event_banquet") {
-      roomType = input.details?.venue || "Cloud Six Banquet";
+      roomType = input.details?.venue || "Cloud 6 Banquet";
       if (input.dates && /^\d{4}-\d{2}-\d{2}$/.test(input.dates)) {
         checkIn = input.dates;
         const nextDay = new Date(new Date(input.dates).getTime() + 86400000).toISOString().slice(0, 10);

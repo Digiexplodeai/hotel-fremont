@@ -103,7 +103,7 @@ export default function HomeClient() {
             {/* 8-Icon Luxury Amenities Grid */}
             <AmenitiesSection />
 
-            {/* In-House Restaurant & Dining */}
+            {/* In-House Dining Hall & Meals */}
             <DiningSection />
 
             {/* Grand Banquets & Corporate Event Venues */}

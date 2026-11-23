@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Hotel Fremont | Comfortable Hotel on Airport Road, Mohali",
   description:
-    "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
+    "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, a ground-floor dining hall, Cloud 6 Banquet and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
   keywords: [
     "hotel in Mohali",
     "hotel near Chandigarh airport",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hotel Fremont | Comfortable Hotel on Airport Road, Mohali",
     description:
-      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed guest rooms, an in-house restaurant, a dedicated banquet venue and conference facilities.",
+      "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. Thoughtfully appointed guest rooms, a ground-floor dining hall, Cloud 6 Banquet and conference facilities.",
     url: siteConfig.siteUrl,
     siteName: siteConfig.siteName,
     locale: "en_IN",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Hotel Fremont | Comfortable Hotel on Airport Road, Mohali",
     description:
-      "Hotel Fremont on Sector 80, Airport Road, Mohali. Thoughtfully appointed guest rooms, in-house restaurant, banquet and conference facilities.",
+      "Hotel Fremont on Sector 80, Airport Road, Mohali. Thoughtfully appointed guest rooms, ground-floor dining hall, Cloud 6 Banquet and conference facilities.",
     images: [`${siteConfig.siteUrl}/assets/logo.png`],
   },
   icons: {

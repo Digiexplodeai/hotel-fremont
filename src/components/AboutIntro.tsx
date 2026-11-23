@@ -17,8 +17,8 @@ export default function AboutIntro() {
   const propertyHighlights = [
     { value: "21", label: "Guest Rooms", sub: "Deluxe, Super Deluxe & Premium", icon: BedDouble },
     { value: "3", label: "Room Categories", sub: "King Beds · Air-Conditioned", icon: Building2 },
-    { value: "50", label: "Restaurant Covers", sub: "Ground Floor · Breakfast Buffet", icon: Utensils },
-    { value: "150", label: "Cloud Six Banquet", sub: "Celebrations & Special Events", icon: Users },
+    { value: "50", label: "Dining Hall Covers", sub: "Ground Floor · Breakfast Buffet", icon: Utensils },
+    { value: "150", label: "Cloud 6 Banquet", sub: "Celebrations & Special Events", icon: Users },
   ];
 
   return (

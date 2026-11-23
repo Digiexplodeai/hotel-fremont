@@ -35,20 +35,20 @@ export default function DiningSection() {
           </p>
         </div>
 
-        {/* Featured Restaurant Banner Card */}
+        {/* Featured Dining Hall Banner Card */}
         <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_25px_70px_rgba(0,0,0,0.7)] mb-14 bg-[#151518]">
           <div className="relative w-full aspect-[16/10] sm:aspect-[21/9] min-h-[380px] sm:min-h-[440px]">
             {bannerImage ? (
               <Image
                 src={bannerImage}
-                alt="Hotel Fremont Restaurant Ground Floor"
+                alt="Hotel Fremont Dining Hall Ground Floor"
                 fill
                 sizes="100vw"
                 className="object-cover object-center"
               />
             ) : (
               <PhotoComingSoon
-                title="Hotel Fremont Restaurant"
+                title="Hotel Fremont Dining Hall"
                 category="In-House Dining · Ground Floor"
                 aspectRatio="aspect-[21/9]"
               />
@@ -61,7 +61,7 @@ export default function DiningSection() {
           <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 lg:p-14 z-10">
             <div className="max-w-xl">
               <span className="px-3 py-1 rounded-full bg-[#E02B1D] text-white text-[10px] font-sans font-bold tracking-widest uppercase mb-4 inline-block shadow">
-                Ground Floor Restaurant
+                GROUND FLOOR DINING HALL
               </span>
 
               <h3 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#F7F3EC] mb-3">
@@ -96,7 +96,7 @@ export default function DiningSection() {
                 className="px-7 py-3 rounded-full bg-[#E02B1D] hover:bg-[#c82215] text-xs font-sans uppercase tracking-[0.2em] text-white font-semibold transition-all duration-300 shadow-[0_4px_25px_rgba(224,43,29,0.45)] flex items-center space-x-2 cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
-                <span>Enquire For Table</span>
+                <span>ENQUIRE FOR DINING</span>
               </button>
             </div>
           </div>

@@ -418,7 +418,7 @@ export default function ContentManager({
           }`}
         >
           <Utensils className="w-3.5 h-3.5" />
-          <span>Restaurant &amp; Dining</span>
+          <span>Dining Hall &amp; Meals</span>
         </button>
 
         <button
@@ -1120,7 +1120,7 @@ export default function ContentManager({
                 </h3>
               </div>
               <p className="text-xs text-[#6B7280] mt-0.5">
-                Cloud Six Banquet (up to 150 guests) and Conference Hall (approx 40 to 50 guests).
+                Cloud 6 Banquet (up to 150 guests) and Conference Hall (approx 40 to 50 guests).
               </p>
             </div>
 
@@ -1213,7 +1213,7 @@ export default function ContentManager({
       )}
 
       {/* ======================================================== */}
-      {/* TAB 4: RESTAURANT & DINING */}
+      {/* TAB 4: DINING HALL */}
       {/* ======================================================== */}
       {activeTab === "dining" && (
         <div className="max-w-3xl space-y-4">
@@ -1222,17 +1222,17 @@ export default function ContentManager({
               <Utensils className="w-4 h-4 text-[#B69A68]" />
               <div>
                 <h3 className="text-base font-serif font-bold text-white">
-                  Hotel Fremont Restaurant Configuration
+                  Hotel Fremont Dining Hall Configuration
                 </h3>
                 <p className="text-xs text-[#6B7280] mt-0.5">
-                  Ground floor restaurant, 50 covers, in-house kitchen open daily until 10:30 PM, breakfast buffet.
+                  Ground floor dining hall, approx. 50 guests, in-house kitchen open daily until 10:30 PM, breakfast buffet.
                 </p>
               </div>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#6B7280] mb-1 font-medium">Restaurant Name</label>
+                <label className="block text-[#6B7280] mb-1 font-medium">Dining Hall Name</label>
                 <input
                   type="text"
                   value={settings.restaurant.name}
@@ -1318,7 +1318,7 @@ export default function ContentManager({
                   className="px-5 py-2.5 rounded-xl bg-[#742B40] hover:bg-[#5b2232] text-white text-xs font-semibold tracking-wide transition flex items-center gap-2 cursor-pointer shadow-lg shadow-[#742B40]/20"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  <span>Save Restaurant Configuration</span>
+                  <span>Save Dining Hall Configuration</span>
                 </button>
               </div>
             </div>
@@ -1624,7 +1624,7 @@ export default function ContentManager({
                   <label className="block text-[#6B7280] mb-1 font-medium">Image Slot Code</label>
                   <input
                     type="text"
-                    placeholder="cloud-six-banquet"
+                    placeholder="cloud-6-banquet"
                     value={venueModal.data.image_slot || ""}
                     onChange={(e) =>
                       setVenueModal({

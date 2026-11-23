@@ -71,21 +71,21 @@ const typeBadges: Record<
     icon: BedDouble,
   },
   dining_aura: {
-    label: "Restaurant Dining",
+    label: "Dining Hall",
     bg: "bg-amber-50",
     text: "text-amber-700",
     border: "border-amber-200",
     icon: Utensils,
   },
   dining: {
-    label: "Restaurant Dining",
+    label: "Dining Hall",
     bg: "bg-amber-50",
     text: "text-amber-700",
     border: "border-amber-200",
     icon: Utensils,
   },
   event_banquet: {
-    label: "Cloud Six Banquet",
+    label: "Cloud 6 Banquet",
     bg: "bg-purple-50",
     text: "text-purple-700",
     border: "border-purple-200",
@@ -471,7 +471,7 @@ export default function EnquiriesManager({
                 : "text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4]"
             }`}
           >
-            <span>Cloud Six Banquet</span>
+            <span>Cloud 6 Banquet</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                 activeTab === "banquet" ? "bg-white/20 text-white" : "bg-[#F8F7F4] text-[#6B7280]"
@@ -489,7 +489,7 @@ export default function EnquiriesManager({
                 : "text-[#6B7280] hover:text-[#24272B] hover:bg-[#F8F7F4]"
             }`}
           >
-            <span>Restaurant Dining</span>
+            <span>Dining Hall</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                 activeTab === "restaurant" ? "bg-white/20 text-white" : "bg-[#F8F7F4] text-[#6B7280]"

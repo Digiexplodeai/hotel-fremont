@@ -125,9 +125,9 @@ export default async function AdminSettingsPage() {
             </div>
 
             <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">
-              <span className="text-[10px] text-[#6B7280] uppercase block font-semibold">In-House Restaurant</span>
-              <span className="text-base font-bold font-serif text-[#24272B] mt-1 block">7:00 AM – 11:00 PM</span>
-              <span className="text-[10px] text-[#6B7280] block mt-0.5">Ground floor · Room service active</span>
+              <span className="text-[10px] text-[#6B7280] uppercase block font-semibold">Dining Hall &amp; Kitchen</span>
+              <span className="text-base font-bold font-serif text-[#24272B] mt-1 block">Daily until 10:30 PM</span>
+              <span className="text-[10px] text-[#6B7280] block mt-0.5">Ground floor · Breakfast buffet</span>
             </div>
 
             <div className="p-4 rounded-xl bg-[#FAF9F7] border border-[#EAE8E3]">

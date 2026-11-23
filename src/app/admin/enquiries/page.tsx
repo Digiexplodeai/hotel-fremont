@@ -28,7 +28,7 @@ export default async function AdminEnquiriesPage() {
     <AdminLayoutShell
       userEmail={user.email}
       title="Guest Enquiries & CRM Inbox"
-      subtitle="Hotel Fremont · Manage room booking leads, banquet requests, restaurant reservations"
+      subtitle="Hotel Fremont · Manage room booking leads, banquet requests, dining hall reservations"
     >
       <EnquiriesManager
         initialEnquiries={enquiriesRes.enquiries}

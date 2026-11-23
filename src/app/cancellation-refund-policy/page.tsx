@@ -171,7 +171,7 @@ export default function CancellationRefundPolicyPage() {
           <span>4. Peak Dates, Banquets &amp; Group Bookings</span>
         </h2>
         <p>
-          Reservations booked under non-refundable promotional tariffs, banquet venue agreements (Cloud Six Banquet or Conference Hall), or peak periods may be subject to specialized contractual cancellation terms indicated on your booking agreement. In the event of a conflict, terms in your signed event contract supersede general website policies.
+          Reservations booked under non-refundable promotional tariffs, banquet venue agreements (Cloud 6 Banquet or Conference Hall), or peak periods may be subject to specialized contractual cancellation terms indicated on your booking agreement. In the event of a conflict, terms in your signed event contract supersede general website policies.
         </p>
       </section>
     </PolicyLayout>

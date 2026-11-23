@@ -36,7 +36,7 @@ export default function ShippingPolicyPage() {
           No Physical Goods Shipped
         </h2>
         <p className="text-[#A8A59E] leading-relaxed text-sm sm:text-base m-0">
-          <strong>Hotel Fremont</strong> is a contemporary hotel offering accommodation across 21 guest rooms, an in-house restaurant, a dedicated banquet venue and a conference room. <strong>We do not sell, package, or dispatch tangible physical products or merchandise requiring postal or courier delivery.</strong>
+          <strong>Hotel Fremont</strong> is a contemporary hotel offering accommodation across 21 guest rooms, a dining hall, Cloud 6 Banquet and a conference room. <strong>We do not sell, package, or dispatch tangible physical products or merchandise requiring postal or courier delivery.</strong>
         </p>
       </div>
 

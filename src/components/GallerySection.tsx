@@ -43,7 +43,7 @@ export default function GallerySection() {
     },
     {
       id: 4,
-      title: "Cloud Six Banquet",
+      title: "Cloud 6 Banquet",
       category: "Venues",
       src: slots["cloud-six-banquet"]?.url || "",
       active: !!(slots["cloud-six-banquet"]?.url && slots["cloud-six-banquet"]?.isActive !== false && slots["cloud-six-banquet"]?.is_active !== false),

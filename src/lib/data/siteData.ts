@@ -21,11 +21,11 @@ export const DEFAULT_SLOTS: Record<string, { url: string; altText: string; focal
   exterior: { url: "", altText: "Hotel Fremont Exterior on Airport Road, Mohali", focalPoint: "50% 50%" },
   "super-deluxe": { url: "", altText: "Super Deluxe Room at Hotel Fremont", focalPoint: "50% 50%" },
   premium: { url: "", altText: "Premium Room with burgundy styling at Hotel Fremont", focalPoint: "50% 50%" },
-  "cloud-six-banquet": { url: "", altText: "Cloud Six Banquet Hall at Hotel Fremont", focalPoint: "50% 50%" },
+  "cloud-six-banquet": { url: "", altText: "Cloud 6 Banquet Hall at Hotel Fremont", focalPoint: "50% 50%" },
 
   // Additional Real Venue / Room Slots
   "deluxe-room": { url: "", altText: "Deluxe Room at Hotel Fremont", focalPoint: "50% 50%" },
-  restaurant: { url: "", altText: "Hotel Fremont Restaurant Ground Floor", focalPoint: "50% 50%" },
+  restaurant: { url: "", altText: "Hotel Fremont Dining Hall Ground Floor", focalPoint: "50% 50%" },
   "conference-hall": { url: "", altText: "Conference Hall for meetings and discussions", focalPoint: "50% 50%" },
 
   // Legacy mappings aliased to real slots
@@ -34,8 +34,8 @@ export const DEFAULT_SLOTS: Record<string, { url: string; altText: string; focal
   "rooms.deluxe-room.main": { url: "", altText: "Deluxe Room", focalPoint: "50% 50%" },
   "rooms.super-deluxe-room.main": { url: "", altText: "Super Deluxe Room", focalPoint: "50% 50%" },
   "rooms.premium-room.main": { url: "", altText: "Premium Room", focalPoint: "50% 50%" },
-  "dining.banner_primary": { url: "", altText: "Hotel Fremont Restaurant", focalPoint: "50% 50%" },
-  "events.venue_1": { url: "", altText: "Cloud Six Banquet", focalPoint: "50% 50%" },
+  "dining.banner_primary": { url: "", altText: "Hotel Fremont Dining Hall", focalPoint: "50% 50%" },
+  "events.venue_1": { url: "", altText: "Cloud 6 Banquet", focalPoint: "50% 50%" },
   "events.venue_2": { url: "", altText: "Conference Hall", focalPoint: "50% 50%" },
 };
 

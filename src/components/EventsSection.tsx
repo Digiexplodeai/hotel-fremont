@@ -10,7 +10,7 @@ import PhotoComingSoon from "@/components/PhotoComingSoon";
 import EventEnquiryModal from "./EventEnquiryModal";
 
 export default function EventsSection() {
-  const [selectedVenue, setSelectedVenue] = useState<string>("Cloud Six Banquet");
+  const [selectedVenue, setSelectedVenue] = useState<string>("Cloud 6 Banquet");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { events } = siteConfig;
   const { slots } = useSiteSlots();
