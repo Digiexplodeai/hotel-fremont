@@ -111,7 +111,7 @@ export default function EventEnquiryModal({
       const customNotes = formData.notes && formData.notes.trim() && formData.notes !== "None"
         ? ` · Notes: ${formData.notes.trim()}`
         : "";
-      const cleanSummary = `${formData.eventType} · ${formData.guests} · ${formattedDisplayDate} · ${formData.venue}${customNotes}`;
+      const cleanSummary = `${formData.eventType} · ${formData.guests} · ${formData.venue}${customNotes}`;
 
       // Record event / conference enquiry to Supabase pipeline
       const res = await submitPublicEnquiryAction({

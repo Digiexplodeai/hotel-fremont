@@ -8,7 +8,13 @@ import {
   updateEnquiryStatusAction,
   addEnquiryNoteAction,
 } from "@/actions/enquiries";
-import { cleanEnquiryNotes, formatEnquiryDate } from "@/lib/enquiryFormat";
+import {
+  cleanEnquiryNotes,
+  formatEnquiryDate,
+  formatReceivedTimestamp,
+  formatEventTime,
+  getEnquiryDateLabel,
+} from "@/lib/enquiryFormat";
 import {
   deleteEnquiryAction,
   bulkDeleteEnquiriesAction,
@@ -652,6 +658,7 @@ export default function EnquiriesManager({
                         )}
                       </div>
 
+                      {/* Customer Contact & Party Size */}
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#6B7280]">
                         <span className="flex items-center gap-1">
                           <Phone className="w-3 h-3 text-[#B69A68]" />
@@ -663,17 +670,11 @@ export default function EnquiriesManager({
                             <span>{enquiry.email}</span>
                           </span>
                         )}
-                        {enquiry.dates && (
-                          <span className="flex items-center gap-1 font-mono text-[11px]">
-                            <Calendar className="w-3 h-3 text-[#B69A68]" />
-                            <span>{formatEnquiryDate(enquiry.dates)}</span>
-                          </span>
-                        )}
                         {(() => {
                           const displayGuests = enquiry.details?.guestRange || (enquiry.guests ? `${enquiry.guests} Guests` : null);
                           if (!displayGuests) return null;
                           return (
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1 text-[#4B5563]">
                               <User className="w-3 h-3 text-[#B69A68]" />
                               <span>{displayGuests}</span>
                             </span>
@@ -681,6 +682,50 @@ export default function EnquiriesManager({
                         })()}
                       </div>
 
+                      {/* Labeled Dates & Timing Section */}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-1 text-xs">
+                        {/* Event Date / Preferred Dining Date (Prominent) */}
+                        {(() => {
+                          const dateLabel = getEnquiryDateLabel(enquiry.type);
+                          const isGeneralContact = enquiry.type === "contact";
+                          const hasDate = Boolean(enquiry.hasEventDate || enquiry.eventDate || enquiry.dates);
+                          const formattedDate = formatEnquiryDate(enquiry.eventDate || enquiry.dates);
+                          const timeStr = enquiry.eventTime ? ` at ${enquiry.eventTime}` : "";
+
+                          if (hasDate && formattedDate) {
+                            return (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-600/30 text-amber-950 font-medium shadow-2xs">
+                                <Calendar className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                                <span className="text-[11px] font-semibold text-amber-800">{dateLabel}:</span>
+                                <span className="font-semibold text-[#24272B]">{formattedDate}{timeStr}</span>
+                              </div>
+                            );
+                          }
+
+                          if (!isGeneralContact) {
+                            return (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-500 text-xs">
+                                <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                <span className="text-[11px] font-medium text-gray-500">{dateLabel}:</span>
+                                <span className="italic">Not specified</span>
+                              </div>
+                            );
+                          }
+
+                          return null;
+                        })()}
+
+                        {/* Received On (Timestamp, Asia/Kolkata) */}
+                        <div className="inline-flex items-center gap-1.5 text-[11px] text-[#6B7280]">
+                          <Clock className="w-3.5 h-3.5 text-[#B69A68] shrink-0" />
+                          <span className="font-medium text-[#6B7280]">Received On:</span>
+                          <span className="font-mono text-[#374151] font-medium">
+                            {formatReceivedTimestamp(enquiry.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Clean Description without repeated dates */}
                       {enquiry.notes && (
                         <p className="text-xs text-[#6B7280] mt-1 line-clamp-2 bg-[#F8F7F4] p-2 rounded-lg border border-[#EAE8E3]">
                           {cleanEnquiryNotes(enquiry.notes)}
@@ -826,6 +871,10 @@ export default function EnquiriesManager({
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3 p-3 bg-[#F8F7F4] rounded-xl border border-[#EAE8E3]">
                 <div>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Customer Name</span>
+                  <span className="text-[#24272B] font-semibold">{detailModalEnquiry.name}</span>
+                </div>
+                <div>
                   <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Phone</span>
                   <span className="font-mono text-[#24272B] font-medium">{detailModalEnquiry.phone}</span>
                 </div>
@@ -834,7 +883,7 @@ export default function EnquiriesManager({
                   <span className="text-[#24272B]">{detailModalEnquiry.email || "Not provided"}</span>
                 </div>
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Lead Type</span>
+                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Enquiry Category</span>
                   <span className="font-medium text-[#742B40]">
                     {typeBadges[detailModalEnquiry.type]?.label || detailModalEnquiry.type}
                   </span>
@@ -844,7 +893,7 @@ export default function EnquiriesManager({
                   <span className="font-medium text-[#24272B] capitalize">{detailModalEnquiry.status}</span>
                 </div>
                 {(detailModalEnquiry.details?.guestRange || detailModalEnquiry.guests) && (
-                  <div className="col-span-2">
+                  <div>
                     <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold">Estimated Guests</span>
                     <span className="font-medium text-[#24272B]">
                       {detailModalEnquiry.details?.guestRange || `${detailModalEnquiry.guests} Guests`}
@@ -853,21 +902,43 @@ export default function EnquiriesManager({
                 )}
               </div>
 
-              {detailModalEnquiry.dates && (
+              {/* Labeled Dates & Timing Box */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-amber-500/5 rounded-xl border border-amber-600/20">
+                {/* Event / Dining Date */}
                 <div>
-                  <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold mb-1">
-                    Requested Dates
+                  <span className="text-amber-800 block text-[10px] uppercase font-semibold mb-1 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-amber-700" />
+                    <span>{getEnquiryDateLabel(detailModalEnquiry.type)}</span>
                   </span>
-                  <p className="p-2.5 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] font-mono text-[#24272B]">
-                    {formatEnquiryDate(detailModalEnquiry.dates)}
+                  <p className="font-semibold text-sm text-[#24272B]">
+                    {detailModalEnquiry.hasEventDate || detailModalEnquiry.eventDate || detailModalEnquiry.dates
+                      ? formatEnquiryDate(detailModalEnquiry.eventDate || detailModalEnquiry.dates)
+                      : (detailModalEnquiry.type === "contact" ? "Not requested" : "Not specified")}
                   </p>
+                  {detailModalEnquiry.eventTime && (
+                    <span className="text-xs text-[#6B7280] block mt-0.5">
+                      Preferred Time: <strong className="text-[#24272B]">{detailModalEnquiry.eventTime}</strong>
+                    </span>
+                  )}
                 </div>
-              )}
+
+                {/* Received Date & Time (Submission Timestamp) */}
+                <div>
+                  <span className="text-[#6B7280] block text-[10px] uppercase font-semibold mb-1 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#B69A68]" />
+                    <span>Received On (Submission Time)</span>
+                  </span>
+                  <p className="font-mono text-xs font-semibold text-[#24272B]">
+                    {formatReceivedTimestamp(detailModalEnquiry.createdAt)}
+                  </p>
+                  <span className="text-[10px] text-[#9CA3AF] block mt-0.5">Timezone: Asia/Kolkata (IST)</span>
+                </div>
+              </div>
 
               {detailModalEnquiry.notes && (
                 <div>
                   <span className="text-[#9CA3AF] block text-[10px] uppercase font-semibold mb-1">
-                    Customer Message &amp; Notes
+                    Event Summary &amp; Customer Notes
                   </span>
                   <div className="p-3 rounded-xl bg-[#F8F7F4] border border-[#EAE8E3] text-[#24272B] whitespace-pre-wrap leading-relaxed">
                     {cleanEnquiryNotes(detailModalEnquiry.notes)}

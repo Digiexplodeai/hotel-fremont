@@ -84,7 +84,7 @@ export default function DiningModal({ isOpen, onClose }: DiningModalProps) {
       const specialReq = formData.specialRequest && formData.specialRequest.trim() && formData.specialRequest !== "None"
         ? ` · Special: ${formData.specialRequest.trim()}`
         : "";
-      const cleanSummary = `Dining Hall Table · ${formData.guests} Guests · ${formattedDate} at ${formData.time} · Seating: ${formData.seating}${specialReq}`;
+      const cleanSummary = `Dining Hall Table · ${formData.guests} Guests · Seating: ${formData.seating}${specialReq}`;
 
       const res = await submitPublicEnquiryAction({
         type: "dining",

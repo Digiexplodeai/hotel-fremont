@@ -8,6 +8,7 @@ import { validateContactPhone } from "@/config/hotel";
 import {
   cleanEnquiryNotes,
   formatEnquiryDate,
+  formatEventTime,
   normalizeGuestRange,
   formatEnquirySummary,
 } from "@/lib/enquiryFormat";
@@ -22,6 +23,9 @@ export interface EnquiryRecord {
   phone: string;
   email?: string;
   dates?: string;
+  eventDate?: string;
+  eventTime?: string;
+  hasEventDate?: boolean;
   checkIn?: string;
   checkOut?: string;
   guests?: number;
@@ -472,12 +476,45 @@ export async function getEnquiriesAction(): Promise<{
       const status = normalizeStatus(r.status);
 
       let dates: string | undefined = undefined;
+      let eventDate: string | undefined = undefined;
+      let eventTime: string | undefined = undefined;
+      let hasEventDate = false;
+
+      // Extract time from details or special_request if present
+      if (r.details?.time) {
+        eventTime = formatEventTime(r.details.time);
+      } else {
+        const timeMatch = (r.special_request || "").match(/(?:at|Time:)\s*(\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?)/i);
+        if (timeMatch) {
+          eventTime = formatEventTime(timeMatch[1]);
+        }
+      }
+
       if (r.check_in && r.check_out && r.check_in !== r.check_out) {
         dates = `${r.check_in} to ${r.check_out}`;
+        eventDate = dates;
+        hasEventDate = true;
       } else if (r.check_in) {
-        dates = r.check_in;
+        if (type === "contact") {
+          const explicitMatch = (r.details?.date || r.special_request || "").match(/\b\d{4}-\d{2}-\d{2}\b/);
+          if (explicitMatch) {
+            eventDate = explicitMatch[0];
+            dates = explicitMatch[0];
+            hasEventDate = true;
+          } else {
+            dates = undefined;
+            eventDate = undefined;
+            hasEventDate = false;
+          }
+        } else {
+          dates = r.check_in;
+          eventDate = r.check_in;
+          hasEventDate = true;
+        }
       } else if (r.event_date) {
         dates = r.event_date;
+        eventDate = r.event_date;
+        hasEventDate = true;
       }
 
       // Build details payload
@@ -509,6 +546,9 @@ export async function getEnquiriesAction(): Promise<{
         phone: r.phone || "",
         email: r.email || undefined,
         dates,
+        eventDate,
+        eventTime,
+        hasEventDate,
         checkIn: r.check_in || undefined,
         checkOut: r.check_out || undefined,
         guests: r.guests || undefined,
