@@ -42,7 +42,7 @@ export const HOTEL_CONFIG = {
   whatsappLink: "https://wa.me/917973450281",
   email: "hotelfremont1@gmail.com",
   address: "Hotel Fremont, Khasra No 186, Sector 80, Village Mauli Baidwan, Airport Road, Mohali (SAS Nagar), Punjab - 140308",
-  checkInTime: "1:00 PM",
+  checkInTime: "12:00 PM",
   checkOutTime: "11:00 AM",
   cancellationHours: 24,
   // GST Threshold Rules (per room per night)

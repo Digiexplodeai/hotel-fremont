@@ -95,10 +95,10 @@ export default function CancellationRefundPolicyPage() {
             <strong className="text-[#F7F3EC]">Free Cancellation:</strong> Cancellations made at least {cancellation.freeCancellationHours} (24 hours or more) before the scheduled check-in time ({checkInTime} on the arrival date) are eligible for a <strong>full refund of the amount paid</strong> with zero penalty.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">Late Cancellation:</strong> Cancellations made less than {cancellation.freeCancellationHours} before the scheduled check-in time are <strong>non-refundable</strong>.
+            <strong className="text-[#F7F3EC]">Late Cancellation:</strong> Cancellations made less than {cancellation.freeCancellationHours} before the scheduled check-in time are charged <strong>1 Night Room Tariff</strong>.
           </li>
           <li>
-            <strong className="text-[#F7F3EC]">No-Show Policy:</strong> Guests who fail to arrive on the scheduled check-in date without prior documented written notice are <strong>non-refundable</strong>, and the remaining nights of the booking will be released for re-allocation.
+            <strong className="text-[#F7F3EC]">No-Show Policy:</strong> Guests who fail to arrive on the scheduled check-in date without prior documented written notice will be charged <strong>1 Night Room Tariff</strong>, and the remaining nights of the booking will be released for re-allocation.
           </li>
           <li>
             <strong className="text-[#F7F3EC]">Early Check-Out:</strong> In the event of an early check-out or departure after arrival, no refund will be provided for unused nights unless approved in advance by hotel management.

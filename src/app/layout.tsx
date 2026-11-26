@@ -99,7 +99,7 @@ export default function RootLayout({
     email: siteConfig.email,
     priceRange: "Rs 2,299 - Rs 4,799 + taxes",
     numberOfRooms: TOTAL_ROOMS || 21,
-    checkinTime: "13:00",
+    checkinTime: "12:00",
     checkoutTime: "11:00",
     address: {
       "@type": "PostalAddress",

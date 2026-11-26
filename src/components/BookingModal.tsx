@@ -792,7 +792,7 @@ export default function BookingModal({
                     {/* Check-In */}
                     <div>
                       <label className="block text-[10px] text-[#A8A59E] uppercase tracking-wider mb-1">
-                        Check-In Date * (1:00 PM)
+                        Check-In Date * (12:00 PM)
                       </label>
                       <input
                         type="date"
@@ -833,7 +833,7 @@ export default function BookingModal({
                   </div>
 
                   <div className="text-[11px] text-[#A8A59E] flex items-center justify-between pt-1">
-                    <span>Check-in: 1:00 PM onwards</span>
+                    <span>Check-in: 12:00 PM onwards</span>
                     <span>Check-out: 11:00 AM</span>
                   </div>
                 </div>
@@ -1550,7 +1550,7 @@ export default function BookingModal({
                   </div>
 
                   <p className="text-[11px] text-center text-[#A8A59E] pt-1">
-                    Check-in: 1:00 PM · Check-out: 11:00 AM · 24-hour reception: +91 79734 50281
+                    Check-in: 12:00 PM · Check-out: 11:00 AM · 24-hour reception: +91 79734 50281
                   </p>
                 </form>
               </motion.div>

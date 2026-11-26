@@ -367,7 +367,7 @@ export default function ReservationsManager({
             <div class="card">
               <h4>Stay Information</h4>
               <div><strong>Category:</strong> ${booking.roomCategory}</div>
-              <div><strong>Check-in:</strong> ${booking.checkIn} (from 1:00 PM)</div>
+              <div><strong>Check-in:</strong> ${booking.checkIn} (from 12:00 PM)</div>
               <div><strong>Check-out:</strong> ${booking.checkOut} (until 11:00 AM)</div>
               <div><strong>Duration:</strong> ${booking.nights} Night(s)</div>
             </div>
@@ -775,7 +775,7 @@ export default function ReservationsManager({
                   </div>
                   <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Check-in:</span>
-                    <span className="font-medium text-[#F5F2EF]">{selectedBooking.checkIn} (from 1:00 PM)</span>
+                    <span className="font-medium text-[#F5F2EF]">{selectedBooking.checkIn} (from 12:00 PM)</span>
                   </div>
                   <div className="flex items-center justify-between text-[#B7A9A7]">
                     <span>Check-out:</span>

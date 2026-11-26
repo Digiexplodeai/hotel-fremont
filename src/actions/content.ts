@@ -175,7 +175,7 @@ let memorySettings: SiteSettings = {
       "Hotel Fremont is a contemporary hotel on Sector 80, Airport Road, Mohali. The property brings together thoughtfully appointed guest rooms, a ground-floor dining hall, Cloud 6 Banquet and a conference room, making it a convenient choice for business and leisure stays as well as social gatherings.",
   },
   timings: {
-    checkInTime: "1:00 PM",
+    checkInTime: "12:00 PM",
     checkOutTime: "11:00 AM",
     frontDesk: "24x7",
     idPolicy: "Valid government-issued photo ID required at check-in for all staying guests.",
@@ -184,8 +184,8 @@ let memorySettings: SiteSettings = {
   cancellation: {
     hours: 24,
     freeWindowText: "Cancellations made 24 hours or more before scheduled check-in time are permitted and fully refunded to the original payment method.",
-    lateChargeText: "Cancellations made within 24 hours of check-in are non-refundable.",
-    noShowText: "A no-show is non-refundable.",
+    lateChargeText: "Cancellations made within 24 hours of check-in are charged 1 Night Room Tariff.",
+    noShowText: "A no-show is charged 1 Night Room Tariff.",
     refundText: "Refunds are processed to the original payment method, usually within 5 to 7 working days.",
   },
   gst: {

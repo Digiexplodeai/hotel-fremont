@@ -227,7 +227,7 @@ export default function RoomDetailModal({ room, onClose, onBookRoom }: RoomDetai
                     <span>24-Hour Cancellation Policy</span>
                   </div>
                   <p className="text-white/70 text-[11px] leading-relaxed">
-                    Full refund for cancellations made 24+ hours before check-in (1:00 PM). Non-refundable within 24 hours. Valid photo ID required for all staying guests.
+                    Full refund for cancellations made 24+ hours before check-in (12:00 PM). Cancellations within 24 hours are charged 1 Night Room Tariff. Valid photo ID required for all staying guests.
                   </p>
                 </div>
               </div>

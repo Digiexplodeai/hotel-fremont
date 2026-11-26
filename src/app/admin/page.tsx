@@ -259,7 +259,7 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="mt-2 text-[11px] font-medium text-blue-400 flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
-            <span>Standard check-in 1:00 PM</span>
+            <span>Standard check-in 12:00 PM</span>
           </div>
         </div>
 
