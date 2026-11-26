@@ -358,7 +358,7 @@ VALUES
   (
     'timings',
     jsonb_build_object(
-      'check_in', '1:00 PM',
+      'check_in', '12:00 PM',
       'check_out', '11:00 AM',
       'front_desk', '24x7',
       'id_policy', 'Valid government-issued photo ID required at check-in for all staying guests.',
@@ -371,8 +371,8 @@ VALUES
     jsonb_build_object(
       'hours', 24,
       'free_window_text', 'Cancellations made 24 hours or more before scheduled check-in time are permitted and fully refunded to the original payment method.',
-      'late_charge_text', 'Cancellations made within 24 hours of check-in are non-refundable.',
-      'no_show_text', 'A no-show is non-refundable.',
+      'late_charge_text', 'Cancellations made within 24 hours of check-in are charged 1 Night Room Tariff.',
+      'no_show_text', 'A no-show is charged 1 Night Room Tariff.',
       'refund_text', 'Refunds are processed to the original payment method, usually within 5 to 7 working days.'
     ),
     now()

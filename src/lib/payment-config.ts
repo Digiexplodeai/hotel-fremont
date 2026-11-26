@@ -19,7 +19,7 @@ export const PAYMENT_CONFIG = {
   THEME_COLOR: "#E02B1D", // Hotel Fremont crimson brand accent
   DEFAULT_HOTEL_EMAIL: "hotelfremont1@gmail.com",
   CANCELLATION_SUMMARY:
-    "Cancellations made 24 hours or more before scheduled check-in time are permitted and fully refunded to the original payment method. Cancellations made within 24 hours of check-in are non-refundable. A no-show is non-refundable. Refunds are processed to the original payment method, usually within 5 to 7 working days.",
+    "Cancellations made 24 hours or more before scheduled check-in time (12:00 PM) are permitted and fully refunded to the original payment method. Cancellations made within 24 hours of check-in are charged 1 Night Room Tariff. A no-show is charged 1 Night Room Tariff. Refunds are processed to the original payment method, usually within 5 to 7 working days.",
 } as const;
 
 export type MealPlan = "with_breakfast" | "without_breakfast" | "cp" | "ep";
